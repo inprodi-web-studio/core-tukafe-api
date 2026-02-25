@@ -1,29 +1,28 @@
 import { createAccessControl } from "better-auth/plugins/access";
-import { defaultStatements } from "better-auth/plugins/admin/access";
+import { defaultStatements as organizationDefaultStatements } from "better-auth/plugins/organization/access";
 
-const authStatements = {
-  ...defaultStatements,
-  customers: ["create", "read", "update", "delete"],
-  customerGroups: ["create", "read", "update", "delete"],
+const organizationStatements = {
+  ...organizationDefaultStatements,
+  schedules: ["create", "read", "update", "delete"],
 } as const;
 
-export const ac = createAccessControl(authStatements);
+export const ORGANIZATION_AC = createAccessControl(organizationStatements);
 
-const authRoles = {
-  admin: ac.newRole({
-    user: defaultStatements.user,
-    session: defaultStatements.session,
-    customers: ["create", "read", "update", "delete"],
-    customerGroups: ["create", "read", "update", "delete"],
+export const ORGANIZATION_ROLES = {
+  owner: ORGANIZATION_AC.newRole({
+    organization: ["update", "delete"],
+    member: ["create", "update", "delete"],
+    invitation: ["create", "cancel"],
+    schedules: ["create", "read", "update", "delete"],
   }),
-  member: ac.newRole({
-    customers: ["read", "update"],
-    customerGroups: ["read"],
+  admin: ORGANIZATION_AC.newRole({
+    organization: ["update"],
+    member: ["create", "update", "delete"],
+    invitation: ["create", "cancel"],
+    schedules: ["create", "read", "update", "delete"],
   }),
-  customer: ac.newRole({
-    customers: [],
+  member: ORGANIZATION_AC.newRole({
+    invitation: ["create"],
+    schedules: ["read"],
   }),
 };
-
-export const AUTH_STATEMENTS = authStatements;
-export const AUTH_ROLES = authRoles;

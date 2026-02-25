@@ -1,0 +1,9 @@
+import { z } from "zod";
+
+export const {{actionCamel}}BodySchema = z.object({});
+
+export type {{actionPascal}}Body = z.infer<typeof {{actionCamel}}BodySchema>;
+
+export const {{actionCamel}}ResponseSchema = z.object({});
+
+export type {{actionPascal}}Response = z.infer<typeof {{actionCamel}}ResponseSchema>;

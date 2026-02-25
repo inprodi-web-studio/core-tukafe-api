@@ -1,6 +1,6 @@
+import { toNodeHandler } from "better-auth/node";
 import type { FastifyPluginAsync } from "fastify";
 import fp from "fastify-plugin";
-import { toNodeHandler } from "better-auth/node";
 
 import { auth } from "@core/config/auth.config";
 
@@ -17,7 +17,7 @@ const authPlugin: FastifyPluginAsync = async (fastify) => {
 
   fastify.route({
     method: ["GET", "POST"],
-    url: "/api/auth/*",
+    url: `/authx/*`,
     handler: async (request, reply) => {
       reply.hijack();
 

@@ -29,6 +29,41 @@
       "when": 1771987867971,
       "tag": "0003_dashing_proemial_gods",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1771988798635,
+      "tag": "0004_uneven_patch",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1772040696523,
+      "tag": "0005_crazy_captain_cross",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1772041347334,
+      "tag": "0006_wide_night_thrasher",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1772049676388,
+      "tag": "0007_useful_blob",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1772050748139,
+      "tag": "0008_brave_wolfsbane",
+      "breakpoints": true
     }
   ]
 }

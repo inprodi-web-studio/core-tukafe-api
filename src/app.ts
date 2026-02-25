@@ -1,9 +1,16 @@
-import qs from "qs";
-import Fastify from "fastify";
-import cors from "@fastify/cors";
 import { env } from "@core/config/env.config";
-import { authPlugin, dbPlugin, errorHandlerPlugin, zodSchemaPlugin } from "@core/plugins";
 import { TRUSTED_ORIGINS } from "@core/constants";
+import {
+  authPlugin,
+  dbPlugin,
+  errorHandlerPlugin,
+  featureNamespacesPlugin,
+  zodSchemaPlugin,
+} from "@core/plugins";
+import cors from "@fastify/cors";
+import { adminAuthRoutes, adminAuthServicesPlugin } from "@features/admin/auth";
+import Fastify from "fastify";
+import qs from "qs";
 
 const server = Fastify({
   logger: {
@@ -44,6 +51,24 @@ await server.register(dbPlugin);
 await server.register(zodSchemaPlugin);
 await server.register(errorHandlerPlugin);
 await server.register(authPlugin);
+await server.register(featureNamespacesPlugin);
+
+await server.register(adminAuthServicesPlugin);
+
+// --- Routes
+await server.register(
+  async (app) => {
+    await app.register(
+      async (adminApp) => {
+        await adminApp.register(adminAuthRoutes, { prefix: "/auth" });
+      },
+      { prefix: "/admin" },
+    );
+
+    await app.register(async (customerApp) => {}, { prefix: "/customer" });
+  },
+  { prefix: "/api" },
+);
 
 const start = async () => {
   try {

@@ -1,0 +1,15 @@
+import type { FastifyInstance } from "fastify";
+import { {{actionCamel}} } from "./{{actionName}}.controllers";
+
+export async function {{actionRoutesFunction}}(server: FastifyInstance) {
+  server.post(
+    "/{{actionName}}",
+    {
+      schema: {
+        // body : "",
+        // response : "",
+      },
+    },
+    {{actionCamel}},
+  );
+}
