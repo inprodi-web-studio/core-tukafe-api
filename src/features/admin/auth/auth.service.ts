@@ -1,6 +1,6 @@
-import type { BetterAuthError } from "@core/types";
 import { badRequest } from "@core/utils";
 import type { FastifyInstance } from "fastify";
+import { mapLoginError } from "./auth.helpers";
 import type { AdminAuthService } from "./auth.types";
 
 export function adminAuthService(fastify: FastifyInstance): AdminAuthService {
@@ -45,23 +45,7 @@ export function adminAuthService(fastify: FastifyInstance): AdminAuthService {
           cookie: headers.get("set-cookie"),
         };
       } catch (e) {
-        if (e instanceof Error && e.name === "HttpError") {
-          throw e;
-        }
-
-        const error = e as BetterAuthError;
-        const code = error.body?.code;
-
-        switch (code) {
-          case "INVALID_EMAIL_OR_PASSWORD":
-            throw badRequest("auth.invalidCredentials", "Invalid email or password");
-
-          case "EMAIL_NOT_VERIFIED":
-            throw badRequest("auth.emailNotVerified", "Email not verified");
-
-          default:
-            throw error;
-        }
+        mapLoginError(e);
       }
     },
   };

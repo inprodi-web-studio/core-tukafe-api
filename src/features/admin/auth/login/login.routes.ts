@@ -4,7 +4,7 @@ import { loginWithEmailBodySchema } from "./login.schemas";
 
 export async function loginRoutes(server: FastifyInstance) {
   server.post(
-    "/email",
+    "/",
     {
       schema: {
         body: loginWithEmailBodySchema,

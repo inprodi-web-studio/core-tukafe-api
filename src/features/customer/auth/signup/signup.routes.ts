@@ -1,15 +1,18 @@
 import type { FastifyInstance } from "fastify";
-import { signup } from "./signup.controllers";
+import { signupWithPhone } from "./signup.controllers";
+import { signupWithPhoneBodySchema, signupWithPhoneResponseSchema } from "./signup.schemas";
 
 export async function signupRoutes(server: FastifyInstance) {
   server.post(
-    "/signup",
+    "/email",
     {
       schema: {
-        // body : "",
-        // response : "",
+        body: signupWithPhoneBodySchema,
+        response: {
+          201: signupWithPhoneResponseSchema,
+        },
       },
     },
-    signup,
+    signupWithPhone,
   );
 }

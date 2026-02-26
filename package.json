@@ -28,6 +28,7 @@
     "drizzle-orm": "^0.45.1",
     "fastify": "^5.7.4",
     "fastify-type-provider-zod": "^6.1.0",
+    "libphonenumber-js": "^1.12.37",
     "pg": "^8.18.0",
     "qs": "^6.15.0",
     "zod": "^4.3.6"

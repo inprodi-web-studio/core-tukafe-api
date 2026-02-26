@@ -9,6 +9,7 @@ import {
 } from "@core/plugins";
 import cors from "@fastify/cors";
 import { adminAuthRoutes, adminAuthServicesPlugin } from "@features/admin/auth";
+import { customerAuthRoutes, customerAuthServicesPlugin } from "@features/customer/auth";
 import Fastify from "fastify";
 import qs from "qs";
 
@@ -54,6 +55,7 @@ await server.register(authPlugin);
 await server.register(featureNamespacesPlugin);
 
 await server.register(adminAuthServicesPlugin);
+await server.register(customerAuthServicesPlugin);
 
 // --- Routes
 await server.register(
@@ -65,7 +67,12 @@ await server.register(
       { prefix: "/admin" },
     );
 
-    await app.register(async (customerApp) => {}, { prefix: "/customer" });
+    await app.register(
+      async (customerApp) => {
+        await customerApp.register(customerAuthRoutes, { prefix: "/auth" });
+      },
+      { prefix: "/customer" },
+    );
   },
   { prefix: "/api" },
 );

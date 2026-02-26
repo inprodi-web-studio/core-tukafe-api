@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { bearer } from "better-auth/plugins/bearer";
 import { organization } from "better-auth/plugins/organization";
 import { phoneNumber } from "better-auth/plugins/phone-number";
 
@@ -40,12 +41,13 @@ export const auth = betterAuth({
   },
   emailAndPassword: {
     enabled: true,
+    requireEmailVerification: false,
   },
   user: {
     additionalFields: {
       middleName: {
         type: "string",
-        required: false,
+        required: true,
       },
       lastName: {
         type: "string",
@@ -54,7 +56,10 @@ export const auth = betterAuth({
     },
   },
   plugins: [
+    bearer(),
     phoneNumber({
+      requireVerification: true,
+      allowedAttempts: 5,
       sendOTP: ({ phoneNumber, code }, ctx) => {
         //TODO: Send with twilio
         console.log(`[OTP] ${phoneNumber}: ${code}`);
