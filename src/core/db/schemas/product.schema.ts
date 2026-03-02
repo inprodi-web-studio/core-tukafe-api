@@ -1,60 +1,41 @@
-import {
-  boolean,
-  index,
-  numeric,
-  pgTable,
-  primaryKey,
-  text,
-  uniqueIndex,
-} from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
+import { check, index, integer, pgEnum, pgTable, text } from "drizzle-orm/pg-core";
 
 import { generateTimestamps } from "@core/utils";
 import { productCategoriesDB } from "./productCategory.schema";
-import { organizationDB } from "./organization.schema";
+import { unitsDB } from "./unit.schema";
+
+export const PRODUCT_TYPES = ["simple", "assembled", "compound"] as const;
+
+export const productTypeEnum = pgEnum("product_type", PRODUCT_TYPES);
 
 const products = pgTable(
-  "products",
+  "product",
   {
     id: text("id").primaryKey(),
     name: text("name").notNull(),
-    description: text("description"),
-    price: numeric("price", { precision: 10, scale: 2 }).notNull(),
+    kitchenName: text("kitchen_name"),
+    priceCents: integer("price_cents"),
+    customerDescription: text("customer_description"),
+    kitchenDescription: text("kitchen_description"),
+    unitId: text("unit_id")
+      .notNull()
+      .references(() => unitsDB.id, { onDelete: "restrict" }),
     categoryId: text("category_id").references(() => productCategoriesDB.id, {
-      onDelete: "set null",
+      onDelete: "restrict",
     }),
-    isLoyaltyProgram: boolean("is_loyalty_program").notNull().default(false),
+    productType: productTypeEnum("product_type").notNull().default("simple"),
     ...generateTimestamps({ withDeletedAt: true }),
   },
   (table) => [
-    uniqueIndex("products_name_unique").on(table.name),
-    index("products_category_id_idx").on(table.categoryId),
-  ],
-);
-
-const organizationProducts = pgTable(
-  "organization_products",
-  {
-    organizationId: text("organization_id")
-      .notNull()
-      .references(() => organizationDB.id, { onDelete: "cascade" }),
-    productId: text("product_id")
-      .notNull()
-      .references(() => products.id, { onDelete: "cascade" }),
-    isActive: boolean("is_active").notNull().default(true),
-    ...generateTimestamps(),
-  },
-  (table) => [
-    primaryKey({
-      name: "organization_products_pk",
-      columns: [table.organizationId, table.productId],
-    }),
-    index("organization_products_organization_id_idx").on(table.organizationId),
-    index("organization_products_product_id_idx").on(table.productId),
+    check("product_price_cents_non_negative_check", sql`${table.priceCents} >= 0`),
+    index("product_name_idx").on(table.name),
+    index("product_unit_id_idx").on(table.unitId),
+    index("product_category_id_idx").on(table.categoryId),
+    index("product_product_type_idx").on(table.productType),
   ],
 );
 
 export const productsDB = products;
-export const organizationProductsDB = organizationProducts;
-
 export type Product = typeof productsDB.$inferSelect;
-export type OrganizationProduct = typeof organizationProductsDB.$inferSelect;
+export type ProductType = (typeof productTypeEnum.enumValues)[number];

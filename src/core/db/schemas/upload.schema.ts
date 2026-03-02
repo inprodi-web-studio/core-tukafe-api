@@ -1,17 +1,21 @@
-import { index, integer, pgEnum, pgTable, primaryKey, text } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
+import { index, integer, pgEnum, pgTable, primaryKey, text, uniqueIndex } from "drizzle-orm/pg-core";
 
 import { generateTimestamps } from "@core/utils";
 
 export const uploadVisibilityEnum = pgEnum("upload_visibility", ["PUBLIC", "PRIVATE"]);
 export const uploadEntityTypeEnum = pgEnum("upload_entity_type", [
   "product",
+  "variation",
+  "ingredient",
+  "supply",
   "organization",
   "customer",
   "user",
 ]);
 
 const uploads = pgTable(
-  "uploads",
+  "upload",
   {
     id: text("id").primaryKey(),
     name: text("name").notNull(),
@@ -20,11 +24,11 @@ const uploads = pgTable(
     mimeType: text("mime_type").notNull(),
     ...generateTimestamps(),
   },
-  (table) => [index("uploads_visibility_idx").on(table.visibility)],
+  (table) => [index("upload_visibility_idx").on(table.visibility)],
 );
 
 const uploadReferences = pgTable(
-  "upload_references",
+  "upload_reference",
   {
     uploadId: text("upload_id")
       .notNull()
@@ -36,11 +40,14 @@ const uploadReferences = pgTable(
   },
   (table) => [
     primaryKey({
-      name: "upload_references_pk",
+      name: "upload_reference_pk",
       columns: [table.uploadId, table.entityType, table.entityId],
     }),
-    index("upload_references_upload_id_idx").on(table.uploadId),
-    index("upload_references_entity_idx").on(table.entityType, table.entityId),
+    index("upload_reference_upload_id_idx").on(table.uploadId),
+    index("upload_reference_entity_idx").on(table.entityType, table.entityId),
+    uniqueIndex("upload_reference_single_image_entity_unique")
+      .on(table.entityType, table.entityId)
+      .where(sql`${table.entityType} NOT IN ('organization', 'customer', 'user')`),
   ],
 );
 

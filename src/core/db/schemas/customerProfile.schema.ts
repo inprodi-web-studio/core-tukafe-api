@@ -1,7 +1,7 @@
 import { date, index, pgTable, text } from "drizzle-orm/pg-core";
 
 import { generateTimestamps } from "@core/utils";
-import { customerGroupsDB } from "./customerGroups.schema";
+import { customerGroupsDB } from "./customerGroup.schema";
 import { userDB } from "./user.schema";
 
 const customerProfile = pgTable(

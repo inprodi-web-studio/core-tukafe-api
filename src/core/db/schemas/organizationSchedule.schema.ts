@@ -13,7 +13,7 @@ import {
 import { organizationDB } from "./organization.schema";
 
 const organizationSchedule = pgTable(
-  "organization_schedules",
+  "organization_schedule",
   {
     organizationId: text("organization_id")
       .notNull()
@@ -24,15 +24,15 @@ const organizationSchedule = pgTable(
   },
   (table) => [
     primaryKey({
-      name: "organization_schedules_pk",
+      name: "organization_schedule_pk",
       columns: [table.organizationId, table.dayOfWeek],
     }),
     check(
-      "organization_schedules_day_of_week_check",
+      "organization_schedule_day_of_week_check",
       sql`${table.dayOfWeek} >= 0 AND ${table.dayOfWeek} <= 6`,
     ),
-    check("organization_schedules_open_close_check", sql`${table.opensAt} < ${table.closesAt}`),
-    index("organization_schedules_day_of_week_idx").on(table.dayOfWeek),
+    check("organization_schedule_open_close_check", sql`${table.opensAt} < ${table.closesAt}`),
+    index("organization_schedule_day_of_week_idx").on(table.dayOfWeek),
   ],
 );
 

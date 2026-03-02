@@ -64,6 +64,41 @@
       "when": 1772050748139,
       "tag": "0008_brave_wolfsbane",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1772146404476,
+      "tag": "0009_brown_prodigy",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1772148775417,
+      "tag": "0010_public_pretty_boy",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1772149390040,
+      "tag": "0011_manual_price_cents",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1772149677594,
+      "tag": "0012_hot_marrow",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1772149707584,
+      "tag": "0013_regular_ogun",
+      "breakpoints": true
     }
   ]
 }

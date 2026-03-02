@@ -4,9 +4,18 @@ import { defaultStatements as organizationDefaultStatements } from "better-auth/
 const organizationStatements = {
   ...organizationDefaultStatements,
   schedules: ["create", "read", "update", "delete"],
+  products: ["create", "read", "update", "archive", "unarchive", "delete"],
+  productCategories: ["create", "read", "update", "delete"],
+  taxes: ["create", "read", "update", "delete"],
 } as const;
 
 export const ORGANIZATION_AC = createAccessControl(organizationStatements);
+
+type OrganizationStatements = typeof ORGANIZATION_AC.statements;
+
+export type OrganizationPermissions = {
+  [K in keyof OrganizationStatements]?: OrganizationStatements[K][number][];
+};
 
 export const ORGANIZATION_ROLES = {
   owner: ORGANIZATION_AC.newRole({
@@ -14,15 +23,24 @@ export const ORGANIZATION_ROLES = {
     member: ["create", "update", "delete"],
     invitation: ["create", "cancel"],
     schedules: ["create", "read", "update", "delete"],
+    products: ["create", "read", "update", "archive", "unarchive", "delete"],
+    productCategories: ["create", "read", "update", "delete"],
+    taxes: ["create", "read", "update", "delete"],
   }),
   admin: ORGANIZATION_AC.newRole({
     organization: ["update"],
     member: ["create", "update", "delete"],
     invitation: ["create", "cancel"],
     schedules: ["create", "read", "update", "delete"],
+    products: ["create", "read", "update", "archive", "unarchive", "delete"],
+    productCategories: ["read"],
+    taxes: ["read"],
   }),
   member: ORGANIZATION_AC.newRole({
     invitation: ["create"],
     schedules: ["read"],
+    products: ["read"],
+    productCategories: ["read"],
+    taxes: ["read"],
   }),
 };

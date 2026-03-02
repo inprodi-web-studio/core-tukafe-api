@@ -1,18 +1,7 @@
-import { sql } from "drizzle-orm";
-import {
-  check,
-  index,
-  integer,
-  pgTable,
-  primaryKey,
-  text,
-  time,
-  timestamp,
-  uniqueIndex,
-} from "drizzle-orm/pg-core";
+import { generateTimestamps } from "@core/utils";
+import { index, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { organizationDB } from "./organization.schema";
 import { userDB } from "./user.schema";
-import { generateTimestamps } from "@core/utils";
 
 const invitation = pgTable(
   "invitation",
@@ -24,7 +13,7 @@ const invitation = pgTable(
       .references(() => organizationDB.id, { onDelete: "cascade" }),
     inviterId: text("inviter_id")
       .notNull()
-      .references(() => userDB.id, { onDelete: "set null" }),
+      .references(() => userDB.id, { onDelete: "restrict" }),
     role: text("role").notNull(),
     status: text("status").notNull().default("pending"),
     expiresAt: timestamp("expires_at", { mode: "date" }),
