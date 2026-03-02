@@ -1,1 +1,0 @@
--- no-op: consolidated into 0011_manual_price_cents.sql

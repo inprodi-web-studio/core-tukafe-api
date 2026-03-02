@@ -4,7 +4,7 @@ import type { CreateBody } from "./create.schemas";
 export async function create(request: FastifyRequest, reply: FastifyReply) {
   const body = request.body as CreateBody;
 
-  const createdTax = await request.server.admin.taxes.create(body);
+  const createdUnit = await request.server.admin.units.create(body);
 
-  return reply.status(201).send(createdTax);
+  return reply.status(201).send(createdUnit);
 }

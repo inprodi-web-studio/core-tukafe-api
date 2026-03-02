@@ -13,8 +13,9 @@ import {
   adminProductcategoriesRoutes,
   adminProductcategoriesServicesPlugin,
 } from "@features/admin/productCategories";
-import { adminProductsRoutes } from "@features/admin/products";
+import { adminProductsRoutes, adminProductsServicesPlugin } from "@features/admin/products";
 import { adminTaxesRoutes, adminTaxesServicesPlugin } from "@features/admin/taxes";
+import { adminUnitsRoutes, adminUnitsServicesPlugin } from "@features/admin/units";
 import { customerAuthRoutes, customerAuthServicesPlugin } from "@features/customer/auth";
 import Fastify from "fastify";
 import qs from "qs";
@@ -63,6 +64,8 @@ await server.register(featureNamespacesPlugin);
 await server.register(adminAuthServicesPlugin);
 await server.register(adminProductcategoriesServicesPlugin);
 await server.register(adminTaxesServicesPlugin);
+await server.register(adminUnitsServicesPlugin);
+await server.register(adminProductsServicesPlugin);
 
 await server.register(customerAuthServicesPlugin);
 
@@ -73,6 +76,7 @@ await server.register(
       async (adminApp) => {
         await adminApp.register(adminAuthRoutes, { prefix: "/auth" });
         await adminApp.register(adminTaxesRoutes, { prefix: "/taxes" });
+        await adminApp.register(adminUnitsRoutes, { prefix: "/units" });
         await adminApp.register(adminProductsRoutes, { prefix: "/products" });
         await adminApp.register(adminProductcategoriesRoutes, { prefix: "/products/categories" });
       },

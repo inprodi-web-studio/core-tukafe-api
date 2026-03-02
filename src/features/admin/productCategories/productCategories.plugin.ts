@@ -1,11 +1,11 @@
 import type { FastifyPluginAsync } from "fastify";
 import fp from "fastify-plugin";
 import { adminProductcategoriesService } from "./productCategories.service";
-import type { AdminProductcategoriesService } from "./productCategories.types";
+import type { AdminProductCategoriesService } from "./productCategories.types";
 
 declare module "@core/types/feature-namespaces" {
   interface AdminNamespace {
-    productCategories: AdminProductcategoriesService;
+    productCategories: AdminProductCategoriesService;
   }
 }
 

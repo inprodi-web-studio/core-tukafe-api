@@ -8,7 +8,7 @@
     "start": "bun src/app.ts",
     "db:generate": "bunx drizzle-kit generate",
     "db:migrate": "bunx drizzle-kit migrate",
-    "db:push": "bun run db:generate && bun run db:migrate",
+    "db:push": "bunx drizzle-kit push",
     "db:seed": "bun scripts/seed-admin.ts",
     "db:studio": "bunx drizzle-kit studio",
     "auth:generate": "bunx @better-auth/cli@latest generate --config ./src/core/config/auth.config.ts",

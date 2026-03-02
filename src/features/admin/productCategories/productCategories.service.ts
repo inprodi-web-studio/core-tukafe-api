@@ -16,11 +16,11 @@ import {
   getMatchedRootIds,
   normalizeProductCategoryInput,
 } from "./productCategories.helpers";
-import type { AdminProductcategoriesService } from "./productCategories.types";
+import type { AdminProductCategoriesService } from "./productCategories.types";
 
 export function adminProductcategoriesService(
   fastify: FastifyInstance,
-): AdminProductcategoriesService {
+): AdminProductCategoriesService {
   return {
     async get(id, { safe = false } = {}) {
       const category = await fastify.db.query.productCategoriesDB.findFirst({

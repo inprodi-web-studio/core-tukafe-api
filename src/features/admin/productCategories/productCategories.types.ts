@@ -1,6 +1,6 @@
-import type { PaginatedResult } from "@core/utils";
 import type { ProductCategory } from "@core/db/schemas";
 import type { GetServiceConfig } from "@core/types";
+import type { PaginatedResult } from "@core/utils";
 
 export interface ProductCategoryListItem {
   id: string;
@@ -10,7 +10,7 @@ export interface ProductCategoryListItem {
   children: ProductCategoryListItem[];
 }
 
-export interface AdminProductcategoriesService {
+export interface AdminProductCategoriesService {
   get(id: string, config?: GetServiceConfig): Promise<ProductCategory | null>;
   list(
     input?: ListProductCategoriesServiceParams,

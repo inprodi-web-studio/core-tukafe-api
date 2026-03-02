@@ -1,15 +1,5 @@
 import { sql } from "drizzle-orm";
-import {
-  check,
-  index,
-  integer,
-  pgTable,
-  primaryKey,
-  text,
-  time,
-  timestamp,
-  uniqueIndex,
-} from "drizzle-orm/pg-core";
+import { check, index, integer, pgTable, primaryKey, text, time } from "drizzle-orm/pg-core";
 import { organizationDB } from "./organization.schema";
 
 const organizationSchedule = pgTable(

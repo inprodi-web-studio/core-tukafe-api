@@ -1,7 +1,7 @@
 import type { AnyColumn, SQL } from "drizzle-orm";
 import { desc, sql } from "drizzle-orm";
 
-const DEFAULT_FUZZY_THRESHOLD = 0.25;
+const DEFAULT_FUZZY_THRESHOLD = 0.3;
 const DEFAULT_MIN_QUERY_LENGTH = 2;
 
 export type FuzzySearchValue = AnyColumn | SQL<unknown>;

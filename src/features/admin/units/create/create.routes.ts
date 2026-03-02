@@ -7,7 +7,7 @@ export async function createRoutes(server: FastifyInstance) {
   server.post(
     "/",
     {
-      preHandler: [adminAuthHandler({ permissions: { products: ["create"] } })],
+      preHandler: [adminAuthHandler({ permissions: { units: ["create"] } })],
       schema: {
         body: createBodySchema,
         response: {
