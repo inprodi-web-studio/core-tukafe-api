@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import { check, index, numeric, pgTable, primaryKey, text } from "drizzle-orm/pg-core";
 
 import { generateTimestamps } from "@core/utils";
@@ -23,7 +23,7 @@ const recipeIngredients = pgTable(
     ingredientId: text("ingredient_id")
       .notNull()
       .references(() => ingredientsDB.id, { onDelete: "restrict" }),
-    quantity: numeric("quantity", { precision: 12, scale: 4 }).notNull(),
+    quantity: numeric("quantity", { precision: 12, scale: 6, mode: "number" }).notNull(),
     ...generateTimestamps(),
   },
   (table) => [
@@ -46,7 +46,7 @@ const recipeSupplies = pgTable(
     supplyId: text("supply_id")
       .notNull()
       .references(() => suppliesDB.id, { onDelete: "restrict" }),
-    quantity: numeric("quantity", { precision: 12, scale: 4 }).notNull(),
+    quantity: numeric("quantity", { precision: 12, scale: 6, mode: "number" }).notNull(),
     ...generateTimestamps(),
   },
   (table) => [
@@ -63,6 +63,37 @@ const recipeSupplies = pgTable(
 export const recipesDB = recipes;
 export const recipeIngredientsDB = recipeIngredients;
 export const recipeSuppliesDB = recipeSupplies;
+
+export const recipesRelations = relations(recipesDB, ({ one, many }) => ({
+  product: one(productsDB, {
+    fields: [recipesDB.productId],
+    references: [productsDB.id],
+  }),
+  ingredients: many(recipeIngredientsDB),
+  supplies: many(recipeSuppliesDB),
+}));
+
+export const recipeIngredientsRelations = relations(recipeIngredientsDB, ({ one }) => ({
+  recipe: one(recipesDB, {
+    fields: [recipeIngredientsDB.recipeId],
+    references: [recipesDB.productId],
+  }),
+  ingredient: one(ingredientsDB, {
+    fields: [recipeIngredientsDB.ingredientId],
+    references: [ingredientsDB.id],
+  }),
+}));
+
+export const recipeSuppliesRelations = relations(recipeSuppliesDB, ({ one }) => ({
+  recipe: one(recipesDB, {
+    fields: [recipeSuppliesDB.recipeId],
+    references: [recipesDB.productId],
+  }),
+  supply: one(suppliesDB, {
+    fields: [recipeSuppliesDB.supplyId],
+    references: [suppliesDB.id],
+  }),
+}));
 
 export type Recipe = typeof recipesDB.$inferSelect;
 export type RecipeIngredient = typeof recipeIngredientsDB.$inferSelect;

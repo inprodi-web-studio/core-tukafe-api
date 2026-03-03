@@ -106,7 +106,7 @@ const modifierOptionIngredients = pgTable(
     ingredientId: text("ingredient_id")
       .notNull()
       .references(() => ingredientsDB.id, { onDelete: "restrict" }),
-    quantity: numeric("quantity", { precision: 12, scale: 4 }).notNull(),
+    quantity: numeric("quantity", { precision: 12, scale: 6, mode: "number" }).notNull(),
     ...generateTimestamps(),
   },
   (table) => [
@@ -129,7 +129,7 @@ const modifierOptionSupplies = pgTable(
     supplyId: text("supply_id")
       .notNull()
       .references(() => suppliesDB.id, { onDelete: "restrict" }),
-    quantity: numeric("quantity", { precision: 12, scale: 4 }).notNull(),
+    quantity: numeric("quantity", { precision: 12, scale: 6, mode: "number" }).notNull(),
     ...generateTimestamps(),
   },
   (table) => [

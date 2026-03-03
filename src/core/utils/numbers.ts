@@ -1,5 +1,6 @@
 const FLOAT_COMPARISON_EPSILON = 1e-8;
 const BASE_100_SCALE_FACTOR = 100;
+export const MAX_SUPPORTED_DECIMAL_PLACES = 6;
 
 export function hasAtMostDecimalPlaces(value: number, decimalPlaces: number): boolean {
   const scaleFactor = 10 ** decimalPlaces;

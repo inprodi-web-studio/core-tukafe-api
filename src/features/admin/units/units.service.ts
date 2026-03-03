@@ -1,5 +1,14 @@
 import { unitsDB } from "@core/db/schemas";
-import { buildFuzzySearch, conflict, generateNanoId, getPgError, notFound, paginate } from "@core/utils";
+import {
+  buildFuzzySearch,
+  conflict,
+  generateNanoId,
+  getPgError,
+  MAX_SUPPORTED_DECIMAL_PLACES,
+  notFound,
+  paginate,
+  validation,
+} from "@core/utils";
 import { asc, type SQL } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
 import { normalizeUnitInput } from "./units.helpers";
@@ -52,6 +61,13 @@ export function adminUnitsService(fastify: FastifyInstance): AdminUnitsService {
 
     async create(input) {
       const { name, abbreviation, precision } = normalizeUnitInput(input);
+
+      if (precision > MAX_SUPPORTED_DECIMAL_PLACES) {
+        throw validation(
+          "unit.invalidPrecision",
+          `Unit precision cannot be greater than ${MAX_SUPPORTED_DECIMAL_PLACES}`,
+        );
+      }
 
       try {
         const [createdUnit] = await fastify.db

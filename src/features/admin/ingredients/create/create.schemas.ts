@@ -1,4 +1,4 @@
-import { hasAtMostDecimalPlaces } from "@core/utils";
+import { hasAtMostDecimalPlaces, MAX_SUPPORTED_DECIMAL_PLACES } from "@core/utils";
 import { z } from "zod";
 
 export const createBodySchema = z
@@ -10,7 +10,10 @@ export const createBodySchema = z
     baseCostPerUnit: z
       .number()
       .nonnegative()
-      .refine((value) => hasAtMostDecimalPlaces(value, 6), "Base cost per unit must have at most 6 decimal places"),
+      .refine(
+        (value) => hasAtMostDecimalPlaces(value, MAX_SUPPORTED_DECIMAL_PLACES),
+        `Base cost per unit must have at most ${MAX_SUPPORTED_DECIMAL_PLACES} decimal places`,
+      ),
   })
   .strict();
 
