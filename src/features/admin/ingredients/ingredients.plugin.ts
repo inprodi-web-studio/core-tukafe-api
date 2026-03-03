@@ -14,6 +14,7 @@ const adminIngredientsServicesPlugin: FastifyPluginAsync = async (fastify) => {
 
   fastify.admin.ingredients = {
     get: ingredientsService.get,
+    list: ingredientsService.list,
     create: ingredientsService.create,
   };
 };

@@ -17,7 +17,11 @@ const ingredients = pgTable(
     categoryId: text("category_id")
       .notNull()
       .references(() => ingredientCategoriesDB.id, { onDelete: "restrict" }),
-    baseCostPerUnit: numeric("base_cost_per_unit", { precision: 14, scale: 6, mode: "number" }).notNull(),
+    baseCostPerUnit: numeric("base_cost_per_unit", {
+      precision: 14,
+      scale: 6,
+      mode: "number",
+    }).notNull(),
     ...generateTimestamps({ withDeletedAt: true }),
   },
   (table) => [

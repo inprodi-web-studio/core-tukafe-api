@@ -1,8 +1,10 @@
 import type { Ingredient, IngredientCategory, Unit } from "@core/db/schemas";
-import type { GetServiceConfig } from "@core/types";
+import type { GetServiceConfig, ListQueryParams } from "@core/types";
+import type { PaginatedResult } from "@core/utils";
 
 export interface AdminIngredientsService {
   get(id: string, config?: GetServiceConfig): Promise<IngredientResponse | null>;
+  list(input?: ListQueryParams): Promise<PaginatedResult<IngredientResponse>>;
   create(input: CreateIngredientServiceParams): Promise<IngredientResponse>;
 }
 

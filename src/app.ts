@@ -18,6 +18,11 @@ import {
   adminIngredientsServicesPlugin,
 } from "@features/admin/ingredients";
 import {
+  adminSupplyCategoriesRoutes,
+  adminSupplyCategoriesServicesPlugin,
+} from "@features/admin/supplyCategories";
+import { adminSuppliesRoutes, adminSuppliesServicesPlugin } from "@features/admin/supplies";
+import {
   adminProductcategoriesRoutes,
   adminProductcategoriesServicesPlugin,
 } from "@features/admin/productCategories";
@@ -72,10 +77,12 @@ await server.register(featureNamespacesPlugin);
 await server.register(adminAuthServicesPlugin);
 await server.register(adminProductcategoriesServicesPlugin);
 await server.register(adminIngredientCategoriesServicesPlugin);
+await server.register(adminSupplyCategoriesServicesPlugin);
 await server.register(adminTaxesServicesPlugin);
 await server.register(adminUnitsServicesPlugin);
 await server.register(adminProductsServicesPlugin);
 await server.register(adminIngredientsServicesPlugin);
+await server.register(adminSuppliesServicesPlugin);
 
 await server.register(customerAuthServicesPlugin);
 
@@ -90,8 +97,12 @@ await server.register(
         await adminApp.register(adminProductsRoutes, { prefix: "/products" });
         await adminApp.register(adminProductcategoriesRoutes, { prefix: "/products/categories" });
         await adminApp.register(adminIngredientsRoutes, { prefix: "/ingredients" });
+        await adminApp.register(adminSuppliesRoutes, { prefix: "/supplies" });
         await adminApp.register(adminIngredientCategoriesRoutes, {
           prefix: "/ingredients/categories",
+        });
+        await adminApp.register(adminSupplyCategoriesRoutes, {
+          prefix: "/supplies/categories",
         });
       },
       { prefix: "/admin" },

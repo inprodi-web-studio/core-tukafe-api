@@ -1,5 +1,13 @@
-import { ingredientsDB } from "@core/db/schemas";
-import { conflict, generateNanoId, getPgError, notFound } from "@core/utils";
+import { ingredientCategoriesDB, ingredientsDB, unitsDB } from "@core/db/schemas";
+import {
+  buildFuzzySearch,
+  conflict,
+  generateNanoId,
+  getPgError,
+  notFound,
+  paginate,
+} from "@core/utils";
+import { and, asc, eq, getTableColumns, isNull, type SQL } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
 import { normalizeIngredientInput } from "./ingredients.helpers";
 import type { AdminIngredientsService } from "./ingredients.types";
@@ -30,6 +38,60 @@ export function adminIngredientsService(fastify: FastifyInstance): AdminIngredie
       }
 
       return ingredient;
+    },
+
+    async list({ search, page, pageSize } = {}) {
+      const defaultOrderBy: [SQL, ...SQL[]] = [asc(ingredientsDB.name), asc(ingredientsDB.id)];
+      const fuzzySearch = buildFuzzySearch({
+        query: search,
+        values: [
+          ingredientsDB.name,
+          ingredientsDB.description,
+          ingredientCategoriesDB.name,
+          unitsDB.name,
+          unitsDB.abbreviation,
+        ],
+        tieBreakers: defaultOrderBy,
+      });
+
+      return paginate({
+        executor: fastify.db,
+        createQuery: () => {
+          const {
+            baseUnitId: omittedBaseUnitId,
+            categoryId: omittedCategoryId,
+            ...ingredientColumns
+          } = getTableColumns(ingredientsDB);
+          
+          void omittedBaseUnitId;
+          void omittedCategoryId;
+
+          const query = fastify.db
+            .select({
+              ...ingredientColumns,
+              baseUnit: unitsDB,
+              category: ingredientCategoriesDB,
+            })
+            .from(ingredientsDB)
+            .innerJoin(unitsDB, eq(ingredientsDB.baseUnitId, unitsDB.id))
+            .innerJoin(
+              ingredientCategoriesDB,
+              eq(ingredientsDB.categoryId, ingredientCategoriesDB.id),
+            )
+            .$dynamic();
+
+          query.where(
+            fuzzySearch.where
+              ? and(isNull(ingredientsDB.deletedAt), fuzzySearch.where)
+              : isNull(ingredientsDB.deletedAt),
+          );
+
+          return query;
+        },
+        orderBy: fuzzySearch.orderBy ?? defaultOrderBy,
+        page,
+        pageSize,
+      });
     },
 
     async create(input) {
