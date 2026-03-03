@@ -4,7 +4,8 @@ import { z } from "zod";
 const listItemSchema = z.object({
   id: z.string(),
   name: z.string(),
-  rate: z.number().min(0).max(10000),
+  icon: z.string(),
+  color: z.string(),
 });
 
 export const listResponseSchema = createPaginatedResponseSchema(listItemSchema);

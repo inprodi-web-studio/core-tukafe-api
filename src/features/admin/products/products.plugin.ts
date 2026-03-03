@@ -20,5 +20,5 @@ const adminProductsServicesPlugin: FastifyPluginAsync = async (fastify) => {
 
 export default fp(adminProductsServicesPlugin, {
   name: "admin-products-services-plugin",
-  dependencies: ["feature-namespaces", "db"],
+  dependencies: ["feature-namespaces"],
 });

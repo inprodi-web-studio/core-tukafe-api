@@ -3,7 +3,6 @@ import { check, index, integer, pgTable, primaryKey, text, uniqueIndex } from "d
 
 import { generateTimestamps } from "@core/utils";
 import { ingredientsDB } from "./ingredient.schema";
-import { productsDB } from "./product.schema";
 import { suppliesDB } from "./supply.schema";
 
 const tax = pgTable(
@@ -18,27 +17,6 @@ const tax = pgTable(
   (table) => [
     uniqueIndex("tax_name_unique").on(table.name),
     check("tax_rate_bps_range_check", sql`${table.rate} >= 0 AND ${table.rate} <= 10000`),
-  ],
-);
-
-const productTax = pgTable(
-  "product_tax",
-  {
-    productId: text("product_id")
-      .notNull()
-      .references(() => productsDB.id, { onDelete: "cascade" }),
-    taxId: text("tax_id")
-      .notNull()
-      .references(() => tax.id, { onDelete: "cascade" }),
-    ...generateTimestamps(),
-  },
-  (table) => [
-    primaryKey({
-      name: "product_tax_pk",
-      columns: [table.productId, table.taxId],
-    }),
-    index("product_tax_product_id_idx").on(table.productId),
-    index("product_tax_tax_id_idx").on(table.taxId),
   ],
 );
 
@@ -85,11 +63,9 @@ const supplyTax = pgTable(
 );
 
 export const taxDB = tax;
-export const productTaxDB = productTax;
 export const ingredientTaxDB = ingredientTax;
 export const supplyTaxDB = supplyTax;
 
 export type Tax = typeof taxDB.$inferSelect;
-export type ProductTax = typeof productTaxDB.$inferSelect;
 export type IngredientTax = typeof ingredientTaxDB.$inferSelect;
 export type SupplyTax = typeof supplyTaxDB.$inferSelect;

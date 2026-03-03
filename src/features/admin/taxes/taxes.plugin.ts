@@ -20,5 +20,5 @@ const adminTaxesServicesPlugin: FastifyPluginAsync = async (fastify) => {
 
 export default fp(adminTaxesServicesPlugin, {
   name: "admin-taxes-services-plugin",
-  dependencies: ["feature-namespaces", "db"],
+  dependencies: ["feature-namespaces"],
 });

@@ -10,6 +10,14 @@ import {
 import cors from "@fastify/cors";
 import { adminAuthRoutes, adminAuthServicesPlugin } from "@features/admin/auth";
 import {
+  adminIngredientCategoriesRoutes,
+  adminIngredientCategoriesServicesPlugin,
+} from "@features/admin/ingredientCategories";
+import {
+  adminIngredientsRoutes,
+  adminIngredientsServicesPlugin,
+} from "@features/admin/ingredients";
+import {
   adminProductcategoriesRoutes,
   adminProductcategoriesServicesPlugin,
 } from "@features/admin/productCategories";
@@ -63,9 +71,11 @@ await server.register(featureNamespacesPlugin);
 
 await server.register(adminAuthServicesPlugin);
 await server.register(adminProductcategoriesServicesPlugin);
+await server.register(adminIngredientCategoriesServicesPlugin);
 await server.register(adminTaxesServicesPlugin);
 await server.register(adminUnitsServicesPlugin);
 await server.register(adminProductsServicesPlugin);
+await server.register(adminIngredientsServicesPlugin);
 
 await server.register(customerAuthServicesPlugin);
 
@@ -79,6 +89,10 @@ await server.register(
         await adminApp.register(adminUnitsRoutes, { prefix: "/units" });
         await adminApp.register(adminProductsRoutes, { prefix: "/products" });
         await adminApp.register(adminProductcategoriesRoutes, { prefix: "/products/categories" });
+        await adminApp.register(adminIngredientsRoutes, { prefix: "/ingredients" });
+        await adminApp.register(adminIngredientCategoriesRoutes, {
+          prefix: "/ingredients/categories",
+        });
       },
       { prefix: "/admin" },
     );

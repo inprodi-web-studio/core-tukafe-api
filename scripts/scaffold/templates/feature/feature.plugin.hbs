@@ -1,20 +1,21 @@
 import type { FastifyPluginAsync } from "fastify";
 import fp from "fastify-plugin";
 import { {{serviceFunction}} } from "./{{featureName}}.service";
+import type { {{serviceInterface}} } from "./{{featureName}}.types";
 
 declare module "@core/types/feature-namespaces" {
   interface {{namespaceInterface}} {
-    {{namespaceKey}}: {};
+    {{featureName}}: {{serviceInterface}};
   }
 }
 
 const {{pluginSymbol}}: FastifyPluginAsync = async (fastify) => {
   const {{featureCamel}}Service = {{serviceFunction}}(fastify);
 
-  fastify.{{areaLower}}.{{featureName}} = {};
+  fastify.{{areaLower}}.{{featureName}} = {{featureCamel}}Service;
 };
 
 export default fp({{pluginSymbol}}, {
   name: "{{areaLower}}-{{featureName}}-services-plugin",
-  dependencies: ["feature-namespaces", "{{featureName}}"],
+  dependencies: ["feature-namespaces"],
 });

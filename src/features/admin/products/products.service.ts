@@ -1,7 +1,7 @@
-import { productsDB } from "@core/db/schemas";
+import { productTaxDB, productsDB } from "@core/db/schemas";
 import { conflict, generateNanoId, getPgError, notFound } from "@core/utils";
 import type { FastifyInstance } from "fastify";
-import { normalizeProductInput } from "./products.helpers";
+import { mapProductResponse, normalizeProductInput } from "./products.helpers";
 import type { AdminProductsService } from "./products.types";
 
 export function adminProductsService(fastify: FastifyInstance): AdminProductsService {
@@ -18,18 +18,23 @@ export function adminProductsService(fastify: FastifyInstance): AdminProductsSer
         with: {
           unit: true,
           category: true,
+          taxes: {
+            with: {
+              tax: true,
+            },
+          },
         },
       });
 
       if (!product && !safe) {
-        throw notFound("product.notFound", "The product category was not found");
+        throw notFound("product.notFound", "The product was not found");
       }
 
       if (!product) {
         return null;
       }
 
-      return product;
+      return mapProductResponse(product);
     },
 
     async create(input) {
@@ -42,6 +47,7 @@ export function adminProductsService(fastify: FastifyInstance): AdminProductsSer
         unitId,
         productType,
         categoryId,
+        taxIds,
       } = normalizeProductInput(input);
 
       try {
@@ -49,6 +55,21 @@ export function adminProductsService(fastify: FastifyInstance): AdminProductsSer
 
         if (categoryId) {
           await fastify.admin.productCategories.get(categoryId);
+        }
+
+        if (taxIds.length > 0) {
+          const taxes = await fastify.db.query.taxDB.findMany({
+            where(table, { inArray }) {
+              return inArray(table.id, taxIds);
+            },
+            columns: {
+              id: true,
+            },
+          });
+
+          if (taxes.length !== taxIds.length) {
+            throw notFound("tax.notFound", "One or more taxes were not found");
+          }
         }
 
         const [createdProduct] = await fastify.db
@@ -68,6 +89,15 @@ export function adminProductsService(fastify: FastifyInstance): AdminProductsSer
 
         if (!createdProduct) {
           throw new Error("Failed to create product");
+        }
+
+        if (taxIds.length > 0) {
+          await fastify.db.insert(productTaxDB).values(
+            taxIds.map((taxId) => ({
+              productId: createdProduct.id,
+              taxId,
+            })),
+          );
         }
 
         const product = await fastify.admin.products.get(createdProduct.id);

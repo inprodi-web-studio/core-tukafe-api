@@ -2,7 +2,7 @@ import { taxDB } from "@core/db/schemas";
 import { buildFuzzySearch, conflict, generateNanoId, getPgError, paginate } from "@core/utils";
 import { asc, type SQL } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
-import { mapTaxOutput, normalizeTaxInput } from "./taxes.helpers";
+import { normalizeTaxInput } from "./taxes.helpers";
 import type { AdminTaxesService } from "./taxes.types";
 
 export function adminTaxesService(fastify: FastifyInstance): AdminTaxesService {
@@ -30,7 +30,6 @@ export function adminTaxesService(fastify: FastifyInstance): AdminTaxesService {
         orderBy: fuzzySearch.orderBy ?? defaultOrderBy,
         page: page,
         pageSize: pageSize,
-        mapRow: mapTaxOutput,
       });
     },
 
@@ -51,7 +50,7 @@ export function adminTaxesService(fastify: FastifyInstance): AdminTaxesService {
           throw new Error("Failed to create tax");
         }
 
-        return mapTaxOutput(createdTax);
+        return createdTax;
       } catch (error) {
         const pgError = getPgError(error);
 

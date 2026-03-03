@@ -1,4 +1,4 @@
-import type { Product, ProductCategory, ProductType, Unit } from "@core/db/schemas";
+import type { Product, ProductCategory, ProductType, Tax, Unit } from "@core/db/schemas";
 import type { GetServiceConfig } from "@core/types";
 
 export interface AdminProductsService {
@@ -9,6 +9,13 @@ export interface AdminProductsService {
 export interface ProductResponse extends Omit<Product, "categoryId" | "unitId"> {
   unit: Unit;
   category: ProductCategory | null;
+  taxes: Array<Tax>;
+}
+
+export interface ProductWithTaxRelations extends Omit<ProductResponse, "taxes"> {
+  taxes: Array<{
+    tax: Tax;
+  }>;
 }
 
 export interface CreateProductServiceParams {
@@ -20,4 +27,5 @@ export interface CreateProductServiceParams {
   unitId: string;
   categoryId?: string | null;
   productType: ProductType;
+  taxIds?: string[] | null;
 }

@@ -21,5 +21,5 @@ const adminAuthServicesPlugin: FastifyPluginAsync = async (fastify) => {
 
 export default fp(adminAuthServicesPlugin, {
   name: "admin-auth-services-plugin",
-  dependencies: ["feature-namespaces", "auth"],
+  dependencies: ["feature-namespaces"],
 });

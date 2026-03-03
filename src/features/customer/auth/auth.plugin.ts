@@ -27,5 +27,5 @@ const customerAuthServicesPlugin: FastifyPluginAsync = async (fastify) => {
 
 export default fp(customerAuthServicesPlugin, {
   name: "customer-auth-services-plugin",
-  dependencies: ["feature-namespaces", "auth", "db"],
+  dependencies: ["feature-namespaces"],
 });

@@ -10,6 +10,7 @@ export const createBodySchema = z.object({
   unitId: z.nanoid(),
   categoryId: z.nanoid().nullish(),
   productType: z.enum(PRODUCT_TYPES),
+  taxIds: z.array(z.string()).nullish(),
 });
 
 export type CreateBody = z.infer<typeof createBodySchema>;
@@ -36,6 +37,13 @@ export const createResponseSchema = z.object({
       parentId: z.string().nullish(),
     })
     .nullish(),
+  taxes: z.array(
+    z.object({
+      id: z.string(),
+      name: z.string(),
+      rate: z.number().int().nonnegative(),
+    }),
+  ),
   productType: z.string(),
 });
 

@@ -2,7 +2,9 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import type { CreateBody } from "./create.schemas";
 
 export async function create(request: FastifyRequest<{ Body: CreateBody }>, reply: FastifyReply) {
-  const createdProduct = await request.server.admin.products.create(request.body);
+  const createdIngredientCategory = await request.server.admin.ingredientCategories.create(
+    request.body,
+  );
 
-  return reply.status(201).send(createdProduct);
+  return reply.status(201).send(createdIngredientCategory);
 }

@@ -1,5 +1,5 @@
-import { sql } from "drizzle-orm";
-import { check, index, integer, pgTable, text } from "drizzle-orm/pg-core";
+import { relations, sql } from "drizzle-orm";
+import { check, index, integer, pgTable, text, uniqueIndex } from "drizzle-orm/pg-core";
 
 import { generateTimestamps } from "@core/utils";
 import { ingredientCategoriesDB } from "./ingredientCategory.schema";
@@ -17,12 +17,14 @@ const ingredients = pgTable(
     categoryId: text("category_id")
       .notNull()
       .references(() => ingredientCategoriesDB.id, { onDelete: "restrict" }),
-    // Price stored in minor units (x100): e.g., 12.34 -> 1234.
-    baseCost: integer("base_cost").notNull(),
-    ...generateTimestamps(),
+    baseCostCents: integer("base_cost_cents").notNull(),
+    ...generateTimestamps({ withDeletedAt: true }),
   },
   (table) => [
-    check("ingredient_base_cost_non_negative_check", sql`${table.baseCost} >= 0`),
+    check("ingredient_base_cost_non_negative_check", sql`${table.baseCostCents} >= 0`),
+    uniqueIndex("ingredient_name_active_unique")
+      .on(table.name)
+      .where(sql`${table.deletedAt} IS NULL`),
     index("ingredient_name_idx").on(table.name),
     index("ingredient_unit_id_idx").on(table.unitId),
     index("ingredient_category_id_idx").on(table.categoryId),
@@ -30,4 +32,14 @@ const ingredients = pgTable(
 );
 
 export const ingredientsDB = ingredients;
+export const ingredientsRelations = relations(ingredientsDB, ({ one }) => ({
+  unit: one(unitsDB, {
+    fields: [ingredientsDB.unitId],
+    references: [unitsDB.id],
+  }),
+  category: one(ingredientCategoriesDB, {
+    fields: [ingredientsDB.categoryId],
+    references: [ingredientCategoriesDB.id],
+  }),
+}));
 export type Ingredient = typeof ingredientsDB.$inferSelect;
