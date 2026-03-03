@@ -1,10 +1,9 @@
-import { normalizeString, toBase100Integer } from "@core/utils";
+import { normalizeString } from "@core/utils";
 import type { CreateIngredientServiceParams } from "./ingredients.types";
 
 export const normalizeIngredientInput = ({
   name,
   description,
-  baseCost,
   ...rest
 }: CreateIngredientServiceParams) => {
   const normalizedName = normalizeString(name, {
@@ -20,7 +19,6 @@ export const normalizeIngredientInput = ({
   return {
     name: normalizedName,
     description: normalizedDescription,
-    baseCostCents: toBase100Integer(baseCost),
     ...rest,
   };
 };

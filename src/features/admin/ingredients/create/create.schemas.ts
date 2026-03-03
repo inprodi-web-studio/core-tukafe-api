@@ -1,12 +1,16 @@
+import { hasAtMostDecimalPlaces } from "@core/utils";
 import { z } from "zod";
 
 export const createBodySchema = z
   .object({
     name: z.string().nonempty(),
     description: z.string().nullish(),
-    unitId: z.nanoid(),
+    baseUnitId: z.nanoid(),
     categoryId: z.nanoid(),
-    baseCost: z.number().nonnegative(),
+    baseCostPerUnit: z
+      .number()
+      .nonnegative()
+      .refine((value) => hasAtMostDecimalPlaces(value, 6), "Base cost per unit must have at most 6 decimal places"),
   })
   .strict();
 
@@ -16,8 +20,8 @@ export const createResponseSchema = z.object({
   id: z.string(),
   name: z.string(),
   description: z.string().nullish(),
-  baseCostCents: z.number().nonnegative(),
-  unit: z.object({
+  baseCostPerUnit: z.number().nonnegative(),
+  baseUnit: z.object({
     id: z.string(),
     name: z.string(),
     abbreviation: z.string(),

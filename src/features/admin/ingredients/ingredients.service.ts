@@ -12,11 +12,11 @@ export function adminIngredientsService(fastify: FastifyInstance): AdminIngredie
           return eq(ingredientTable.id, id);
         },
         columns: {
-          unitId: false,
+          baseUnitId: false,
           categoryId: false,
         },
         with: {
-          unit: true,
+          baseUnit: true,
           category: true,
         },
       });
@@ -33,11 +33,11 @@ export function adminIngredientsService(fastify: FastifyInstance): AdminIngredie
     },
 
     async create(input) {
-      const { name, categoryId, baseCostCents, description, unitId } =
+      const { name, categoryId, baseCostPerUnit, description, baseUnitId } =
         normalizeIngredientInput(input);
 
       try {
-        await fastify.admin.units.get(unitId);
+        await fastify.admin.units.get(baseUnitId);
 
         await fastify.admin.ingredientCategories.get(categoryId);
 
@@ -47,9 +47,9 @@ export function adminIngredientsService(fastify: FastifyInstance): AdminIngredie
             id: generateNanoId(),
             name,
             categoryId,
-            baseCostCents,
+            baseCostPerUnit,
             description,
-            unitId,
+            baseUnitId,
           })
           .returning();
 

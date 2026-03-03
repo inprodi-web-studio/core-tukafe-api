@@ -9,12 +9,12 @@ export interface AdminIngredientsService {
 export interface CreateIngredientServiceParams {
   name: string;
   description?: string | null;
-  unitId: string;
+  baseUnitId: string;
   categoryId: string;
-  baseCost: number;
+  baseCostPerUnit: number;
 }
 
-export interface IngredientResponse extends Omit<Ingredient, "categoryId" | "unitId"> {
-  unit: Unit;
+export interface IngredientResponse extends Omit<Ingredient, "categoryId" | "baseUnitId"> {
+  baseUnit: Unit;
   category: IngredientCategory;
 }
