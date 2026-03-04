@@ -1,4 +1,5 @@
 export * from "./api";
+export * from "./arrays";
 export * from "./columns";
 export * from "./error-mapper";
 export * from "./errors";

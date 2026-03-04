@@ -42,6 +42,20 @@ const recipeSchema = z
     }
   });
 
+const variationSelectionSchema = z.object({
+  variationGroupId: z.nanoid(),
+  variationOptionId: z.nanoid(),
+});
+
+const variationSchema = z.object({
+  price: z.number().nonnegative(),
+  kitchenName: z.string().nullish(),
+  customerDescription: z.string().nullish(),
+  kitchenDescription: z.string().nullish(),
+  selections: z.array(variationSelectionSchema).min(1),
+  recipe: recipeSchema.optional(),
+});
+
 const recipeItemIngredientSchema = z.object({
   quantity: z.number().positive(),
   ingredient: z.object({
@@ -92,31 +106,132 @@ const recipeResponseSchema = z.object({
   supplies: z.array(recipeItemSupplySchema),
 });
 
+const variationGroupOptionResponseSchema = z.object({
+  id: z.string(),
+  variationGroupId: z.string(),
+  name: z.string(),
+  sortOrder: z.number().int().min(0),
+});
+
+const variationGroupResponseSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  sortOrder: z.number().int().min(0),
+  options: z.array(variationGroupOptionResponseSchema),
+});
+
+const variationResponseSchema = z.object({
+  id: z.string(),
+  sortOrder: z.number().int().min(0),
+  priceCents: z.number().nonnegative(),
+  kitchenName: z.string().nullish(),
+  customerDescription: z.string().nullish(),
+  kitchenDescription: z.string().nullish(),
+  selections: z.array(
+    z.object({
+      group: variationGroupResponseSchema.omit({ options: true }),
+      option: variationGroupOptionResponseSchema,
+    }),
+  ),
+  recipe: recipeResponseSchema.nullish(),
+});
+
 const createBaseBodySchema = z.object({
   name: z.string().nonempty(),
   kitchenName: z.string().nullish(),
-  price: z.number().nonnegative(),
+  price: z.number().nonnegative().optional(),
   customerDescription: z.string().nullish(),
   kitchenDescription: z.string().nullish(),
   unitId: z.nanoid(),
   categoryId: z.nanoid().nullish(),
   taxIds: z.array(z.string()).nullish(),
+  variationGroupIds: z.array(z.nanoid()).min(1).optional(),
+  variations: z.array(variationSchema).min(1).optional(),
 });
 
-export const createBodySchema = z.discriminatedUnion("productType", [
-  createBaseBodySchema.extend({
-    productType: z.literal("assembled"),
-    recipe: recipeSchema,
-  }),
-  createBaseBodySchema.extend({
-    productType: z.literal("simple"),
-    recipe: z.never().optional(),
-  }),
-  createBaseBodySchema.extend({
-    productType: z.literal("compound"),
-    recipe: z.never().optional(),
-  }),
-]);
+export const createBodySchema = z
+  .discriminatedUnion("productType", [
+    createBaseBodySchema.extend({
+      productType: z.literal("assembled"),
+      recipe: recipeSchema.optional(),
+    }),
+    createBaseBodySchema.extend({
+      productType: z.literal("simple"),
+      recipe: z.never().optional(),
+    }),
+    createBaseBodySchema.extend({
+      productType: z.literal("compound"),
+      recipe: z.never().optional(),
+    }),
+  ])
+  .superRefine((body, context) => {
+    const variationsCount = body.variations?.length ?? 0;
+    const variationGroupsCount = body.variationGroupIds?.length ?? 0;
+
+    if (variationsCount > 0 && variationGroupsCount === 0) {
+      context.addIssue({
+        code: "custom",
+        message: "Products with variations must include variation groups",
+        path: ["variationGroupIds"],
+      });
+    }
+
+    if (variationsCount > 0 && body.price !== undefined) {
+      context.addIssue({
+        code: "custom",
+        message: "Products with variations cannot include a base price",
+        path: ["price"],
+      });
+    }
+
+    if (variationsCount === 0 && body.price === undefined) {
+      context.addIssue({
+        code: "custom",
+        message: "Products without variations require a base price",
+        path: ["price"],
+      });
+    }
+
+    if (body.productType === "assembled") {
+      if (variationsCount > 0 && body.recipe !== undefined) {
+        context.addIssue({
+          code: "custom",
+          message: "Assembled products with variations cannot include a base recipe",
+          path: ["recipe"],
+        });
+      }
+
+      if (variationsCount === 0 && body.recipe === undefined) {
+        context.addIssue({
+          code: "custom",
+          message: "Assembled products without variations require a recipe",
+          path: ["recipe"],
+        });
+      }
+
+      body.variations?.forEach((variation, index) => {
+        if (variation.recipe === undefined) {
+          context.addIssue({
+            code: "custom",
+            message: "Each variation must include a recipe for assembled products",
+            path: ["variations", index, "recipe"],
+          });
+        }
+      });
+    }
+
+    if (body.productType !== "assembled") {
+      body.variations?.forEach((variation, index) => {
+        if (variation.recipe !== undefined) {
+          context.addIssue({
+            code: "custom",
+            message: "Only assembled products can include recipes in variations",
+            path: ["variations", index, "recipe"],
+          });
+        }
+      });
+    }
+  });
 
 export type CreateBody = z.infer<typeof createBodySchema>;
 
@@ -124,7 +239,7 @@ export const createResponseSchema = z.object({
   id: z.string(),
   name: z.string(),
   kitchenName: z.string().nullish(),
-  priceCents: z.number().nonnegative(),
+  priceCents: z.number().nonnegative().nullable(),
   customerDescription: z.string(),
   kitchenDescription: z.string().nullish(),
   unit: z.object({
@@ -151,6 +266,7 @@ export const createResponseSchema = z.object({
   ),
   productType: z.string(),
   recipe: recipeResponseSchema.nullish(),
+  variations: z.array(variationResponseSchema),
 });
 
 export type CreateResponse = z.infer<typeof createResponseSchema>;

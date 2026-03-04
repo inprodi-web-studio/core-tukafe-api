@@ -4,13 +4,15 @@ import type {
   Product,
   ProductCategory,
   ProductType,
-  Recipe,
-  RecipeIngredient,
-  RecipeSupply,
+  ProductVariationGroup,
   Supply,
   SupplyCategory,
   Tax,
   Unit,
+  Variation,
+  VariationGroup,
+  VariationGroupOption,
+  VariationSelection,
 } from "@core/db/schemas";
 import type { GetServiceConfig } from "@core/types";
 
@@ -23,20 +25,22 @@ export interface ProductResponse extends Omit<Product, "categoryId" | "unitId"> 
   unit: Unit;
   category: ProductCategory | null;
   taxes: Array<Tax>;
-  recipe: ProductRecipeResponse | null;
+  recipe: RecipeDetailsResponse | null;
+  variationGroups: ProductVariationGroupResponse[];
+  variations: ProductVariationResponse[];
 }
 
-export interface ProductWithRelations extends Omit<ProductResponse, "taxes" | "recipe"> {
+export interface ProductWithRelations extends Omit<ProductResponse, "taxes" | "variationGroups"> {
   taxes: Array<{
     tax: Tax;
   }>;
-  recipe: ProductRecipeWithRelations | null;
+  variationGroups: ProductVariationGroupLinkWithRelations[];
 }
 
 export interface CreateProductServiceParams {
   name: string;
   kitchenName?: string | null;
-  price: number;
+  price?: number | null;
   customerDescription?: string | null;
   kitchenDescription?: string | null;
   unitId: string;
@@ -44,6 +48,8 @@ export interface CreateProductServiceParams {
   productType: ProductType;
   taxIds?: string[] | null;
   recipe?: CreateProductRecipeParams;
+  variationGroupIds?: string[] | null;
+  variations?: CreateProductVariationParams[] | null;
 }
 
 export interface CreateProductRecipeParams {
@@ -58,6 +64,47 @@ export interface ValidatedProductRecipe {
   supplies: CreateProductRecipeSupplyParams[];
 }
 
+export interface CreateProductVariationParams {
+  price: number;
+  kitchenName?: string | null;
+  customerDescription?: string | null;
+  kitchenDescription?: string | null;
+  selections: CreateProductVariationSelectionParams[];
+  recipe?: CreateProductRecipeParams;
+}
+
+export interface NormalizedProductVariationParams extends Omit<
+  CreateProductVariationParams,
+  "price"
+> {
+  priceCents: number;
+}
+
+export interface CreateProductVariationSelectionParams {
+  variationGroupId: string;
+  variationOptionId: string;
+}
+
+export interface ValidatedProductVariation {
+  priceCents: number;
+  kitchenName: string | null;
+  customerDescription: string | null;
+  kitchenDescription: string | null;
+  selections: ValidatedProductVariationSelection[];
+  recipe: ValidatedProductRecipe | null;
+  combinationKey: string;
+}
+
+export interface ValidatedProductVariationSelection {
+  variationGroupId: string;
+  variationOptionId: string;
+}
+
+export interface ValidatedProductVariationConfig {
+  variationGroups: ProductVariationGroupResponse[];
+  variations: ValidatedProductVariation[];
+}
+
 export interface CreateProductRecipeIngredientParams {
   ingredientId: string;
   quantity: number;
@@ -68,17 +115,25 @@ export interface CreateProductRecipeSupplyParams {
   quantity: number;
 }
 
-export interface ProductRecipeResponse extends Omit<Recipe, "productId"> {
+export interface RecipeDetailsResponse {
+  description: string | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
   ingredients: ProductRecipeIngredientResponse[];
   supplies: ProductRecipeSupplyResponse[];
 }
 
-export interface ProductRecipeIngredientResponse
-  extends Omit<RecipeIngredient, "recipeId" | "ingredientId"> {
+export interface ProductRecipeIngredientResponse {
+  quantity: number;
+  createdAt: Date | null;
+  updatedAt: Date | null;
   ingredient: ProductRecipeIngredientItem;
 }
 
-export interface ProductRecipeSupplyResponse extends Omit<RecipeSupply, "recipeId" | "supplyId"> {
+export interface ProductRecipeSupplyResponse {
+  quantity: number;
+  createdAt: Date | null;
+  updatedAt: Date | null;
   supply: ProductRecipeSupplyItem;
 }
 
@@ -92,17 +147,23 @@ export interface ProductRecipeSupplyItem extends Omit<Supply, "baseUnitId" | "ca
   category: SupplyCategory;
 }
 
-export interface ProductRecipeWithRelations extends Omit<ProductRecipeResponse, "ingredients" | "supplies"> {
-  ingredients: Array<{
-    quantity: number;
-    createdAt: Date | null;
-    updatedAt: Date | null;
-    ingredient: ProductRecipeIngredientItem;
-  }>;
-  supplies: Array<{
-    quantity: number;
-    createdAt: Date | null;
-    updatedAt: Date | null;
-    supply: ProductRecipeSupplyItem;
-  }>;
+export interface ProductVariationGroupResponse extends VariationGroup {
+  options: VariationGroupOption[];
+}
+
+export interface ProductVariationGroupLinkWithRelations extends ProductVariationGroup {
+  group: ProductVariationGroupResponse;
+}
+
+export interface ProductVariationResponse extends Omit<Variation, "productId" | "combinationKey"> {
+  selections: ProductVariationSelectionResponse[];
+  recipe: RecipeDetailsResponse | null;
+}
+
+export interface ProductVariationSelectionResponse extends Omit<
+  VariationSelection,
+  "variationId" | "variationGroupId" | "variationOptionId"
+> {
+  group: VariationGroup;
+  option: VariationGroupOption;
 }
