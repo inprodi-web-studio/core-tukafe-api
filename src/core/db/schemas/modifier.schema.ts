@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
   boolean,
   check,
@@ -63,6 +63,7 @@ const modifierOptions = pgTable(
   },
   (table) => [
     uniqueIndex("modifier_option_modifier_name_unique").on(table.modifierId, table.name),
+    uniqueIndex("modifier_option_modifier_sort_order_unique").on(table.modifierId, table.sortOrder),
     uniqueIndex("modifier_option_single_default_unique")
       .on(table.modifierId)
       .where(sql`${table.isDefault} = true`),
@@ -148,6 +149,56 @@ export const modifierOptionsDB = modifierOptions;
 export const productModifiersDB = productModifiers;
 export const modifierOptionIngredientsDB = modifierOptionIngredients;
 export const modifierOptionSuppliesDB = modifierOptionSupplies;
+
+export const modifiersRelations = relations(modifiersDB, ({ many }) => ({
+  options: many(modifierOptionsDB),
+  productLinks: many(productModifiersDB),
+}));
+
+export const modifierOptionsRelations = relations(modifierOptionsDB, ({ one, many }) => ({
+  modifier: one(modifiersDB, {
+    fields: [modifierOptionsDB.modifierId],
+    references: [modifiersDB.id],
+  }),
+  ingredients: many(modifierOptionIngredientsDB),
+  supplies: many(modifierOptionSuppliesDB),
+}));
+
+export const productModifiersRelations = relations(productModifiersDB, ({ one }) => ({
+  product: one(productsDB, {
+    fields: [productModifiersDB.productId],
+    references: [productsDB.id],
+  }),
+  modifier: one(modifiersDB, {
+    fields: [productModifiersDB.modifierId],
+    references: [modifiersDB.id],
+  }),
+}));
+
+export const modifierOptionIngredientsRelations = relations(
+  modifierOptionIngredientsDB,
+  ({ one }) => ({
+    option: one(modifierOptionsDB, {
+      fields: [modifierOptionIngredientsDB.modifierOptionId],
+      references: [modifierOptionsDB.id],
+    }),
+    ingredient: one(ingredientsDB, {
+      fields: [modifierOptionIngredientsDB.ingredientId],
+      references: [ingredientsDB.id],
+    }),
+  }),
+);
+
+export const modifierOptionSuppliesRelations = relations(modifierOptionSuppliesDB, ({ one }) => ({
+  option: one(modifierOptionsDB, {
+    fields: [modifierOptionSuppliesDB.modifierOptionId],
+    references: [modifierOptionsDB.id],
+  }),
+  supply: one(suppliesDB, {
+    fields: [modifierOptionSuppliesDB.supplyId],
+    references: [suppliesDB.id],
+  }),
+}));
 
 export type Modifier = typeof modifiersDB.$inferSelect;
 export type ModifierOption = typeof modifierOptionsDB.$inferSelect;

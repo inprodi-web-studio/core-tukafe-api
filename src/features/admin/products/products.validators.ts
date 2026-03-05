@@ -208,6 +208,36 @@ export async function validateProductRecipe(
   return validateOptionalRecipe(fastify, recipe);
 }
 
+export async function validateProductModifiers(
+  fastify: FastifyInstance,
+  modifierIds: string[],
+): Promise<string[]> {
+  if (modifierIds.length === 0) {
+    return [];
+  }
+
+  assertUniqueValues(
+    modifierIds,
+    "product.duplicateModifier",
+    "Product modifiers cannot contain duplicates",
+  );
+
+  const matchedModifiers = await fastify.db.query.modifiersDB.findMany({
+    where(table, { inArray }) {
+      return inArray(table.id, modifierIds);
+    },
+    columns: {
+      id: true,
+    },
+  });
+
+  if (matchedModifiers.length !== modifierIds.length) {
+    throw notFound("modifier.notFound", "One or more modifiers were not found");
+  }
+
+  return modifierIds;
+}
+
 export function validateProductBasePrice(priceCents: number | null, variationsCount: number) {
   if (variationsCount > 0 && priceCents !== null) {
     throw validation(

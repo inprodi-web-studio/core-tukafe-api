@@ -3,6 +3,7 @@ import type {
   IngredientCategory,
   Product,
   ProductCategory,
+  ProductModifier,
   ProductType,
   ProductVariationGroup,
   Supply,
@@ -15,26 +16,38 @@ import type {
   VariationSelection,
 } from "@core/db/schemas";
 import type { GetServiceConfig } from "@core/types";
+import type { ModifierResponse } from "../modifiers/modifiers.types";
 
 export interface AdminProductsService {
   get(id: string, config?: GetServiceConfig): Promise<ProductResponse | null>;
   create(input: CreateProductServiceParams): Promise<ProductResponse>;
+  createVariation(
+    productId: string,
+    input: CreateProductVariationParams,
+  ): Promise<ProductResponse>;
+  createModifier(
+    productId: string,
+    input: CreateProductModifierParams,
+  ): Promise<ProductResponse>;
 }
 
 export interface ProductResponse extends Omit<Product, "categoryId" | "unitId"> {
   unit: Unit;
   category: ProductCategory | null;
   taxes: Array<Tax>;
+  modifiers: ProductModifierResponse[];
   recipe: RecipeDetailsResponse | null;
   variationGroups: ProductVariationGroupResponse[];
   variations: ProductVariationResponse[];
 }
 
-export interface ProductWithRelations extends Omit<ProductResponse, "taxes" | "variationGroups"> {
+export interface ProductWithRelations
+  extends Omit<ProductResponse, "taxes" | "variationGroups" | "modifiers"> {
   taxes: Array<{
     tax: Tax;
   }>;
   variationGroups: ProductVariationGroupLinkWithRelations[];
+  modifiers: ProductModifierLinkWithRelations[];
 }
 
 export interface CreateProductServiceParams {
@@ -47,9 +60,15 @@ export interface CreateProductServiceParams {
   categoryId?: string | null;
   productType: ProductType;
   taxIds?: string[] | null;
+  modifierIds?: string[] | null;
+  modifiers?: string[] | null;
   recipe?: CreateProductRecipeParams;
   variationGroupIds?: string[] | null;
   variations?: CreateProductVariationParams[] | null;
+}
+
+export interface CreateProductModifierParams {
+  modifierId: string;
 }
 
 export interface CreateProductRecipeParams {
@@ -154,6 +173,12 @@ export interface ProductVariationGroupResponse extends VariationGroup {
 export interface ProductVariationGroupLinkWithRelations extends ProductVariationGroup {
   group: ProductVariationGroupResponse;
 }
+
+export interface ProductModifierLinkWithRelations extends ProductModifier {
+  modifier: ProductModifierResponse;
+}
+
+export type ProductModifierResponse = ModifierResponse;
 
 export interface ProductVariationResponse extends Omit<Variation, "productId" | "combinationKey"> {
   selections: ProductVariationSelectionResponse[];

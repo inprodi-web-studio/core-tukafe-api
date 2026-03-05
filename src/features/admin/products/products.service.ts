@@ -1,4 +1,5 @@
 import {
+  productModifiersDB,
   productsDB,
   productTaxDB,
   productVariationGroupsDB,
@@ -12,12 +13,19 @@ import {
   variationSelectionsDB,
 } from "@core/db/schemas";
 import { conflict, generateNanoId, getPgError, notFound } from "@core/utils";
+import { asc, eq, sql } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
-import { normalizeProductInput } from "./products.helpers";
+import {
+  buildProductModifierInsertPayloads,
+  buildProductVariationInsertPayloads,
+  normalizeProductInput,
+  normalizeProductVariationsInput,
+} from "./products.helpers";
 import { mapProductResponse } from "./products.mappers";
 import type { AdminProductsService } from "./products.types";
 import {
   validateProductBasePrice,
+  validateProductModifiers,
   validateProductRecipe,
   validateProductVariations,
 } from "./products.validators";
@@ -25,7 +33,8 @@ import {
 export function adminProductsService(fastify: FastifyInstance): AdminProductsService {
   return {
     async get(id, { safe = false } = {}) {
-      const [product, recipe, productVariationGroups, variations] = await Promise.all([
+      const [product, recipe, productVariationGroups, variations, productModifiers] =
+        await Promise.all([
         fastify.db.query.productsDB.findFirst({
           where(productTable, { eq }) {
             return eq(productTable.id, id);
@@ -167,6 +176,60 @@ export function adminProductsService(fastify: FastifyInstance): AdminProductsSer
             },
           },
         }),
+        fastify.db.query.productModifiersDB.findMany({
+          where(table, { eq }) {
+            return eq(table.productId, id);
+          },
+          with: {
+            modifier: {
+              with: {
+                options: {
+                  columns: {
+                    modifierId: false,
+                  },
+                  with: {
+                    ingredients: {
+                      columns: {
+                        modifierOptionId: false,
+                        ingredientId: false,
+                      },
+                      with: {
+                        ingredient: {
+                          columns: {
+                            baseUnitId: false,
+                            categoryId: false,
+                          },
+                          with: {
+                            baseUnit: true,
+                            category: true,
+                          },
+                        },
+                      },
+                    },
+                    supplies: {
+                      columns: {
+                        modifierOptionId: false,
+                        supplyId: false,
+                      },
+                      with: {
+                        supply: {
+                          columns: {
+                            baseUnitId: false,
+                            categoryId: false,
+                          },
+                          with: {
+                            baseUnit: true,
+                            category: true,
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        }),
       ]);
 
       if (!product && !safe) {
@@ -182,6 +245,7 @@ export function adminProductsService(fastify: FastifyInstance): AdminProductsSer
         recipe: recipe ?? null,
         variationGroups: productVariationGroups,
         variations,
+        modifiers: productModifiers,
       });
     },
 
@@ -197,6 +261,7 @@ export function adminProductsService(fastify: FastifyInstance): AdminProductsSer
         categoryId,
         recipe,
         taxIds,
+        modifierIds,
         variationGroupIds,
         variations,
       } = normalizeProductInput(input);
@@ -223,10 +288,13 @@ export function adminProductsService(fastify: FastifyInstance): AdminProductsSer
           }
         }
 
-        const [validatedRecipe, validatedVariationConfig] = await Promise.all([
-          validateProductRecipe(fastify, productType, variations.length > 0, recipe),
-          validateProductVariations(fastify, productType, variationGroupIds, variations),
-        ]);
+        const [validatedRecipe, validatedVariationConfig, validatedModifierIds] = await Promise.all(
+          [
+            validateProductRecipe(fastify, productType, variations.length > 0, recipe),
+            validateProductVariations(fastify, productType, variationGroupIds, variations),
+            validateProductModifiers(fastify, modifierIds),
+          ],
+        );
         const validatedPriceCents = validateProductBasePrice(
           priceCents,
           validatedVariationConfig.variations.length,
@@ -259,6 +327,16 @@ export function adminProductsService(fastify: FastifyInstance): AdminProductsSer
                 taxId,
               })),
             );
+          }
+
+          const productModifierPayloads = buildProductModifierInsertPayloads(
+            createdProduct.id,
+            validatedModifierIds,
+            0,
+          );
+
+          if (productModifierPayloads.length > 0) {
+            await tx.insert(productModifiersDB).values(productModifierPayloads);
           }
 
           if (validatedVariationConfig.variationGroups.length > 0) {
@@ -298,74 +376,41 @@ export function adminProductsService(fastify: FastifyInstance): AdminProductsSer
             }
           }
 
-          if (validatedVariationConfig.variations.length > 0) {
-            const createdVariations = validatedVariationConfig.variations.map(
-              (variation, index) => ({
-                id: generateNanoId(),
-                productId: createdProduct.id,
-                combinationKey: variation.combinationKey,
-                sortOrder: index,
-                priceCents: variation.priceCents,
-                kitchenName: variation.kitchenName,
-                customerDescription: variation.customerDescription,
-                kitchenDescription: variation.kitchenDescription,
-              }),
-            );
+          const variationInsertPayloads = buildProductVariationInsertPayloads(
+            createdProduct.id,
+            validatedVariationConfig.variations,
+            0,
+          );
 
-            await tx.insert(variationsDB).values(createdVariations);
+          if (variationInsertPayloads.createdVariations.length > 0) {
+            await tx.insert(variationsDB).values(variationInsertPayloads.createdVariations);
+          }
 
-            await tx.insert(variationSelectionsDB).values(
-              createdVariations.flatMap(
-                (createdVariation, index) =>
-                  validatedVariationConfig.variations[index]?.selections.map((selection) => ({
-                    variationId: createdVariation.id,
-                    variationGroupId: selection.variationGroupId,
-                    variationOptionId: selection.variationOptionId,
-                  })) ?? [],
-              ),
-            );
+          if (variationInsertPayloads.variationSelections.length > 0) {
+            await tx.insert(variationSelectionsDB).values(variationInsertPayloads.variationSelections);
+          }
 
-            const variationRecipes = createdVariations
-              .map((createdVariation, index) => ({
-                variationId: createdVariation.id,
-                recipe: validatedVariationConfig.variations[index]?.recipe ?? null,
-              }))
-              .filter((variation) => variation.recipe);
-
-            if (variationRecipes.length > 0) {
-              await tx.insert(variationRecipesDB).values(
-                variationRecipes.map(({ variationId, recipe: variationRecipe }) => ({
+          if (variationInsertPayloads.variationRecipes.length > 0) {
+            await tx.insert(variationRecipesDB).values(
+              variationInsertPayloads.variationRecipes.map(
+                ({ variationId, recipe: variationRecipe }) => ({
                   variationId,
                   description: variationRecipe?.description ?? null,
-                })),
-              );
+                }),
+              ),
+            );
+          }
 
-              const variationRecipeIngredients = variationRecipes.flatMap(
-                ({ variationId, recipe: variationRecipe }) =>
-                  variationRecipe?.ingredients.map(({ ingredientId, quantity }) => ({
-                    variationId,
-                    ingredientId,
-                    quantity,
-                  })) ?? [],
-              );
+          if (variationInsertPayloads.variationRecipeIngredients.length > 0) {
+            await tx
+              .insert(variationRecipeIngredientsDB)
+              .values(variationInsertPayloads.variationRecipeIngredients);
+          }
 
-              if (variationRecipeIngredients.length > 0) {
-                await tx.insert(variationRecipeIngredientsDB).values(variationRecipeIngredients);
-              }
-
-              const variationRecipeSupplies = variationRecipes.flatMap(
-                ({ variationId, recipe: variationRecipe }) =>
-                  variationRecipe?.supplies.map(({ supplyId, quantity }) => ({
-                    variationId,
-                    supplyId,
-                    quantity,
-                  })) ?? [],
-              );
-
-              if (variationRecipeSupplies.length > 0) {
-                await tx.insert(variationRecipeSuppliesDB).values(variationRecipeSupplies);
-              }
-            }
+          if (variationInsertPayloads.variationRecipeSupplies.length > 0) {
+            await tx.insert(variationRecipeSuppliesDB).values(
+              variationInsertPayloads.variationRecipeSupplies,
+            );
           }
 
           return createdProduct.id;
@@ -392,6 +437,179 @@ export function adminProductsService(fastify: FastifyInstance): AdminProductsSer
           throw conflict(
             "productVariation.duplicatedCombination",
             "A variation with this combination already exists for the product",
+          );
+        }
+
+        throw error;
+      }
+    },
+
+    async createVariation(productId, input) {
+      const product = await fastify.db.query.productsDB.findFirst({
+        where(table, { eq: eqOperator }) {
+          return eqOperator(table.id, productId);
+        },
+        columns: {
+          id: true,
+          productType: true,
+        },
+      });
+
+      if (!product) {
+        throw notFound("product.notFound", "The product was not found");
+      }
+
+      const productVariationGroups = await fastify.db
+        .select({
+          variationGroupId: productVariationGroupsDB.variationGroupId,
+        })
+        .from(productVariationGroupsDB)
+        .where(eq(productVariationGroupsDB.productId, productId))
+        .orderBy(
+          asc(productVariationGroupsDB.sortOrder),
+          asc(productVariationGroupsDB.variationGroupId),
+        );
+
+      const normalizedVariations = normalizeProductVariationsInput([input]);
+      const validatedVariationConfig = await validateProductVariations(
+        fastify,
+        product.productType,
+        productVariationGroups.map((variationGroup) => variationGroup.variationGroupId),
+        normalizedVariations,
+      );
+
+      try {
+        await fastify.db.transaction(async (tx) => {
+          await tx
+            .update(productsDB)
+            .set({
+              priceCents: null,
+            })
+            .where(eq(productsDB.id, productId));
+
+          if (product.productType === "assembled") {
+            await tx.delete(recipesDB).where(eq(recipesDB.productId, productId));
+          }
+
+          const [nextSortOrderRow] = await tx
+            .select({
+              nextSortOrder: sql<number>`coalesce(max(${variationsDB.sortOrder}), -1) + 1`,
+            })
+            .from(variationsDB)
+            .where(eq(variationsDB.productId, productId));
+
+          const variationInsertPayloads = buildProductVariationInsertPayloads(
+            productId,
+            validatedVariationConfig.variations,
+            nextSortOrderRow?.nextSortOrder ?? 0,
+          );
+
+          if (variationInsertPayloads.createdVariations.length > 0) {
+            await tx.insert(variationsDB).values(variationInsertPayloads.createdVariations);
+          }
+
+          if (variationInsertPayloads.variationSelections.length > 0) {
+            await tx.insert(variationSelectionsDB).values(variationInsertPayloads.variationSelections);
+          }
+
+          if (variationInsertPayloads.variationRecipes.length > 0) {
+            await tx.insert(variationRecipesDB).values(
+              variationInsertPayloads.variationRecipes.map(
+                ({ variationId, recipe: variationRecipe }) => ({
+                  variationId,
+                  description: variationRecipe?.description ?? null,
+                }),
+              ),
+            );
+          }
+
+          if (variationInsertPayloads.variationRecipeIngredients.length > 0) {
+            await tx
+              .insert(variationRecipeIngredientsDB)
+              .values(variationInsertPayloads.variationRecipeIngredients);
+          }
+
+          if (variationInsertPayloads.variationRecipeSupplies.length > 0) {
+            await tx.insert(variationRecipeSuppliesDB).values(
+              variationInsertPayloads.variationRecipeSupplies,
+            );
+          }
+        });
+
+        const updatedProduct = await fastify.admin.products.get(productId);
+
+        if (!updatedProduct) {
+          throw new Error("Failed to retrieve updated product");
+        }
+
+        return updatedProduct;
+      } catch (error) {
+        const pgError = getPgError(error);
+
+        if (
+          pgError?.code === "23505" &&
+          pgError.constraint === "variation_product_combination_key_active_unique"
+        ) {
+          throw conflict(
+            "productVariation.duplicatedCombination",
+            "A variation with this combination already exists for the product",
+          );
+        }
+
+        throw error;
+      }
+    },
+
+    async createModifier(productId, input) {
+      const product = await fastify.db.query.productsDB.findFirst({
+        where(table, { eq: eqOperator }) {
+          return eqOperator(table.id, productId);
+        },
+        columns: {
+          id: true,
+        },
+      });
+
+      if (!product) {
+        throw notFound("product.notFound", "The product was not found");
+      }
+
+      await validateProductModifiers(fastify, [input.modifierId]);
+
+      try {
+        await fastify.db.transaction(async (tx) => {
+          const [nextSortOrderRow] = await tx
+            .select({
+              nextSortOrder: sql<number>`coalesce(max(${productModifiersDB.sortOrder}), -1) + 1`,
+            })
+            .from(productModifiersDB)
+            .where(eq(productModifiersDB.productId, productId));
+
+          const productModifierPayloads = buildProductModifierInsertPayloads(
+            productId,
+            [input.modifierId],
+            nextSortOrderRow?.nextSortOrder ?? 0,
+          );
+
+          if (productModifierPayloads.length > 0) {
+            await tx.insert(productModifiersDB).values(productModifierPayloads);
+          }
+        });
+
+        const updatedProduct = await fastify.admin.products.get(productId);
+
+        if (!updatedProduct) {
+          throw new Error("Failed to retrieve updated product");
+        }
+
+        return updatedProduct;
+      } catch (error) {
+        const pgError = getPgError(error);
+
+        if (pgError?.code === "23505" && pgError.constraint === "product_modifier_pk") {
+          throw conflict(
+            "productModifier.duplicatedModifier",
+            "This modifier is already assigned to the product",
           );
         }
 

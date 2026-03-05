@@ -1,3 +1,4 @@
+import { mapModifierResponse } from "../modifiers/modifiers.helpers";
 import type {
   ProductVariationGroupResponse,
   ProductResponse,
@@ -37,6 +38,19 @@ export const mapProductResponse = (product: ProductWithRelations): ProductRespon
   return {
     ...product,
     taxes: product.taxes.map(({ tax }) => tax),
+    modifiers: [...product.modifiers]
+      .sort((left, right) => {
+        if (left.sortOrder !== right.sortOrder) {
+          return left.sortOrder - right.sortOrder;
+        }
+
+        if (left.modifier.name !== right.modifier.name) {
+          return left.modifier.name.localeCompare(right.modifier.name);
+        }
+
+        return left.modifier.id.localeCompare(right.modifier.id);
+      })
+      .map(({ modifier }) => mapModifierResponse(modifier)),
     recipe: product.recipe ? mapRecipeResponse(product.recipe) : null,
     variationGroups: [...product.variationGroups]
       .sort((left, right) => {

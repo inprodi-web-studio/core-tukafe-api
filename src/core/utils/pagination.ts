@@ -1,6 +1,7 @@
 import type { AnyColumn, SQL } from "drizzle-orm";
+import type { PgDatabase, PgQueryResultHKT, PgSelect } from "drizzle-orm/pg-core";
+
 import { sql } from "drizzle-orm";
-import type { PgDatabase, PgSelect } from "drizzle-orm/pg-core";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_PAGE_SIZE = 10;
@@ -8,7 +9,7 @@ const DEFAULT_MAX_PAGE_SIZE = 100;
 
 type PaginationInput = number | string | null | undefined;
 type CountDistinctTarget = AnyColumn | SQL<unknown>;
-type PgPaginationExecutor = Pick<PgDatabase<any, any, any>, "select">;
+type PgPaginationExecutor = Pick<PgDatabase<PgQueryResultHKT>, "select">;
 type RowOf<TSelect extends PgSelect> = Awaited<ReturnType<TSelect["execute"]>>[number];
 
 export interface PaginationMeta {
@@ -37,8 +38,10 @@ export interface PaginateParams<TSelect extends PgSelect> extends BasePaginatePa
   mapRow?: undefined;
 }
 
-export interface PaginateMappedParams<TSelect extends PgSelect, TMapped>
-  extends BasePaginateParams<TSelect> {
+export interface PaginateMappedParams<
+  TSelect extends PgSelect,
+  TMapped,
+> extends BasePaginateParams<TSelect> {
   mapRow: (row: RowOf<TSelect>) => TMapped;
 }
 
@@ -102,9 +105,10 @@ export async function paginate<TSelect extends PgSelect, TMapped = RowOf<TSelect
 
   const totalItems = Number(countRows[0]?.totalItems ?? 0);
   const totalPages = totalItems === 0 ? 0 : Math.ceil(totalItems / normalizedPageSize);
-  const data = "mapRow" in params && params.mapRow
-    ? rows.map((row) => params.mapRow(row))
-    : (rows as TMapped[]);
+  const data =
+    "mapRow" in params && params.mapRow
+      ? rows.map((row) => params.mapRow(row))
+      : (rows as TMapped[]);
 
   return {
     data,
