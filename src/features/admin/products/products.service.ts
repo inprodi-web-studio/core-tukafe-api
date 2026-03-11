@@ -12,8 +12,15 @@ import {
   variationsDB,
   variationSelectionsDB,
 } from "@core/db/schemas";
-import { conflict, generateNanoId, getPgError, notFound } from "@core/utils";
-import { asc, eq, sql } from "drizzle-orm";
+import {
+  buildFuzzySearch,
+  conflict,
+  generateNanoId,
+  getPgError,
+  notFound,
+  paginate,
+} from "@core/utils";
+import { and, asc, eq, isNull, sql, type SQL } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
 import {
   buildProductModifierInsertPayloads,
@@ -247,6 +254,61 @@ export function adminProductsService(fastify: FastifyInstance): AdminProductsSer
         variations,
         modifiers: productModifiers,
       });
+    },
+
+    async list({ search, page, pageSize } = {}) {
+      const defaultOrderBy: [SQL, ...SQL[]] = [asc(productsDB.name), asc(productsDB.id)];
+      const fuzzySearch = buildFuzzySearch({
+        query: search,
+        values: [
+          productsDB.name,
+          productsDB.kitchenName,
+          productsDB.customerDescription,
+          productsDB.kitchenDescription,
+        ],
+        tieBreakers: defaultOrderBy,
+      });
+
+      const paginatedProducts = await paginate({
+        executor: fastify.db,
+        createQuery: () => {
+          const query = fastify.db
+            .select({
+              id: productsDB.id,
+            })
+            .from(productsDB)
+            .$dynamic();
+
+          query.where(
+            fuzzySearch.where
+              ? and(isNull(productsDB.deletedAt), fuzzySearch.where)
+              : isNull(productsDB.deletedAt),
+          );
+
+          return query;
+        },
+        orderBy: fuzzySearch.orderBy ?? defaultOrderBy,
+        page,
+        pageSize,
+      });
+
+      if (paginatedProducts.data.length === 0) {
+        return {
+          data: [],
+          pagination: paginatedProducts.pagination,
+        };
+      }
+
+      const products = await Promise.all(
+        paginatedProducts.data.map((product) =>
+          fastify.admin.products.get(product.id, { safe: true }),
+        ),
+      );
+
+      return {
+        data: products.filter((product): product is NonNullable<typeof product> => product !== null),
+        pagination: paginatedProducts.pagination,
+      };
     },
 
     async create(input) {

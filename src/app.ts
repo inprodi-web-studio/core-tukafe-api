@@ -23,6 +23,7 @@ import {
   adminProductcategoriesServicesPlugin,
 } from "@features/admin/productCategories";
 import { adminProductsRoutes, adminProductsServicesPlugin } from "@features/admin/products";
+import { adminSuppliersRoutes, adminSuppliersServicesPlugin } from "@features/admin/suppliers";
 import { adminSuppliesRoutes, adminSuppliesServicesPlugin } from "@features/admin/supplies";
 import {
   adminSupplyCategoriesRoutes,
@@ -90,6 +91,7 @@ await server.register(adminUnitsServicesPlugin);
 await server.register(adminProductsServicesPlugin);
 await server.register(adminIngredientsServicesPlugin);
 await server.register(adminSuppliesServicesPlugin);
+await server.register(adminSuppliersServicesPlugin);
 
 await server.register(customerAuthServicesPlugin);
 
@@ -109,6 +111,7 @@ await server.register(
         await adminApp.register(adminModifiersRoutes, { prefix: "/modifiers" });
         await adminApp.register(adminIngredientsRoutes, { prefix: "/ingredients" });
         await adminApp.register(adminSuppliesRoutes, { prefix: "/supplies" });
+        await adminApp.register(adminSuppliersRoutes, { prefix: "/suppliers" });
         await adminApp.register(adminIngredientCategoriesRoutes, {
           prefix: "/ingredients/categories",
         });

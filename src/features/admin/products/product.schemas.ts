@@ -169,5 +169,6 @@ export const productResponseSchema = z.object({
   modifiers: z.array(modifierResponseSchema),
   productType: z.string(),
   recipe: recipeResponseSchema.nullish(),
+  variationGroups: z.array(variationGroupResponseSchema),
   variations: z.array(variationResponseSchema),
 });

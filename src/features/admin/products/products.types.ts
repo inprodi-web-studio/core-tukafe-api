@@ -15,11 +15,13 @@ import type {
   VariationGroupOption,
   VariationSelection,
 } from "@core/db/schemas";
-import type { GetServiceConfig } from "@core/types";
+import type { GetServiceConfig, ListQueryParams } from "@core/types";
+import type { PaginatedResult } from "@core/utils";
 import type { ModifierResponse } from "../modifiers/modifiers.types";
 
 export interface AdminProductsService {
   get(id: string, config?: GetServiceConfig): Promise<ProductResponse | null>;
+  list(input?: ListQueryParams): Promise<PaginatedResult<ProductResponse>>;
   create(input: CreateProductServiceParams): Promise<ProductResponse>;
   createVariation(
     productId: string,

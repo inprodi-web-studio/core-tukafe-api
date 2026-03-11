@@ -12,6 +12,7 @@ export * from "./product.schema";
 export * from "./productCategory.schema";
 export * from "./recipe.schema";
 export * from "./session.schema";
+export * from "./supplier.schema";
 export * from "./supply.schema";
 export * from "./supplyCategory.schema";
 export * from "./tax.schema";
