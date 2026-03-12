@@ -8,6 +8,7 @@ export * from "./member.schema";
 export * from "./modifier.schema";
 export * from "./organization.schema";
 export * from "./organizationSchedule.schema";
+export * from "./order.schema";
 export * from "./product.schema";
 export * from "./productCategory.schema";
 export * from "./recipe.schema";

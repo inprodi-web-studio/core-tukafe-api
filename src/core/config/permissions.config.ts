@@ -15,6 +15,7 @@ const organizationStatements = {
   supplyCategories: ["create", "read", "update", "delete"],
   taxes: ["create", "read", "update", "delete"],
   units: ["create", "read", "update", "delete"],
+  orders: ["create", "read", "update", "delete"],
 } as const;
 
 export const ORGANIZATION_AC = createAccessControl(organizationStatements);
@@ -42,6 +43,7 @@ export const ORGANIZATION_ROLES = {
     supplyCategories: ["create", "read", "update", "delete"],
     taxes: ["create", "read", "update", "delete"],
     units: ["create", "read", "update", "delete"],
+    orders: ["create", "read", "update", "delete"],
   }),
   admin: ORGANIZATION_AC.newRole({
     organization: ["update"],
@@ -59,6 +61,7 @@ export const ORGANIZATION_ROLES = {
     supplyCategories: ["read"],
     taxes: ["read"],
     units: ["read"],
+    orders: ["create", "read", "update", "delete"],
   }),
   member: ORGANIZATION_AC.newRole({
     invitation: ["create"],
@@ -74,5 +77,6 @@ export const ORGANIZATION_ROLES = {
     supplyCategories: ["read"],
     taxes: ["read"],
     units: ["read"],
+    orders: ["create", "read"],
   }),
 };
