@@ -38,6 +38,21 @@ export const mapProductResponse = (product: ProductWithRelations): ProductRespon
   return {
     ...product,
     taxes: product.taxes.map(({ tax }) => tax),
+    organizations: [...product.organizations]
+      .sort((left, right) => {
+        if (left.organization.name !== right.organization.name) {
+          return left.organization.name.localeCompare(right.organization.name);
+        }
+
+        return left.organization.id.localeCompare(right.organization.id);
+      })
+      .map(({ organization }) => ({
+        id: organization.id,
+        name: organization.name,
+        slug: organization.slug,
+        address: organization.address,
+        logo: organization.logo,
+      })),
     modifiers: [...product.modifiers]
       .sort((left, right) => {
         if (left.sortOrder !== right.sortOrder) {

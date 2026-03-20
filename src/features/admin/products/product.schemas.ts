@@ -166,6 +166,15 @@ export const productResponseSchema = z.object({
       rate: z.number().int().nonnegative(),
     }),
   ),
+  organizations: z.array(
+    z.object({
+      id: z.string(),
+      name: z.string(),
+      slug: z.string(),
+      address: z.string(),
+      logo: z.string().nullish(),
+    }),
+  ),
   modifiers: z.array(modifierResponseSchema),
   productType: z.string(),
   recipe: recipeResponseSchema.nullish(),

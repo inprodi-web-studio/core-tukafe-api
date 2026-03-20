@@ -1,5 +1,6 @@
 import { relations, sql } from "drizzle-orm";
 import {
+  boolean,
   check,
   index,
   integer,
@@ -11,6 +12,7 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { generateTimestamps } from "@core/utils";
+import { organizationDB } from "./organization.schema";
 import { productCategoriesDB } from "./productCategory.schema";
 import { taxDB } from "./tax.schema";
 import { unitsDB } from "./unit.schema";
@@ -70,8 +72,33 @@ const productTax = pgTable(
   ],
 );
 
+const organizationProduct = pgTable(
+  "organization_product",
+  {
+    productId: text("product_id")
+      .notNull()
+      .references(() => productsDB.id, { onDelete: "cascade" }),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organizationDB.id, { onDelete: "cascade" }),
+    isActive: boolean("is_active").notNull().default(true),
+    ...generateTimestamps(),
+  },
+  (table) => [
+    primaryKey({
+      name: "organization_product_pk",
+      columns: [table.productId, table.organizationId],
+    }),
+    index("organization_product_organization_id_idx").on(table.organizationId),
+    index("organization_product_organization_active_idx")
+      .on(table.organizationId)
+      .where(sql`${table.isActive} = true`),
+  ],
+);
+
 export const productsDB = products;
 export const productTaxDB = productTax;
+export const organizationProductDB = organizationProduct;
 export const productsRelations = relations(productsDB, ({ one, many }) => ({
   unit: one(unitsDB, {
     fields: [productsDB.unitId],
@@ -82,6 +109,7 @@ export const productsRelations = relations(productsDB, ({ one, many }) => ({
     references: [productCategoriesDB.id],
   }),
   taxes: many(productTaxDB),
+  organizations: many(organizationProductDB),
 }));
 export const productTaxRelations = relations(productTaxDB, ({ one }) => ({
   product: one(productsDB, {
@@ -93,7 +121,18 @@ export const productTaxRelations = relations(productTaxDB, ({ one }) => ({
     references: [taxDB.id],
   }),
 }));
+export const organizationProductRelations = relations(organizationProductDB, ({ one }) => ({
+  product: one(productsDB, {
+    fields: [organizationProductDB.productId],
+    references: [productsDB.id],
+  }),
+  organization: one(organizationDB, {
+    fields: [organizationProductDB.organizationId],
+    references: [organizationDB.id],
+  }),
+}));
 
 export type Product = typeof productsDB.$inferSelect;
 export type ProductTax = typeof productTaxDB.$inferSelect;
+export type OrganizationProduct = typeof organizationProductDB.$inferSelect;
 export type ProductType = (typeof productTypeEnum.enumValues)[number];

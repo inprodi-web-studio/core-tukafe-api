@@ -238,6 +238,39 @@ export async function validateProductModifiers(
   return modifierIds;
 }
 
+export async function validateProductOrganizations(
+  fastify: FastifyInstance,
+  organizationIds: string[],
+): Promise<string[]> {
+  if (organizationIds.length === 0) {
+    throw validation(
+      "product.organizationRequired",
+      "Products must be assigned to at least one organization",
+    );
+  }
+
+  assertUniqueValues(
+    organizationIds,
+    "product.duplicateOrganization",
+    "Product organizations cannot contain duplicates",
+  );
+
+  const matchedOrganizations = await fastify.db.query.organizationDB.findMany({
+    where(table, { and, inArray, isNull }) {
+      return and(inArray(table.id, organizationIds), isNull(table.deletedAt));
+    },
+    columns: {
+      id: true,
+    },
+  });
+
+  if (matchedOrganizations.length !== organizationIds.length) {
+    throw notFound("organization.notFound", "One or more organizations were not found");
+  }
+
+  return organizationIds;
+}
+
 export function validateProductBasePrice(priceCents: number | null, variationsCount: number) {
   if (variationsCount > 0 && priceCents !== null) {
     throw validation(

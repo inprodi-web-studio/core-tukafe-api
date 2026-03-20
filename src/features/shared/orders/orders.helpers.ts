@@ -1,8 +1,5 @@
 import { normalizeString } from "@core/utils";
-import type {
-  CreateOrderServiceParams,
-  NormalizedCreateOrderServiceParams,
-} from "./orders.types";
+import type { CreateOrderParams, NormalizedCreateOrderParams } from "./orders.types";
 
 function normalizeNullableText(value?: string | null): string | null {
   const normalizedValue = normalizeString(value, { trim: true, collapseWhitespace: true });
@@ -14,7 +11,7 @@ export function normalizeCreateOrderInput({
   comment,
   items,
   ...rest
-}: CreateOrderServiceParams): NormalizedCreateOrderServiceParams {
+}: CreateOrderParams): NormalizedCreateOrderParams {
   return {
     ...rest,
     comment: normalizeNullableText(comment),

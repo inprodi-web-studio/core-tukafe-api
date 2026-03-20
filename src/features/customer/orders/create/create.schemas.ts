@@ -1,10 +1,10 @@
 import { orderItemBodySchema } from "@features/shared/orders/create-order.schemas";
+import { orderResponseSchema } from "@features/shared/orders/orders.schemas";
 import { z } from "zod";
-import { orderResponseSchema } from "../orders.schemas";
 
 export const createBodySchema = z
   .object({
-    customerId: z.string(),
+    organizationId: z.string(),
     comment: z.string().nullish(),
     items: z.array(orderItemBodySchema).min(1),
   })

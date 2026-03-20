@@ -16,6 +16,8 @@ const adminProductsServicesPlugin: FastifyPluginAsync = async (fastify) => {
     get: productsService.get,
     list: productsService.list,
     create: productsService.create,
+    assignOrganization: productsService.assignOrganization,
+    unassignOrganization: productsService.unassignOrganization,
     createVariation: productsService.createVariation,
     createModifier: productsService.createModifier,
   };

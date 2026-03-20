@@ -2,10 +2,12 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import type { CreateBody } from "./create.schemas";
 
 export async function create(request: FastifyRequest<{ Body: CreateBody }>, reply: FastifyReply) {
-  const createdProduct = await request.server.admin.products.create({
+  const { user } = request.customerAuth;
+
+  const createdOrder = await request.server.customer.orders.create({
     ...request.body,
-    organizationIds: request.body.organizationIds ?? [request.auth.member.organizationId],
+    customerId: user.id,
   });
 
-  return reply.status(201).send(createdProduct);
+  return reply.status(201).send(createdOrder);
 }

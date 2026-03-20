@@ -1,6 +1,8 @@
 import type {
   Ingredient,
   IngredientCategory,
+  Organization,
+  OrganizationProduct,
   Product,
   ProductCategory,
   ProductModifier,
@@ -23,6 +25,8 @@ export interface AdminProductsService {
   get(id: string, config?: GetServiceConfig): Promise<ProductResponse | null>;
   list(input?: ListQueryParams): Promise<PaginatedResult<ProductResponse>>;
   create(input: CreateProductServiceParams): Promise<ProductResponse>;
+  assignOrganization(productId: string, organizationId: string): Promise<ProductResponse>;
+  unassignOrganization(productId: string, organizationId: string): Promise<ProductResponse>;
   createVariation(
     productId: string,
     input: CreateProductVariationParams,
@@ -37,6 +41,7 @@ export interface ProductResponse extends Omit<Product, "categoryId" | "unitId"> 
   unit: Unit;
   category: ProductCategory | null;
   taxes: Array<Tax>;
+  organizations: ProductOrganizationResponse[];
   modifiers: ProductModifierResponse[];
   recipe: RecipeDetailsResponse | null;
   variationGroups: ProductVariationGroupResponse[];
@@ -44,10 +49,11 @@ export interface ProductResponse extends Omit<Product, "categoryId" | "unitId"> 
 }
 
 export interface ProductWithRelations
-  extends Omit<ProductResponse, "taxes" | "variationGroups" | "modifiers"> {
+  extends Omit<ProductResponse, "taxes" | "variationGroups" | "modifiers" | "organizations"> {
   taxes: Array<{
     tax: Tax;
   }>;
+  organizations: ProductOrganizationLinkWithRelations[];
   variationGroups: ProductVariationGroupLinkWithRelations[];
   modifiers: ProductModifierLinkWithRelations[];
 }
@@ -62,6 +68,7 @@ export interface CreateProductServiceParams {
   categoryId?: string | null;
   productType: ProductType;
   taxIds?: string[] | null;
+  organizationIds?: string[] | null;
   modifierIds?: string[] | null;
   modifiers?: string[] | null;
   recipe?: CreateProductRecipeParams;
@@ -179,6 +186,15 @@ export interface ProductVariationGroupLinkWithRelations extends ProductVariation
 export interface ProductModifierLinkWithRelations extends ProductModifier {
   modifier: ProductModifierResponse;
 }
+
+export interface ProductOrganizationLinkWithRelations extends OrganizationProduct {
+  organization: Organization;
+}
+
+export type ProductOrganizationResponse = Pick<
+  Organization,
+  "id" | "name" | "slug" | "address" | "logo"
+>;
 
 export type ProductModifierResponse = ModifierResponse;
 

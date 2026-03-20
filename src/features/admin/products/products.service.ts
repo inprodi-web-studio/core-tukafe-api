@@ -1,4 +1,5 @@
 import {
+  organizationProductDB,
   productModifiersDB,
   productsDB,
   productTaxDB,
@@ -33,6 +34,7 @@ import type { AdminProductsService } from "./products.types";
 import {
   validateProductBasePrice,
   validateProductModifiers,
+  validateProductOrganizations,
   validateProductRecipe,
   validateProductVariations,
 } from "./products.validators";
@@ -56,6 +58,11 @@ export function adminProductsService(fastify: FastifyInstance): AdminProductsSer
             taxes: {
               with: {
                 tax: true,
+              },
+            },
+            organizations: {
+              with: {
+                organization: true,
               },
             },
           },
@@ -323,6 +330,7 @@ export function adminProductsService(fastify: FastifyInstance): AdminProductsSer
         categoryId,
         recipe,
         taxIds,
+        organizationIds,
         modifierIds,
         variationGroupIds,
         variations,
@@ -350,11 +358,17 @@ export function adminProductsService(fastify: FastifyInstance): AdminProductsSer
           }
         }
 
-        const [validatedRecipe, validatedVariationConfig, validatedModifierIds] = await Promise.all(
+        const [
+          validatedRecipe,
+          validatedVariationConfig,
+          validatedModifierIds,
+          validatedOrganizationIds,
+        ] = await Promise.all(
           [
             validateProductRecipe(fastify, productType, variations.length > 0, recipe),
             validateProductVariations(fastify, productType, variationGroupIds, variations),
             validateProductModifiers(fastify, modifierIds),
+            validateProductOrganizations(fastify, organizationIds),
           ],
         );
         const validatedPriceCents = validateProductBasePrice(
@@ -390,6 +404,14 @@ export function adminProductsService(fastify: FastifyInstance): AdminProductsSer
               })),
             );
           }
+
+          await tx.insert(organizationProductDB).values(
+            validatedOrganizationIds.map((organizationId) => ({
+              productId: createdProduct.id,
+              organizationId,
+              isActive: true,
+            })),
+          );
 
           const productModifierPayloads = buildProductModifierInsertPayloads(
             createdProduct.id,
@@ -677,6 +699,92 @@ export function adminProductsService(fastify: FastifyInstance): AdminProductsSer
 
         throw error;
       }
+    },
+
+    async assignOrganization(productId, organizationId) {
+      const product = await fastify.db.query.productsDB.findFirst({
+        where(table, { and, eq: eqOperator, isNull }) {
+          return and(eqOperator(table.id, productId), isNull(table.deletedAt));
+        },
+        columns: {
+          id: true,
+        },
+      });
+
+      if (!product) {
+        throw notFound("product.notFound", "The product was not found");
+      }
+
+      await validateProductOrganizations(fastify, [organizationId]);
+
+      try {
+        await fastify.db.insert(organizationProductDB).values({
+          productId,
+          organizationId,
+          isActive: true,
+        });
+
+        const updatedProduct = await fastify.admin.products.get(productId);
+
+        if (!updatedProduct) {
+          throw new Error("Failed to retrieve updated product");
+        }
+
+        return updatedProduct;
+      } catch (error) {
+        const pgError = getPgError(error);
+
+        if (pgError?.code === "23505" && pgError.constraint === "organization_product_pk") {
+          throw conflict(
+            "productOrganization.alreadyAssigned",
+            "The product is already assigned to this organization",
+          );
+        }
+
+        throw error;
+      }
+    },
+
+    async unassignOrganization(productId, organizationId) {
+      const product = await fastify.db.query.productsDB.findFirst({
+        where(table, { and, eq: eqOperator, isNull }) {
+          return and(eqOperator(table.id, productId), isNull(table.deletedAt));
+        },
+        columns: {
+          id: true,
+        },
+      });
+
+      if (!product) {
+        throw notFound("product.notFound", "The product was not found");
+      }
+
+      const [deletedAssignment] = await fastify.db
+        .delete(organizationProductDB)
+        .where(
+          and(
+            eq(organizationProductDB.productId, productId),
+            eq(organizationProductDB.organizationId, organizationId),
+          ),
+        )
+        .returning({
+          productId: organizationProductDB.productId,
+        });
+
+      if (!deletedAssignment) {
+        throw notFound(
+          "productOrganization.notAssigned",
+          "The product is not assigned to this organization",
+        );
+      }
+
+      const updatedProduct = await fastify.admin.products.get(productId);
+
+      if (!updatedProduct) {
+        throw new Error("Failed to retrieve updated product");
+      }
+
+      return updatedProduct;
     },
   };
 }

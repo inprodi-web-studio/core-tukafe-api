@@ -10,6 +10,7 @@ const createBaseBodySchema = z.object({
   unitId: z.nanoid(),
   categoryId: z.nanoid().nullish(),
   taxIds: z.array(z.string()).nullish(),
+  organizationIds: z.array(z.nanoid()).min(1).optional(),
   modifierIds: z.array(z.nanoid()).min(1).optional(),
   modifiers: z.array(z.nanoid()).min(1).optional(),
   variationGroupIds: z.array(z.nanoid()).min(1).optional(),

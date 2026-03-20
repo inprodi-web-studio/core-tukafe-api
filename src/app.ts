@@ -37,6 +37,7 @@ import {
   adminVariationGroupsServicesPlugin,
 } from "@features/admin/variationGroups";
 import { customerAuthRoutes, customerAuthServicesPlugin } from "@features/customer/auth";
+import { customerOrdersRoutes, customerOrdersServicesPlugin } from "@features/customer/orders";
 import Fastify from "fastify";
 import qs from "qs";
 
@@ -96,6 +97,7 @@ await server.register(adminSuppliesServicesPlugin);
 await server.register(adminSuppliersServicesPlugin);
 
 await server.register(customerAuthServicesPlugin);
+await server.register(customerOrdersServicesPlugin);
 
 // --- Routes
 await server.register(
@@ -128,6 +130,7 @@ await server.register(
     await app.register(
       async (customerApp) => {
         await customerApp.register(customerAuthRoutes, { prefix: "/auth" });
+        await customerApp.register(customerOrdersRoutes, { prefix: "/orders" });
       },
       { prefix: "/customer" },
     );
