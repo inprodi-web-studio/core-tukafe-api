@@ -8,6 +8,7 @@ import {
   zodSchemaPlugin,
 } from "@core/plugins";
 import cors from "@fastify/cors";
+import { adminApiKeysRoutes, adminApiKeysServicesPlugin } from "@features/admin/apiKeys";
 import { adminAuthRoutes, adminAuthServicesPlugin } from "@features/admin/auth";
 import {
   adminIngredientCategoriesRoutes,
@@ -18,11 +19,11 @@ import {
   adminIngredientsServicesPlugin,
 } from "@features/admin/ingredients";
 import { adminModifiersRoutes, adminModifiersServicesPlugin } from "@features/admin/modifiers";
+import { adminOrdersRoutes, adminOrdersServicesPlugin } from "@features/admin/orders";
 import {
   adminProductcategoriesRoutes,
   adminProductcategoriesServicesPlugin,
 } from "@features/admin/productCategories";
-import { adminOrdersRoutes, adminOrdersServicesPlugin } from "@features/admin/orders";
 import { adminProductsRoutes, adminProductsServicesPlugin } from "@features/admin/products";
 import { adminSuppliersRoutes, adminSuppliersServicesPlugin } from "@features/admin/suppliers";
 import { adminSuppliesRoutes, adminSuppliesServicesPlugin } from "@features/admin/supplies";
@@ -38,6 +39,10 @@ import {
 } from "@features/admin/variationGroups";
 import { customerAuthRoutes, customerAuthServicesPlugin } from "@features/customer/auth";
 import { customerOrdersRoutes, customerOrdersServicesPlugin } from "@features/customer/orders";
+import {
+  guestOrganizationsRoutes,
+  guestOrganizationsServicesPlugin,
+} from "@features/guest/organizations";
 import Fastify from "fastify";
 import qs from "qs";
 
@@ -70,7 +75,7 @@ const server = Fastify({
 await server.register(cors, {
   origin: TRUSTED_ORIGINS,
   methods: ["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "X-API-Key"],
   credentials: true,
   maxAge: 86400,
 });
@@ -83,6 +88,7 @@ await server.register(authPlugin);
 await server.register(featureNamespacesPlugin);
 
 await server.register(adminAuthServicesPlugin);
+await server.register(adminApiKeysServicesPlugin);
 await server.register(adminProductcategoriesServicesPlugin);
 await server.register(adminIngredientCategoriesServicesPlugin);
 await server.register(adminSupplyCategoriesServicesPlugin);
@@ -99,12 +105,15 @@ await server.register(adminSuppliersServicesPlugin);
 await server.register(customerAuthServicesPlugin);
 await server.register(customerOrdersServicesPlugin);
 
+await server.register(guestOrganizationsServicesPlugin);
+
 // --- Routes
 await server.register(
   async (app) => {
     await app.register(
       async (adminApp) => {
         await adminApp.register(adminAuthRoutes, { prefix: "/auth" });
+        await adminApp.register(adminApiKeysRoutes, { prefix: "/api-keys" });
         await adminApp.register(adminTaxesRoutes, { prefix: "/taxes" });
         await adminApp.register(adminUnitsRoutes, { prefix: "/units" });
         await adminApp.register(adminProductsRoutes, { prefix: "/products" });
@@ -133,6 +142,13 @@ await server.register(
         await customerApp.register(customerOrdersRoutes, { prefix: "/orders" });
       },
       { prefix: "/customer" },
+    );
+
+    await app.register(
+      async (guestApp) => {
+        await guestApp.register(guestOrganizationsRoutes, { prefix: "/organizations" });
+      },
+      { prefix: "/guest" },
     );
   },
   { prefix: "/api" },

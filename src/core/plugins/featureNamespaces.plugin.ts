@@ -9,6 +9,10 @@ const featureNamespacesPlugin: FastifyPluginAsync = async (fastify) => {
   if (!fastify.hasDecorator("customer")) {
     fastify.decorate("customer", {} as typeof fastify.customer);
   }
+
+  if (!fastify.hasDecorator("guest")) {
+    fastify.decorate("guest", {} as typeof fastify.guest);
+  }
 };
 
 export default fp(featureNamespacesPlugin, {

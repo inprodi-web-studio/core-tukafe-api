@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { apiKey } from "better-auth/plugins";
 import { bearer } from "better-auth/plugins/bearer";
 import { organization } from "better-auth/plugins/organization";
 import { phoneNumber } from "better-auth/plugins/phone-number";
@@ -9,6 +10,7 @@ import { TRUSTED_ORIGINS } from "@core/constants";
 import { db } from "@core/db";
 import {
   accountDB,
+  apiKeyDB,
   invitationDB,
   memberDB,
   organizationDB,
@@ -28,6 +30,7 @@ export const auth = betterAuth({
     provider: "pg",
     schema: {
       account: accountDB,
+      apikey: apiKeyDB,
       invitation: invitationDB,
       member: memberDB,
       organization: organizationDB,
@@ -57,6 +60,13 @@ export const auth = betterAuth({
   },
   plugins: [
     bearer(),
+    apiKey({
+      defaultPrefix: "guest_",
+      requireName: true,
+      rateLimit: {
+        enabled: false,
+      },
+    }),
     phoneNumber({
       requireVerification: true,
       allowedAttempts: 5,

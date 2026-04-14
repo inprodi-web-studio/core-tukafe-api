@@ -1,4 +1,5 @@
 export * from "./account.schema";
+export * from "./apiKey.schema";
 export * from "./customerGroup.schema";
 export * from "./customerProfile.schema";
 export * from "./ingredient.schema";
