@@ -1,4 +1,4 @@
-import type { CustomerProfile } from "@core/db/schemas";
+import type { Customer } from "@core/db/schemas";
 import { isHttpError, unauthorized } from "@core/utils";
 import type { Session, User } from "better-auth";
 import { fromNodeHeaders } from "better-auth/node";
@@ -7,7 +7,7 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 export interface CustomerAuthSession {
   user: User;
   session: Session;
-  customerProfile: CustomerProfile;
+  customer: Customer;
 }
 
 declare module "fastify" {
@@ -31,13 +31,13 @@ function customerAuthHandler() {
 
       const { session, user } = headerSession;
 
-      const customerProfile = await request.server.db.query.customerProfileDB.findFirst({
+      const customer = await request.server.db.query.customersDB.findFirst({
         where(table, { and, eq, isNull }) {
           return and(eq(table.userId, user.id), isNull(table.deletedAt));
         },
       });
 
-      if (!customerProfile) {
+      if (!customer) {
         throw unauthorized(
           "auth.customerAccessOnly",
           "This account is not enabled for customer access",
@@ -47,7 +47,7 @@ function customerAuthHandler() {
       request.customerAuth = {
         user,
         session,
-        customerProfile,
+        customer,
       };
     } catch (error) {
       if (isHttpError(error)) {

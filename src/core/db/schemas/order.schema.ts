@@ -11,12 +11,12 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { generateTimestamps, MAX_SUPPORTED_DECIMAL_PLACES } from "@core/utils";
+import { customersDB } from "./customer.schema";
 import { modifierOptionsDB, modifiersDB } from "./modifier.schema";
 import { organizationDB } from "./organization.schema";
 import { productsDB } from "./product.schema";
 import { taxDB } from "./tax.schema";
 import { unitsDB } from "./unit.schema";
-import { userDB } from "./user.schema";
 import { variationsDB } from "./variation.schema";
 
 const orders = pgTable(
@@ -28,7 +28,7 @@ const orders = pgTable(
       .references(() => organizationDB.id, { onDelete: "restrict" }),
     customerId: text("customer_id")
       .notNull()
-      .references(() => userDB.id, { onDelete: "restrict" }),
+      .references(() => customersDB.id, { onDelete: "restrict" }),
     folio: text("folio").notNull(),
     comment: text("comment"),
     subtotalCents: integer("subtotal_cents").notNull().default(0),
@@ -40,6 +40,7 @@ const orders = pgTable(
     uniqueIndex("order_organization_folio_unique").on(table.organizationId, table.folio),
     index("order_organization_id_idx").on(table.organizationId),
     index("order_customer_id_idx").on(table.customerId),
+    index("order_customer_id_created_at_idx").on(table.customerId, table.createdAt),
     index("order_created_at_idx").on(table.createdAt),
     check("order_folio_format_check", sql`${table.folio} ~ '^(0[1-9]|1[0-2])-[0-9]{2}-[0-9]{6}$'`),
     check("order_subtotal_cents_non_negative_check", sql`${table.subtotalCents} >= 0`),
@@ -193,9 +194,9 @@ export const ordersRelations = relations(ordersDB, ({ one, many }) => ({
     fields: [ordersDB.organizationId],
     references: [organizationDB.id],
   }),
-  customer: one(userDB, {
+  customer: one(customersDB, {
     fields: [ordersDB.customerId],
-    references: [userDB.id],
+    references: [customersDB.id],
   }),
   items: many(orderItemsDB),
 }));

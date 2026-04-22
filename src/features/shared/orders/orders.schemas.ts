@@ -53,10 +53,11 @@ export const orderResponseSchema = z.object({
   grandTotalCents: z.number().int().nonnegative(),
   customer: z.object({
     id: z.string(),
-    name: z.string(),
+    userId: z.string().nullable(),
+    name: z.string().nullable(),
     middleName: z.string().nullable(),
     lastName: z.string().nullable(),
-    email: z.string(),
+    email: z.string().nullable(),
     phoneNumber: z.string().nullable(),
   }),
   items: z.array(orderItemResponseSchema),

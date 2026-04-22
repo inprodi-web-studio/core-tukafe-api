@@ -31,9 +31,9 @@ export async function getCustomerAccessByIdentifier(
     return undefined;
   }
 
-  const customerProfile = await fastify.db.query.customerProfileDB.findFirst({
-    where(profileTable, { eq }) {
-      return eq(profileTable.userId, user.id);
+  const customer = await fastify.db.query.customersDB.findFirst({
+    where(customerTable, { and, eq, isNull }) {
+      return and(eq(customerTable.userId, user.id), isNull(customerTable.deletedAt));
     },
   });
 
@@ -42,7 +42,7 @@ export async function getCustomerAccessByIdentifier(
     role: user.role,
     phoneNumber: user.phoneNumber ?? null,
     phoneNumberVerified: user.phoneNumberVerified,
-    isCustomer: Boolean(customerProfile),
+    isCustomer: Boolean(customer),
   };
 }
 

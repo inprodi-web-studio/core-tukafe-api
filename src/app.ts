@@ -40,9 +40,17 @@ import {
 import { customerAuthRoutes, customerAuthServicesPlugin } from "@features/customer/auth";
 import { customerOrdersRoutes, customerOrdersServicesPlugin } from "@features/customer/orders";
 import {
+  guestCustomersRoutes,
+  guestCustomersServicesPlugin,
+} from "@features/guest/customers";
+import {
   guestOrganizationsRoutes,
   guestOrganizationsServicesPlugin,
 } from "@features/guest/organizations";
+import {
+  guestProductCategoriesRoutes,
+  guestProductCategoriesServicesPlugin,
+} from "@features/guest/productCategories";
 import Fastify from "fastify";
 import qs from "qs";
 
@@ -105,7 +113,9 @@ await server.register(adminSuppliersServicesPlugin);
 await server.register(customerAuthServicesPlugin);
 await server.register(customerOrdersServicesPlugin);
 
+await server.register(guestCustomersServicesPlugin);
 await server.register(guestOrganizationsServicesPlugin);
+await server.register(guestProductCategoriesServicesPlugin);
 
 // --- Routes
 await server.register(
@@ -146,7 +156,9 @@ await server.register(
 
     await app.register(
       async (guestApp) => {
+        await guestApp.register(guestCustomersRoutes, { prefix: "/customers" });
         await guestApp.register(guestOrganizationsRoutes, { prefix: "/organizations" });
+        await guestApp.register(guestProductCategoriesRoutes, { prefix: "/product-categories" });
       },
       { prefix: "/guest" },
     );

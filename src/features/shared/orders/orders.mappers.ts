@@ -10,11 +10,12 @@ export function mapOrderResponse(order: OrderWithRelations): OrderResponse {
     comment: order.comment ?? null,
     customer: {
       id: order.customer.id,
-      name: order.customer.name,
+      userId: order.customer.userId ?? null,
+      name: order.customer.name ?? null,
       middleName: order.customer.middleName ?? null,
       lastName: order.customer.lastName ?? null,
-      email: order.customer.email,
-      phoneNumber: order.customer.phoneNumber ?? null,
+      email: order.customer.email ?? null,
+      phoneNumber: order.customer.phone ?? null,
     },
     items: [...order.items]
       .sort((left, right) => {

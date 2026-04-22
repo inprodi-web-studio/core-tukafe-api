@@ -29,11 +29,12 @@ async function loadOrder(
       customer: {
         columns: {
           id: true,
+          userId: true,
           name: true,
           middleName: true,
           lastName: true,
           email: true,
-          phoneNumber: true,
+          phone: true,
         },
       },
       items: {

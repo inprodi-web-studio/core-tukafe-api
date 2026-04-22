@@ -154,18 +154,46 @@ async function seed() {
       [CUSTOMER.phone, customerId],
     );
 
-    // ── 5. Customer profile ────────────────────────────────────────
-    const existingProfile = await client.query<{ user_id: string }>(
-      'select user_id from "customer_profile" where user_id = $1 limit 1;',
+    // ── 5. Customer identity ───────────────────────────────────────
+    const existingCustomerByUser = await client.query<{ id: string }>(
+      'select id from "customer" where user_id = $1 and deleted_at is null limit 1;',
       [customerId],
     );
 
-    if (!existingProfile.rows[0]) {
+    if (existingCustomerByUser.rows[0]) {
       await client.query(
-        `insert into "customer_profile" (user_id, created_at, updated_at)
-         values ($1, now(), now());`,
-        [customerId],
+        `update "customer"
+         set phone = $1, name = $2, middle_name = $3, email = $4, updated_at = now(), deleted_at = null
+         where id = $5;`,
+        [CUSTOMER.phone, CUSTOMER.name, CUSTOMER.middleName, CUSTOMER.email, existingCustomerByUser.rows[0].id],
       );
+    } else {
+      const existingCustomerByPhone = await client.query<{ id: string; user_id: string | null }>(
+        'select id, user_id from "customer" where phone = $1 and deleted_at is null limit 1;',
+        [CUSTOMER.phone],
+      );
+
+      const phoneCustomer = existingCustomerByPhone.rows[0];
+
+      if (phoneCustomer) {
+        if (phoneCustomer.user_id && phoneCustomer.user_id !== customerId) {
+          throw new Error("El teléfono del cliente ya está ligado a otro usuario.");
+        }
+
+        await client.query(
+          `update "customer"
+           set user_id = $1, name = $2, middle_name = $3, email = $4, updated_at = now(), deleted_at = null
+           where id = $5;`,
+          [customerId, CUSTOMER.name, CUSTOMER.middleName, CUSTOMER.email, phoneCustomer.id],
+        );
+      } else {
+        await client.query(
+          `insert into "customer"
+             (id, user_id, phone, name, middle_name, email, created_at, updated_at)
+           values (gen_random_uuid()::text, $1, $2, $3, $4, $5, now(), now());`,
+          [customerId, CUSTOMER.phone, CUSTOMER.name, CUSTOMER.middleName, CUSTOMER.email],
+        );
+      }
     }
 
     console.log(

@@ -121,26 +121,16 @@ export async function validateOrderCustomer(
   fastify: FastifyInstance,
   customerId: string,
 ): Promise<void> {
-  const [customer, customerProfile] = await Promise.all([
-    fastify.db.query.userDB.findFirst({
-      where(table, { eq }) {
-        return eq(table.id, customerId);
-      },
-      columns: {
-        id: true,
-      },
-    }),
-    fastify.db.query.customerProfileDB.findFirst({
-      where(table, { and, eq, isNull }) {
-        return and(eq(table.userId, customerId), isNull(table.deletedAt));
-      },
-      columns: {
-        userId: true,
-      },
-    }),
-  ]);
+  const customer = await fastify.db.query.customersDB.findFirst({
+    where(table, { and, eq, isNull }) {
+      return and(eq(table.id, customerId), isNull(table.deletedAt));
+    },
+    columns: {
+      id: true,
+    },
+  });
 
-  if (!customer || !customerProfile) {
+  if (!customer) {
     throw notFound("customer.notFound", "The customer was not found");
   }
 }

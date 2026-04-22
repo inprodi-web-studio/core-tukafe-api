@@ -1,5 +1,13 @@
-import { customerProfileDB } from "@core/db/schemas";
-import { badRequest, normalizePresets, normalizeString, unauthorized } from "@core/utils";
+import { customersDB, ordersDB } from "@core/db/schemas";
+import {
+  badRequest,
+  conflict,
+  generateNanoId,
+  normalizePresets,
+  normalizeString,
+  unauthorized,
+} from "@core/utils";
+import { eq } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
 import {
   getCustomerAccessByIdentifier,
@@ -164,15 +172,108 @@ export function customerAuthService(fastify: FastifyInstance): CustomerAuthServi
       }
 
       const user = result.user;
+      const normalizedPhone = normalizeString(user.phoneNumber ?? phone, normalizePresets.phone);
+      const persistedUser = await fastify.db.query.userDB.findFirst({
+        where(table, { eq }) {
+          return eq(table.id, user.id);
+        },
+        columns: {
+          name: true,
+          middleName: true,
+          lastName: true,
+          email: true,
+        },
+      });
 
-      await fastify.db
-        .insert(customerProfileDB)
-        .values({
+      const customerName = persistedUser?.name ?? user.name ?? null;
+      const customerMiddleName = persistedUser?.middleName ?? null;
+      const customerLastName = persistedUser?.lastName ?? null;
+      const customerEmail = persistedUser?.email ?? user.email ?? null;
+
+      await fastify.db.transaction(async (tx) => {
+        const [existingCustomerByPhone, existingCustomerByUser] = await Promise.all([
+          tx.query.customersDB.findFirst({
+            where(table, { and, eq, isNull }) {
+              return and(eq(table.phone, normalizedPhone), isNull(table.deletedAt));
+            },
+            columns: {
+              id: true,
+              userId: true,
+            },
+          }),
+          tx.query.customersDB.findFirst({
+            where(table, { and, eq, isNull }) {
+              return and(eq(table.userId, user.id), isNull(table.deletedAt));
+            },
+            columns: {
+              id: true,
+              userId: true,
+            },
+          }),
+        ]);
+
+        if (
+          existingCustomerByPhone &&
+          existingCustomerByPhone.userId &&
+          existingCustomerByPhone.userId !== user.id
+        ) {
+          throw conflict(
+            "auth.phoneAlreadyLinked",
+            "This phone number is already linked to another account",
+          );
+        }
+
+        let targetCustomerId = existingCustomerByPhone?.id ?? existingCustomerByUser?.id ?? null;
+
+        if (
+          existingCustomerByPhone &&
+          existingCustomerByUser &&
+          existingCustomerByPhone.id !== existingCustomerByUser.id
+        ) {
+          // Merge purchases under the phone-based customer identity.
+          await tx
+            .update(ordersDB)
+            .set({ customerId: existingCustomerByPhone.id })
+            .where(eq(ordersDB.customerId, existingCustomerByUser.id));
+
+          await tx
+            .update(customersDB)
+            .set({
+              userId: null,
+              deletedAt: new Date(),
+            })
+            .where(eq(customersDB.id, existingCustomerByUser.id));
+
+          targetCustomerId = existingCustomerByPhone.id;
+        }
+
+        if (targetCustomerId) {
+          await tx
+            .update(customersDB)
+            .set({
+              userId: user.id,
+              phone: normalizedPhone,
+              name: customerName,
+              middleName: customerMiddleName,
+              lastName: customerLastName,
+              email: customerEmail,
+              deletedAt: null,
+            })
+            .where(eq(customersDB.id, targetCustomerId));
+
+          return;
+        }
+
+        await tx.insert(customersDB).values({
+          id: generateNanoId(),
           userId: user.id,
-        })
-        .onConflictDoNothing({
-          target: customerProfileDB.userId,
+          phone: normalizedPhone,
+          name: customerName,
+          middleName: customerMiddleName,
+          lastName: customerLastName,
+          email: customerEmail,
         });
+      });
 
       return {
         token: result.token,

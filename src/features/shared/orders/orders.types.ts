@@ -1,4 +1,4 @@
-import type { Order, OrderItem, OrderItemModifier, OrderItemTax, User } from "@core/db/schemas";
+import type { Customer, Order, OrderItem, OrderItemModifier, OrderItemTax } from "@core/db/schemas";
 
 export interface CreateOrderParams {
   organizationId: string;
@@ -40,10 +40,11 @@ export interface NormalizedCreateOrderParams
 
 export interface OrderCustomerResponse {
   id: string;
-  name: string;
+  userId: string | null;
+  name: string | null;
   middleName: string | null;
   lastName: string | null;
-  email: string;
+  email: string | null;
   phoneNumber: string | null;
 }
 
@@ -62,7 +63,7 @@ export interface OrderResponse extends Order {
 }
 
 export interface OrderWithRelations extends Order {
-  customer: Pick<User, "id" | "name" | "middleName" | "lastName" | "email" | "phoneNumber"> | null;
+  customer: Pick<Customer, "id" | "userId" | "name" | "middleName" | "lastName" | "email" | "phone"> | null;
   items: Array<
     OrderItem & {
       modifiers: OrderItemModifier[];
