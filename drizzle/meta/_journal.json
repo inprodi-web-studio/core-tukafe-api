@@ -8,6 +8,34 @@
       "when": 1776424680000,
       "tag": "0001_customer_identity",
       "breakpoints": false
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1778187600000,
+      "tag": "0002_open_promotion_candidates",
+      "breakpoints": false
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1778200200000,
+      "tag": "0003_coupon_module",
+      "breakpoints": false
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1778533200000,
+      "tag": "0004_work_order_events",
+      "breakpoints": false
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1778619600000,
+      "tag": "0005_work_order_variation_selections",
+      "breakpoints": false
     }
   ]
 }

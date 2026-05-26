@@ -1,6 +1,7 @@
 import { variationGroupOptionsDB, variationGroupsDB } from "@core/db/schemas";
 import {
   assertUniqueValues,
+  badRequest,
   buildFuzzySearch,
   conflict,
   generateNanoId,
@@ -21,7 +22,22 @@ export function adminVariationGroupsService(fastify: FastifyInstance): AdminVari
           return eq(table.id, id);
         },
         with: {
-          options: true,
+          options: {
+            columns: {
+              imageUploadId: false,
+            },
+            with: {
+              image: {
+                columns: {
+                  id: true,
+                  name: true,
+                  path: true,
+                  visibility: true,
+                  mimeType: true,
+                },
+              },
+            },
+          },
         },
       });
 
@@ -79,6 +95,20 @@ export function adminVariationGroupsService(fastify: FastifyInstance): AdminVari
         where(table, { inArray }) {
           return inArray(table.variationGroupId, variationGroupIds);
         },
+        columns: {
+          imageUploadId: false,
+        },
+        with: {
+          image: {
+            columns: {
+              id: true,
+              name: true,
+              path: true,
+              visibility: true,
+              mimeType: true,
+            },
+          },
+        },
       });
 
       const optionsByGroupId = new Map<string, typeof variationGroupOptions>();
@@ -102,7 +132,7 @@ export function adminVariationGroupsService(fastify: FastifyInstance): AdminVari
     },
 
     async create(input) {
-      const { name, options } = normalizeVariationGroupInput(input);
+      const { name, customerLabel, options } = normalizeVariationGroupInput(input);
 
       assertUniqueValues(
         options.map((option) => option.name),
@@ -115,6 +145,35 @@ export function adminVariationGroupsService(fastify: FastifyInstance): AdminVari
         "variationGroup.duplicateOptionSortOrder",
         "Variation group options cannot contain duplicate sort orders",
       );
+
+      const imageUploadIds = [...new Set(options.flatMap((option) => option.imageUploadId ?? []))];
+      const imageUploads =
+        imageUploadIds.length > 0
+          ? await fastify.db.query.uploadsDB.findMany({
+              columns: {
+                id: true,
+                mimeType: true,
+              },
+              where(uploadTable, { inArray }) {
+                return inArray(uploadTable.id, imageUploadIds);
+              },
+            })
+          : [];
+
+      if (imageUploads.length !== imageUploadIds.length) {
+        throw notFound("upload.notFound", "One or more option image uploads were not found");
+      }
+
+      const imageUploadsById = new Map(imageUploads.map((upload) => [upload.id, upload]));
+
+      for (const imageUpload of imageUploads) {
+        if (!imageUpload.mimeType.toLowerCase().startsWith("image/")) {
+          throw badRequest(
+            "variationGroup.invalidOptionImageUpload",
+            "Option image uploads must be image files",
+          );
+        }
+      }
 
       try {
         const createdVariationGroupId = await fastify.db.transaction(async (tx) => {
@@ -131,6 +190,7 @@ export function adminVariationGroupsService(fastify: FastifyInstance): AdminVari
             .values({
               id: generateNanoId(),
               name,
+              customerLabel,
               sortOrder: nextSortOrder,
             })
             .returning();
@@ -144,6 +204,10 @@ export function adminVariationGroupsService(fastify: FastifyInstance): AdminVari
               id: generateNanoId(),
               variationGroupId: createdVariationGroup.id,
               name: option.name,
+              customerDescription: option.customerDescription,
+              imageUploadId: option.imageUploadId
+                ? (imageUploadsById.get(option.imageUploadId)?.id ?? null)
+                : null,
               sortOrder: option.sortOrder,
             })),
           );

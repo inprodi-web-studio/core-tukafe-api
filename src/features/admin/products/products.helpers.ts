@@ -39,6 +39,7 @@ export const normalizeProductInput = ({
   name,
   price,
   recipe,
+  imageUploadId,
   taxIds,
   organizationIds,
   modifiers,
@@ -52,11 +53,18 @@ export const normalizeProductInput = ({
     collapseWhitespace: true,
   });
   const normalizedRecipe = normalizeRecipeInput(recipe);
+  const normalizedImageUploadId = imageUploadId
+    ? normalizeString(imageUploadId, {
+        trim: true,
+        collapseWhitespace: true,
+      })
+    : null;
 
   return {
     name: normalizedName,
     priceCents: price == null ? null : toBase100Integer(price),
     recipe: normalizedRecipe,
+    imageUploadId: normalizedImageUploadId,
     taxIds: [...new Set(taxIds ?? [])],
     organizationIds: [...new Set(organizationIds ?? [])],
     modifierIds: [...new Set(modifierIds ?? modifiers ?? [])],

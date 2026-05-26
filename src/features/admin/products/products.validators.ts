@@ -346,7 +346,22 @@ export async function validateProductVariations(
       return inArray(table.id, variationGroupIds);
     },
     with: {
-      options: true,
+      options: {
+        columns: {
+          imageUploadId: false,
+        },
+        with: {
+          image: {
+            columns: {
+              id: true,
+              name: true,
+              path: true,
+              visibility: true,
+              mimeType: true,
+            },
+          },
+        },
+      },
     },
   });
 

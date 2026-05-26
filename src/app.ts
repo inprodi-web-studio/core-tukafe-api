@@ -5,11 +5,14 @@ import {
   dbPlugin,
   errorHandlerPlugin,
   featureNamespacesPlugin,
+  multipartPlugin,
+  workOrderRealtimePlugin,
   zodSchemaPlugin,
 } from "@core/plugins";
 import cors from "@fastify/cors";
 import { adminApiKeysRoutes, adminApiKeysServicesPlugin } from "@features/admin/apiKeys";
 import { adminAuthRoutes, adminAuthServicesPlugin } from "@features/admin/auth";
+import { adminCouponsRoutes, adminCouponsServicesPlugin } from "@features/admin/coupons";
 import {
   adminIngredientCategoriesRoutes,
   adminIngredientCategoriesServicesPlugin,
@@ -37,20 +40,25 @@ import {
   adminVariationGroupsRoutes,
   adminVariationGroupsServicesPlugin,
 } from "@features/admin/variationGroups";
+import { adminUploadsRoutes, adminUploadsServicesPlugin } from "@features/admin/uploads";
+import { adminWorkOrdersRoutes, adminWorkOrdersServicesPlugin } from "@features/admin/workOrders";
 import { customerAuthRoutes, customerAuthServicesPlugin } from "@features/customer/auth";
+import { customerOrganizationsRoutes } from "@features/customer/organizations";
 import { customerOrdersRoutes, customerOrdersServicesPlugin } from "@features/customer/orders";
-import {
-  guestCustomersRoutes,
-  guestCustomersServicesPlugin,
-} from "@features/guest/customers";
+import { customerProductCategoriesRoutes } from "@features/customer/productCategories";
+import { customerProductsRoutes } from "@features/customer/products";
+import { customerRewardsRoutes } from "@features/customer/rewards";
+import { guestCustomersRoutes, guestCustomersServicesPlugin } from "@features/guest/customers";
 import {
   guestOrganizationsRoutes,
   guestOrganizationsServicesPlugin,
 } from "@features/guest/organizations";
+import { guestOrdersRoutes, guestOrdersServicesPlugin } from "@features/guest/orders";
 import {
   guestProductCategoriesRoutes,
   guestProductCategoriesServicesPlugin,
 } from "@features/guest/productCategories";
+import { guestProductsRoutes, guestProductsServicesPlugin } from "@features/guest/products";
 import Fastify from "fastify";
 import qs from "qs";
 
@@ -91,9 +99,11 @@ await server.register(cors, {
 // --- Plugins
 await server.register(dbPlugin);
 await server.register(zodSchemaPlugin);
+await server.register(multipartPlugin);
 await server.register(errorHandlerPlugin);
 await server.register(authPlugin);
 await server.register(featureNamespacesPlugin);
+await server.register(workOrderRealtimePlugin);
 
 await server.register(adminAuthServicesPlugin);
 await server.register(adminApiKeysServicesPlugin);
@@ -105,7 +115,10 @@ await server.register(adminModifiersServicesPlugin);
 await server.register(adminTaxesServicesPlugin);
 await server.register(adminUnitsServicesPlugin);
 await server.register(adminProductsServicesPlugin);
+await server.register(adminCouponsServicesPlugin);
+await server.register(adminUploadsServicesPlugin);
 await server.register(adminOrdersServicesPlugin);
+await server.register(adminWorkOrdersServicesPlugin);
 await server.register(adminIngredientsServicesPlugin);
 await server.register(adminSuppliesServicesPlugin);
 await server.register(adminSuppliersServicesPlugin);
@@ -115,7 +128,9 @@ await server.register(customerOrdersServicesPlugin);
 
 await server.register(guestCustomersServicesPlugin);
 await server.register(guestOrganizationsServicesPlugin);
+await server.register(guestOrdersServicesPlugin);
 await server.register(guestProductCategoriesServicesPlugin);
+await server.register(guestProductsServicesPlugin);
 
 // --- Routes
 await server.register(
@@ -127,7 +142,10 @@ await server.register(
         await adminApp.register(adminTaxesRoutes, { prefix: "/taxes" });
         await adminApp.register(adminUnitsRoutes, { prefix: "/units" });
         await adminApp.register(adminProductsRoutes, { prefix: "/products" });
+        await adminApp.register(adminCouponsRoutes, { prefix: "/coupons" });
+        await adminApp.register(adminUploadsRoutes, { prefix: "/uploads" });
         await adminApp.register(adminOrdersRoutes, { prefix: "/orders" });
+        await adminApp.register(adminWorkOrdersRoutes, { prefix: "/work-orders" });
         await adminApp.register(adminProductcategoriesRoutes, { prefix: "/products/categories" });
         await adminApp.register(adminVariationGroupsRoutes, {
           prefix: "/variations/groups",
@@ -149,7 +167,13 @@ await server.register(
     await app.register(
       async (customerApp) => {
         await customerApp.register(customerAuthRoutes, { prefix: "/auth" });
+        await customerApp.register(customerOrganizationsRoutes, { prefix: "/organizations" });
         await customerApp.register(customerOrdersRoutes, { prefix: "/orders" });
+        await customerApp.register(customerProductCategoriesRoutes, {
+          prefix: "/product-categories",
+        });
+        await customerApp.register(customerProductsRoutes, { prefix: "/products" });
+        await customerApp.register(customerRewardsRoutes, { prefix: "/rewards" });
       },
       { prefix: "/customer" },
     );
@@ -158,7 +182,9 @@ await server.register(
       async (guestApp) => {
         await guestApp.register(guestCustomersRoutes, { prefix: "/customers" });
         await guestApp.register(guestOrganizationsRoutes, { prefix: "/organizations" });
+        await guestApp.register(guestOrdersRoutes, { prefix: "/orders" });
         await guestApp.register(guestProductCategoriesRoutes, { prefix: "/product-categories" });
+        await guestApp.register(guestProductsRoutes, { prefix: "/products" });
       },
       { prefix: "/guest" },
     );

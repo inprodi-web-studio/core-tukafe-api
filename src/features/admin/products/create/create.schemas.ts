@@ -9,6 +9,7 @@ const createBaseBodySchema = z.object({
   kitchenDescription: z.string().nullish(),
   unitId: z.nanoid(),
   categoryId: z.nanoid().nullish(),
+  imageUploadId: z.string().nonempty().nullish(),
   taxIds: z.array(z.string()).nullish(),
   organizationIds: z.array(z.nanoid()).min(1).optional(),
   modifierIds: z.array(z.nanoid()).min(1).optional(),

@@ -1,8 +1,9 @@
-import { sql } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
-import { check, index, pgTable, text, uniqueIndex } from "drizzle-orm/pg-core";
+import { boolean, check, index, pgTable, text, uniqueIndex } from "drizzle-orm/pg-core";
 
 import { generateTimestamps } from "@core/utils";
+import { uploadsDB } from "./upload.schema";
 
 const productCategories = pgTable(
   "product_category",
@@ -11,6 +12,10 @@ const productCategories = pgTable(
     name: text("name").notNull(),
     icon: text("icon").notNull(),
     color: text("color").notNull(),
+    isFourPlusOneEligible: boolean("is_four_plus_one_eligible").notNull().default(false),
+    imageUploadId: text("image_upload_id").references(() => uploadsDB.id, {
+      onDelete: "restrict",
+    }),
     parentId: text("parent_id").references((): AnyPgColumn => productCategories.id, {
       onDelete: "set null",
     }),
@@ -22,6 +27,7 @@ const productCategories = pgTable(
       .on(table.name)
       .where(sql`${table.parentId} IS NULL`),
     index("product_category_parent_id_idx").on(table.parentId),
+    index("product_category_image_upload_id_idx").on(table.imageUploadId),
     check("product_category_color_hex_check", sql`${table.color} ~ '^#[0-9A-Fa-f]{6}$'`),
     check(
       "product_category_parent_not_self_check",
@@ -31,4 +37,10 @@ const productCategories = pgTable(
 );
 
 export const productCategoriesDB = productCategories;
+export const productCategoriesRelations = relations(productCategoriesDB, ({ one }) => ({
+  image: one(uploadsDB, {
+    fields: [productCategoriesDB.imageUploadId],
+    references: [uploadsDB.id],
+  }),
+}));
 export type ProductCategory = typeof productCategoriesDB.$inferSelect;

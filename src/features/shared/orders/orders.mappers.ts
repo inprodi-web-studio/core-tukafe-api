@@ -1,22 +1,31 @@
-import type { OrderResponse, OrderWithRelations } from "./orders.types";
+import type {
+  OrderCouponResponse,
+  OrderPaymentAttemptResponse,
+  OrderPromotionResponse,
+  OrderResponse,
+  OrderWithRelations,
+} from "./orders.types";
 
-export function mapOrderResponse(order: OrderWithRelations): OrderResponse {
-  if (!order.customer) {
-    throw new Error("Order customer relation was not found");
-  }
-
+export function mapOrderResponse(
+  order: OrderWithRelations,
+  promotion: OrderPromotionResponse | null = null,
+  coupon: OrderCouponResponse | null = null,
+): OrderResponse {
   return {
     ...order,
+    customerId: order.customerId ?? null,
     comment: order.comment ?? null,
-    customer: {
-      id: order.customer.id,
-      userId: order.customer.userId ?? null,
-      name: order.customer.name ?? null,
-      middleName: order.customer.middleName ?? null,
-      lastName: order.customer.lastName ?? null,
-      email: order.customer.email ?? null,
-      phoneNumber: order.customer.phone ?? null,
-    },
+    customer: order.customer
+      ? {
+          id: order.customer.id,
+          userId: order.customer.userId ?? null,
+          name: order.customer.name ?? null,
+          middleName: order.customer.middleName ?? null,
+          lastName: order.customer.lastName ?? null,
+          email: order.customer.email ?? null,
+          phoneNumber: order.customer.phone ?? null,
+        }
+      : null,
     items: [...order.items]
       .sort((left, right) => {
         if (left.sortOrder !== right.sortOrder) {
@@ -30,6 +39,13 @@ export function mapOrderResponse(order: OrderWithRelations): OrderResponse {
         variationId: item.variationId ?? null,
         variationName: item.variationName ?? null,
         comment: item.comment ?? null,
+        promotionCode: item.promotionCode ?? null,
+        couponDiscountCents: item.couponDiscountCents ?? 0,
+        sourceClientItemId: null,
+        lineType: "paid",
+        displayUnitPriceCents:
+          item.unitPriceCents +
+          (item.quantity > 0 ? Math.round(item.modifiersSubtotalCents / item.quantity) : 0),
         modifiers: [...item.modifiers]
           .sort((left, right) => {
             if (left.sortOrder !== right.sortOrder) {
@@ -49,5 +65,14 @@ export function mapOrderResponse(order: OrderWithRelations): OrderResponse {
           })
           .map(({ orderItemId: _orderItemId, ...tax }) => tax),
       })),
+    promotion,
+    coupon,
+    payment: order.paymentAttempts?.[0]
+      ? ({
+          ...order.paymentAttempts[0],
+          provider: "zettle",
+          status: order.paymentAttempts[0].status as OrderPaymentAttemptResponse["status"],
+        } satisfies OrderPaymentAttemptResponse)
+      : null,
   };
 }

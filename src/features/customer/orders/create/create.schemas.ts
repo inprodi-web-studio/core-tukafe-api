@@ -1,11 +1,19 @@
-import { orderItemBodySchema } from "@features/shared/orders/create-order.schemas";
+import {
+  orderItemBodySchema,
+  orderCouponCodeSchema,
+  orderPaymentAttemptIdSchema,
+  orderTipBodySchema,
+} from "@features/shared/orders/create-order.schemas";
 import { orderResponseSchema } from "@features/shared/orders/orders.schemas";
 import { z } from "zod";
 
 export const createBodySchema = z
   .object({
     organizationId: z.string(),
+    paymentAttemptId: orderPaymentAttemptIdSchema.nullish(),
+    couponCode: orderCouponCodeSchema.nullish(),
     comment: z.string().nullish(),
+    tip: orderTipBodySchema.nullish(),
     items: z.array(orderItemBodySchema).min(1),
   })
   .strict();

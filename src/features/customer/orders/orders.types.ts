@@ -1,6 +1,11 @@
-import type { CreateOrderParams, OrderResponse } from "@features/shared/orders/orders.types";
+import type {
+  CreateOrderParams,
+  OrderPreviewResponse,
+  OrderResponse,
+} from "@features/shared/orders/orders.types";
 
 export interface CustomerOrdersService {
+  preview(input: CreateCustomerOrderServiceParams): Promise<OrderPreviewResponse>;
   create(input: CreateCustomerOrderServiceParams): Promise<OrderResponse>;
 }
 

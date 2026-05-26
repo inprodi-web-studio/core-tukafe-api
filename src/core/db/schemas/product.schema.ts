@@ -16,6 +16,7 @@ import { organizationDB } from "./organization.schema";
 import { productCategoriesDB } from "./productCategory.schema";
 import { taxDB } from "./tax.schema";
 import { unitsDB } from "./unit.schema";
+import { uploadsDB } from "./upload.schema";
 
 export const PRODUCT_TYPES = ["simple", "assembled", "compound"] as const;
 
@@ -36,6 +37,9 @@ const products = pgTable(
     categoryId: text("category_id").references(() => productCategoriesDB.id, {
       onDelete: "restrict",
     }),
+    imageUploadId: text("image_upload_id").references(() => uploadsDB.id, {
+      onDelete: "restrict",
+    }),
     productType: productTypeEnum("product_type").notNull().default("simple"),
     ...generateTimestamps({ withDeletedAt: true }),
   },
@@ -47,6 +51,7 @@ const products = pgTable(
     index("product_name_idx").on(table.name),
     index("product_unit_id_idx").on(table.unitId),
     index("product_category_id_idx").on(table.categoryId),
+    index("product_image_upload_id_idx").on(table.imageUploadId),
     index("product_product_type_idx").on(table.productType),
   ],
 );
@@ -107,6 +112,10 @@ export const productsRelations = relations(productsDB, ({ one, many }) => ({
   category: one(productCategoriesDB, {
     fields: [productsDB.categoryId],
     references: [productCategoriesDB.id],
+  }),
+  image: one(uploadsDB, {
+    fields: [productsDB.imageUploadId],
+    references: [uploadsDB.id],
   }),
   taxes: many(productTaxDB),
   organizations: many(organizationProductDB),

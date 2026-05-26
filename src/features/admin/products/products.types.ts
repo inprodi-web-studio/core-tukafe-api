@@ -12,6 +12,7 @@ import type {
   SupplyCategory,
   Tax,
   Unit,
+  Upload,
   Variation,
   VariationGroup,
   VariationGroupOption,
@@ -37,9 +38,16 @@ export interface AdminProductsService {
   ): Promise<ProductResponse>;
 }
 
-export interface ProductResponse extends Omit<Product, "categoryId" | "unitId"> {
+export interface ProductCategoryResponse extends Omit<ProductCategory, "imageUploadId"> {
+  image: Pick<Upload, "id" | "name" | "path" | "visibility" | "mimeType"> | null;
+}
+
+export type ProductImageResponse = Pick<Upload, "id" | "name" | "path" | "visibility" | "mimeType">;
+
+export interface ProductResponse extends Omit<Product, "categoryId" | "unitId" | "imageUploadId"> {
   unit: Unit;
-  category: ProductCategory | null;
+  category: ProductCategoryResponse | null;
+  image: ProductImageResponse | null;
   taxes: Array<Tax>;
   organizations: ProductOrganizationResponse[];
   modifiers: ProductModifierResponse[];
@@ -66,6 +74,7 @@ export interface CreateProductServiceParams {
   kitchenDescription?: string | null;
   unitId: string;
   categoryId?: string | null;
+  imageUploadId?: string | null;
   productType: ProductType;
   taxIds?: string[] | null;
   organizationIds?: string[] | null;
@@ -176,7 +185,12 @@ export interface ProductRecipeSupplyItem extends Omit<Supply, "baseUnitId" | "ca
 }
 
 export interface ProductVariationGroupResponse extends VariationGroup {
-  options: VariationGroupOption[];
+  options: ProductVariationGroupOptionResponse[];
+}
+
+export interface ProductVariationGroupOptionResponse
+  extends Omit<VariationGroupOption, "imageUploadId"> {
+  image: ProductImageResponse | null;
 }
 
 export interface ProductVariationGroupLinkWithRelations extends ProductVariationGroup {
@@ -208,5 +222,5 @@ export interface ProductVariationSelectionResponse extends Omit<
   "variationId" | "variationGroupId" | "variationOptionId"
 > {
   group: VariationGroup;
-  option: VariationGroupOption;
+  option: ProductVariationGroupOptionResponse;
 }

@@ -34,5 +34,5 @@
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false
   },
-  "include": ["src", "drizzle.config.ts", "./**/*.tsx"]
+  "include": ["src", "scripts/**/*.ts", "drizzle.config.ts", "./**/*.tsx"]
 }

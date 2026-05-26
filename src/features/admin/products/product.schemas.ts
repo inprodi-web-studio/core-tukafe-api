@@ -107,16 +107,27 @@ export const recipeResponseSchema = z.object({
   supplies: z.array(recipeItemSupplySchema),
 });
 
+const imageSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  path: z.string(),
+  visibility: z.enum(["PUBLIC", "PRIVATE"]),
+  mimeType: z.string(),
+});
+
 export const variationGroupOptionResponseSchema = z.object({
   id: z.string(),
   variationGroupId: z.string(),
   name: z.string(),
+  customerDescription: z.string().nullish(),
+  image: imageSchema.nullable(),
   sortOrder: z.number().int().min(0),
 });
 
 export const variationGroupResponseSchema = z.object({
   id: z.string(),
   name: z.string(),
+  customerLabel: z.string().nullish(),
   sortOrder: z.number().int().min(0),
   options: z.array(variationGroupOptionResponseSchema),
 });
@@ -144,6 +155,7 @@ export const productResponseSchema = z.object({
   priceCents: z.number().nonnegative().nullable(),
   customerDescription: z.string(),
   kitchenDescription: z.string().nullish(),
+  image: imageSchema.nullable(),
   unit: z.object({
     id: z.string(),
     name: z.string(),
@@ -156,6 +168,7 @@ export const productResponseSchema = z.object({
       name: z.string(),
       icon: z.string(),
       color: z.string(),
+      image: imageSchema.nullable(),
       parentId: z.string().nullish(),
     })
     .nullish(),

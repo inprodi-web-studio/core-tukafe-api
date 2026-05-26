@@ -57,3 +57,4 @@ export const uploadReferencesDB = uploadReferences;
 export type Upload = typeof uploadsDB.$inferSelect;
 export type UploadReference = typeof uploadReferencesDB.$inferSelect;
 export type UploadEntityType = (typeof uploadEntityTypeEnum.enumValues)[number];
+export type UploadVisibility = (typeof uploadVisibilityEnum.enumValues)[number];

@@ -1,5 +1,6 @@
 import { productCategoriesDB } from "@core/db/schemas";
 import {
+  badRequest,
   buildFuzzySearch,
   conflict,
   generateNanoId,
@@ -26,6 +27,20 @@ export function adminProductcategoriesService(
       const category = await fastify.db.query.productCategoriesDB.findFirst({
         where(categoryTable, { eq }) {
           return eq(categoryTable.id, id);
+        },
+        columns: {
+          imageUploadId: false,
+        },
+        with: {
+          image: {
+            columns: {
+              id: true,
+              name: true,
+              path: true,
+              visibility: true,
+              mimeType: true,
+            },
+          },
         },
       });
 
@@ -105,10 +120,34 @@ export function adminProductcategoriesService(
     },
 
     async create(input) {
-      const { name, parentId, color, icon } = normalizeProductCategoryInput(input);
+      const { name, parentId, color, icon, imageUploadId, isFourPlusOneEligible } =
+        normalizeProductCategoryInput(input);
 
       if (parentId) {
         await fastify.admin.productCategories.get(parentId);
+      }
+
+      const imageUpload = imageUploadId
+        ? await fastify.db.query.uploadsDB.findFirst({
+            columns: {
+              id: true,
+              mimeType: true,
+            },
+            where(uploadTable, { eq }) {
+              return eq(uploadTable.id, imageUploadId);
+            },
+          })
+        : null;
+
+      if (imageUploadId && !imageUpload) {
+        throw notFound("upload.notFound", "The image upload was not found");
+      }
+
+      if (imageUpload && !imageUpload.mimeType.toLowerCase().startsWith("image/")) {
+        throw badRequest(
+          "productCategory.invalidImageUpload",
+          "The selected upload must be an image file",
+        );
       }
 
       try {
@@ -119,6 +158,8 @@ export function adminProductcategoriesService(
             name,
             icon,
             color,
+            isFourPlusOneEligible,
+            imageUploadId: imageUpload?.id ?? null,
             parentId,
           })
           .returning();
@@ -127,7 +168,13 @@ export function adminProductcategoriesService(
           throw new Error("Failed to create product category");
         }
 
-        return createdCategory;
+        const category = await fastify.admin.productCategories.get(createdCategory.id);
+
+        if (!category) {
+          throw new Error("Failed to retrieve created product category");
+        }
+
+        return category;
       } catch (error) {
         const pgError = getPgError(error);
 

@@ -14,6 +14,7 @@ import {
   variationSelectionsDB,
 } from "@core/db/schemas";
 import {
+  badRequest,
   buildFuzzySearch,
   conflict,
   generateNanoId,
@@ -51,10 +52,35 @@ export function adminProductsService(fastify: FastifyInstance): AdminProductsSer
           columns: {
             unitId: false,
             categoryId: false,
+            imageUploadId: false,
           },
           with: {
             unit: true,
-            category: true,
+            image: {
+              columns: {
+                id: true,
+                name: true,
+                path: true,
+                visibility: true,
+                mimeType: true,
+              },
+            },
+            category: {
+              columns: {
+                imageUploadId: false,
+              },
+              with: {
+                image: {
+                  columns: {
+                    id: true,
+                    name: true,
+                    path: true,
+                    visibility: true,
+                    mimeType: true,
+                  },
+                },
+              },
+            },
             taxes: {
               with: {
                 tax: true,
@@ -120,7 +146,22 @@ export function adminProductsService(fastify: FastifyInstance): AdminProductsSer
           with: {
             group: {
               with: {
-                options: true,
+                options: {
+                  columns: {
+                    imageUploadId: false,
+                  },
+                  with: {
+                    image: {
+                      columns: {
+                        id: true,
+                        name: true,
+                        path: true,
+                        visibility: true,
+                        mimeType: true,
+                      },
+                    },
+                  },
+                },
               },
             },
           },
@@ -142,7 +183,22 @@ export function adminProductsService(fastify: FastifyInstance): AdminProductsSer
               },
               with: {
                 group: true,
-                option: true,
+                option: {
+                  columns: {
+                    imageUploadId: false,
+                  },
+                  with: {
+                    image: {
+                      columns: {
+                        id: true,
+                        name: true,
+                        path: true,
+                        visibility: true,
+                        mimeType: true,
+                      },
+                    },
+                  },
+                },
               },
             },
             recipe: {
@@ -328,6 +384,7 @@ export function adminProductsService(fastify: FastifyInstance): AdminProductsSer
         unitId,
         productType,
         categoryId,
+        imageUploadId,
         recipe,
         taxIds,
         organizationIds,
@@ -341,6 +398,26 @@ export function adminProductsService(fastify: FastifyInstance): AdminProductsSer
 
         if (categoryId) {
           await fastify.admin.productCategories.get(categoryId);
+        }
+
+        const imageUpload = imageUploadId
+          ? await fastify.db.query.uploadsDB.findFirst({
+              columns: {
+                id: true,
+                mimeType: true,
+              },
+              where(uploadTable, { eq }) {
+                return eq(uploadTable.id, imageUploadId);
+              },
+            })
+          : null;
+
+        if (imageUploadId && !imageUpload) {
+          throw notFound("upload.notFound", "The image upload was not found");
+        }
+
+        if (imageUpload && !imageUpload.mimeType.toLowerCase().startsWith("image/")) {
+          throw badRequest("product.invalidImageUpload", "The selected upload must be an image file");
         }
 
         if (taxIds.length > 0) {
@@ -389,6 +466,7 @@ export function adminProductsService(fastify: FastifyInstance): AdminProductsSer
               unitId,
               productType,
               categoryId,
+              imageUploadId: imageUpload?.id ?? null,
             })
             .returning();
 

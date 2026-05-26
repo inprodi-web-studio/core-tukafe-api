@@ -6,17 +6,29 @@ export const createBodySchema = z
     name: z.string().nonempty(),
     icon: z.string().nonempty(),
     color: colorSchema,
+    isFourPlusOneEligible: z.boolean().optional(),
+    imageUploadId: z.string().nonempty().nullish(),
     parentId: z.string().nullish(),
   })
   .strict();
 
 export type CreateBody = z.infer<typeof createBodySchema>;
 
+const imageSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  path: z.string(),
+  visibility: z.enum(["PUBLIC", "PRIVATE"]),
+  mimeType: z.string(),
+});
+
 export const createResponseSchema = z.object({
   id: z.string(),
   name: z.string(),
   icon: z.string(),
   color: z.string(),
+  isFourPlusOneEligible: z.boolean(),
+  image: imageSchema.nullable(),
   parentId: z.string().nullish(),
 });
 

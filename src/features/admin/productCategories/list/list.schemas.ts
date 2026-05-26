@@ -11,12 +11,22 @@ export const listQuerySchema = z
 
 export type ListQuery = z.infer<typeof listQuerySchema>;
 
+const imageSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  path: z.string(),
+  visibility: z.enum(["PUBLIC", "PRIVATE"]),
+  mimeType: z.string(),
+});
+
 const listItemSchema: z.ZodType<ProductCategoryListItem> = z.lazy(() =>
   z.object({
     id: z.string(),
     name: z.string(),
     icon: z.string(),
     color: z.string(),
+    isFourPlusOneEligible: z.boolean(),
+    image: imageSchema.nullable(),
     children: z.array(listItemSchema),
   }),
 );

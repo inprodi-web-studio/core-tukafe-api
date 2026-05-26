@@ -11,6 +11,8 @@ interface ProductCategoryTreeSource {
   name: string;
   icon: string;
   color: string;
+  isFourPlusOneEligible: boolean;
+  image: GuestProductCategoryListItem["image"];
   parentId: string | null;
 }
 
@@ -26,6 +28,8 @@ function buildProductCategoryTree(
       name: category.name,
       icon: category.icon,
       color: category.color,
+      isFourPlusOneEligible: category.isFourPlusOneEligible,
+      image: category.image,
       children: [],
     });
   }
@@ -66,7 +70,19 @@ export function guestProductCategoriesService(
           name: true,
           icon: true,
           color: true,
+          isFourPlusOneEligible: true,
           parentId: true,
+        },
+        with: {
+          image: {
+            columns: {
+              id: true,
+              name: true,
+              path: true,
+              visibility: true,
+              mimeType: true,
+            },
+          },
         },
         orderBy: [asc(productCategoriesDB.name), asc(productCategoriesDB.id)],
       });

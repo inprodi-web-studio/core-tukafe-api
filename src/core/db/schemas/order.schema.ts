@@ -3,6 +3,7 @@ import {
   check,
   index,
   integer,
+  jsonb,
   numeric,
   pgTable,
   primaryKey,
@@ -11,6 +12,7 @@ import {
 } from "drizzle-orm/pg-core";
 
 import { generateTimestamps, MAX_SUPPORTED_DECIMAL_PLACES } from "@core/utils";
+import { couponsDB } from "./coupon.schema";
 import { customersDB } from "./customer.schema";
 import { modifierOptionsDB, modifiersDB } from "./modifier.schema";
 import { organizationDB } from "./organization.schema";
@@ -26,11 +28,18 @@ const orders = pgTable(
     organizationId: text("organization_id")
       .notNull()
       .references(() => organizationDB.id, { onDelete: "restrict" }),
-    customerId: text("customer_id")
-      .notNull()
-      .references(() => customersDB.id, { onDelete: "restrict" }),
+    customerId: text("customer_id").references(() => customersDB.id, { onDelete: "restrict" }),
+    couponId: text("coupon_id").references(() => couponsDB.id, { onDelete: "restrict" }),
+    couponCode: text("coupon_code"),
     folio: text("folio").notNull(),
     comment: text("comment"),
+    tipType: text("tip_type", { enum: ["none", "percentage", "amount"] })
+      .notNull()
+      .default("none"),
+    tipRateBps: integer("tip_rate_bps"),
+    tipCents: integer("tip_cents").notNull().default(0),
+    promotionDiscountCents: integer("promotion_discount_cents").notNull().default(0),
+    couponDiscountCents: integer("coupon_discount_cents").notNull().default(0),
     subtotalCents: integer("subtotal_cents").notNull().default(0),
     taxesCents: integer("taxes_cents").notNull().default(0),
     grandTotalCents: integer("grand_total_cents").notNull().default(0),
@@ -40,16 +49,75 @@ const orders = pgTable(
     uniqueIndex("order_organization_folio_unique").on(table.organizationId, table.folio),
     index("order_organization_id_idx").on(table.organizationId),
     index("order_customer_id_idx").on(table.customerId),
+    index("order_coupon_id_idx").on(table.couponId),
     index("order_customer_id_created_at_idx").on(table.customerId, table.createdAt),
     index("order_created_at_idx").on(table.createdAt),
     check("order_folio_format_check", sql`${table.folio} ~ '^(0[1-9]|1[0-2])-[0-9]{2}-[0-9]{6}$'`),
     check("order_subtotal_cents_non_negative_check", sql`${table.subtotalCents} >= 0`),
     check("order_taxes_cents_non_negative_check", sql`${table.taxesCents} >= 0`),
+    check("order_tip_cents_non_negative_check", sql`${table.tipCents} >= 0`),
+    check(
+      "order_promotion_discount_cents_non_negative_check",
+      sql`${table.promotionDiscountCents} >= 0`,
+    ),
+    check("order_coupon_discount_cents_non_negative_check", sql`${table.couponDiscountCents} >= 0`),
+    check("order_tip_type_check", sql`${table.tipType} in ('none', 'percentage', 'amount')`),
+    check(
+      "order_tip_type_rate_consistency_check",
+      sql`(${table.tipType} = 'percentage' and ${table.tipRateBps} is not null and ${table.tipRateBps} between 1 and 10000) or (${table.tipType} <> 'percentage' and ${table.tipRateBps} is null)`,
+    ),
+    check(
+      "order_tip_type_amount_consistency_check",
+      sql`(${table.tipType} = 'none' and ${table.tipCents} = 0) or (${table.tipType} <> 'none' and ${table.tipCents} >= 0)`,
+    ),
     check("order_grand_total_cents_non_negative_check", sql`${table.grandTotalCents} >= 0`),
     check(
       "order_grand_total_consistency_check",
-      sql`${table.grandTotalCents} = ${table.subtotalCents} + ${table.taxesCents}`,
+      sql`${table.grandTotalCents} = ${table.subtotalCents} + ${table.taxesCents} + ${table.tipCents}`,
     ),
+  ],
+);
+
+const orderPaymentAttempts = pgTable(
+  "order_payment_attempt",
+  {
+    id: text("id").primaryKey(),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organizationDB.id, { onDelete: "restrict" }),
+    orderId: text("order_id").references(() => orders.id, { onDelete: "set null" }),
+    provider: text("provider").notNull().default("zettle"),
+    reference: text("reference").notNull(),
+    amountCents: integer("amount_cents").notNull(),
+    currency: text("currency").notNull().default("MXN"),
+    status: text("status").notNull().default("pending"),
+    transactionId: text("transaction_id"),
+    referenceNumber: text("reference_number"),
+    cardBrand: text("card_brand"),
+    entryMode: text("entry_mode"),
+    authorizationCode: text("authorization_code"),
+    obfuscatedPan: text("obfuscated_pan"),
+    rawResponse: jsonb("raw_response").$type<Record<string, unknown> | null>(),
+    failureCode: text("failure_code"),
+    failureMessage: text("failure_message"),
+    ...generateTimestamps(),
+  },
+  (table) => [
+    uniqueIndex("order_payment_attempt_reference_unique").on(table.reference),
+    uniqueIndex("order_payment_attempt_transaction_id_unique").on(table.transactionId),
+    index("order_payment_attempt_organization_status_created_at_idx").on(
+      table.organizationId,
+      table.status,
+      table.createdAt,
+    ),
+    index("order_payment_attempt_order_id_idx").on(table.orderId),
+    check("order_payment_attempt_provider_check", sql`${table.provider} in ('zettle')`),
+    check(
+      "order_payment_attempt_status_check",
+      sql`${table.status} in ('pending', 'paid_unlinked', 'completed', 'cancelled', 'failed', 'requires_reconciliation')`,
+    ),
+    check("order_payment_attempt_amount_positive_check", sql`${table.amountCents} > 0`),
+    check("order_payment_attempt_currency_check", sql`${table.currency} ~ '^[A-Z]{3}$'`),
   ],
 );
 
@@ -78,6 +146,10 @@ const orderItems = pgTable(
     comment: text("comment"),
     unitPriceCents: integer("unit_price_cents").notNull(),
     modifiersSubtotalCents: integer("modifiers_subtotal_cents").notNull().default(0),
+    freeUnits: integer("free_units").notNull().default(0),
+    promotionCode: text("promotion_code"),
+    promotionDiscountCents: integer("promotion_discount_cents").notNull().default(0),
+    couponDiscountCents: integer("coupon_discount_cents").notNull().default(0),
     subtotalCents: integer("subtotal_cents").notNull(),
     taxesCents: integer("taxes_cents").notNull(),
     grandTotalCents: integer("grand_total_cents").notNull(),
@@ -101,6 +173,15 @@ const orderItems = pgTable(
       "order_item_modifiers_subtotal_cents_non_negative_check",
       sql`${table.modifiersSubtotalCents} >= 0`,
     ),
+    check("order_item_free_units_non_negative_check", sql`${table.freeUnits} >= 0`),
+    check(
+      "order_item_promotion_discount_cents_non_negative_check",
+      sql`${table.promotionDiscountCents} >= 0`,
+    ),
+    check(
+      "order_item_coupon_discount_cents_non_negative_check",
+      sql`${table.couponDiscountCents} >= 0`,
+    ),
     check("order_item_subtotal_cents_non_negative_check", sql`${table.subtotalCents} >= 0`),
     check("order_item_taxes_cents_non_negative_check", sql`${table.taxesCents} >= 0`),
     check("order_item_grand_total_cents_non_negative_check", sql`${table.grandTotalCents} >= 0`),
@@ -109,6 +190,29 @@ const orderItems = pgTable(
       sql`${table.grandTotalCents} = ${table.subtotalCents} + ${table.taxesCents}`,
     ),
     check("order_item_sort_order_non_negative_check", sql`${table.sortOrder} >= 0`),
+  ],
+);
+
+const customerOrderPromotionStates = pgTable(
+  "customer_order_promotion_state",
+  {
+    customerId: text("customer_id")
+      .primaryKey()
+      .references(() => customersDB.id, { onDelete: "cascade" }),
+    progressCount: integer("progress_count").notNull().default(0),
+    candidateProductIds: text("candidate_product_ids")
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
+    version: integer("version").notNull().default(0),
+    ...generateTimestamps(),
+  },
+  (table) => [
+    index("customer_order_promotion_state_updated_at_idx").on(table.updatedAt),
+    check(
+      "customer_order_promotion_state_progress_count_range_check",
+      sql`${table.progressCount} >= 0 AND ${table.progressCount} <= 4`,
+    ),
   ],
 );
 
@@ -185,9 +289,11 @@ const orderItemTaxes = pgTable(
 );
 
 export const ordersDB = orders;
+export const orderPaymentAttemptsDB = orderPaymentAttempts;
 export const orderItemsDB = orderItems;
 export const orderItemModifiersDB = orderItemModifiers;
 export const orderItemTaxesDB = orderItemTaxes;
+export const customerOrderPromotionStatesDB = customerOrderPromotionStates;
 
 export const ordersRelations = relations(ordersDB, ({ one, many }) => ({
   organization: one(organizationDB, {
@@ -198,8 +304,34 @@ export const ordersRelations = relations(ordersDB, ({ one, many }) => ({
     fields: [ordersDB.customerId],
     references: [customersDB.id],
   }),
+  coupon: one(couponsDB, {
+    fields: [ordersDB.couponId],
+    references: [couponsDB.id],
+  }),
+  paymentAttempts: many(orderPaymentAttemptsDB),
   items: many(orderItemsDB),
 }));
+
+export const orderPaymentAttemptsRelations = relations(orderPaymentAttemptsDB, ({ one }) => ({
+  organization: one(organizationDB, {
+    fields: [orderPaymentAttemptsDB.organizationId],
+    references: [organizationDB.id],
+  }),
+  order: one(ordersDB, {
+    fields: [orderPaymentAttemptsDB.orderId],
+    references: [ordersDB.id],
+  }),
+}));
+
+export const customerOrderPromotionStatesRelations = relations(
+  customerOrderPromotionStatesDB,
+  ({ one }) => ({
+    customer: one(customersDB, {
+      fields: [customerOrderPromotionStatesDB.customerId],
+      references: [customersDB.id],
+    }),
+  }),
+);
 
 export const orderItemsRelations = relations(orderItemsDB, ({ one, many }) => ({
   order: one(ordersDB, {
@@ -249,6 +381,8 @@ export const orderItemTaxesRelations = relations(orderItemTaxesDB, ({ one }) => 
 }));
 
 export type Order = typeof ordersDB.$inferSelect;
+export type OrderPaymentAttempt = typeof orderPaymentAttemptsDB.$inferSelect;
 export type OrderItem = typeof orderItemsDB.$inferSelect;
 export type OrderItemModifier = typeof orderItemModifiersDB.$inferSelect;
 export type OrderItemTax = typeof orderItemTaxesDB.$inferSelect;
+export type CustomerOrderPromotionState = typeof customerOrderPromotionStatesDB.$inferSelect;

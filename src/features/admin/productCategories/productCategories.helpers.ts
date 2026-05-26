@@ -8,14 +8,21 @@ import type {
 } from "./productCategories.types";
 
 type ProductCategoryQueryExecutor = Pick<FastifyInstance["db"], "execute">;
-type ProductCategoryTreeSource = Pick<ProductCategoryListItem, "id" | "name" | "icon" | "color"> & {
-  parentId: string | null;
-};
+type ProductCategoryTreeSource = Pick<
+  ProductCategoryListItem,
+  "id" | "name" | "icon" | "color" | "isFourPlusOneEligible" | "image"
+> & { parentId: string | null };
 type ProductCategoryTreeRow = Record<string, unknown> & {
   id: string;
   name: string;
   icon: string;
   color: string;
+  isFourPlusOneEligible: boolean;
+  imageId: string | null;
+  imageName: string | null;
+  imagePath: string | null;
+  imageVisibility: "PUBLIC" | "PRIVATE" | null;
+  imageMimeType: string | null;
   parentId: string | null;
 };
 
@@ -27,7 +34,9 @@ export const normalizeProductCategoryInput = ({
   name,
   icon,
   color,
+  imageUploadId,
   parentId,
+  isFourPlusOneEligible,
 }: CreateProductCategoryServiceParams) => {
   const normalizedName = normalizeString(name, {
     trim: true,
@@ -44,15 +53,45 @@ export const normalizeProductCategoryInput = ({
     uppercase: true,
   });
 
+  const normalizedImageUploadId = imageUploadId
+    ? normalizeString(imageUploadId, {
+        trim: true,
+        collapseWhitespace: true,
+      })
+    : null;
+
   const normalizedParentId = parentId ?? null;
 
   return {
     name: normalizedName,
     icon: normalizedIcon,
     color: normalizedColor,
+    isFourPlusOneEligible: isFourPlusOneEligible ?? false,
+    imageUploadId: normalizedImageUploadId,
     parentId: normalizedParentId,
   };
 };
+
+function mapProductCategoryTreeRow(row: ProductCategoryTreeRow): ProductCategoryTreeSource {
+  return {
+    id: row.id,
+    name: row.name,
+    icon: row.icon,
+    color: row.color,
+    isFourPlusOneEligible: row.isFourPlusOneEligible,
+    parentId: row.parentId,
+    image:
+      row.imageId && row.imageName && row.imagePath && row.imageVisibility && row.imageMimeType
+        ? {
+            id: row.imageId,
+            name: row.imageName,
+            path: row.imagePath,
+            visibility: row.imageVisibility,
+            mimeType: row.imageMimeType,
+          }
+        : null,
+  };
+}
 
 export function buildProductCategoryTree(
   categories: ProductCategoryTreeSource[],
@@ -66,6 +105,8 @@ export function buildProductCategoryTree(
       name: category.name,
       icon: category.icon,
       color: category.color,
+      isFourPlusOneEligible: category.isFourPlusOneEligible,
+      image: category.image,
       children: [],
     });
   }
@@ -104,8 +145,8 @@ export async function getDescendantTreeRows(
   }
 
   const result = await database.execute<ProductCategoryTreeRow>(sql`
-    with recursive category_tree(id, name, icon, color, parent_id) as (
-      select id, name, icon, color, parent_id
+    with recursive category_tree(id, name, icon, color, is_four_plus_one_eligible, image_upload_id, parent_id) as (
+      select id, name, icon, color, is_four_plus_one_eligible, image_upload_id, parent_id
       from product_category
       where id in (${sql.join(
         rootIds.map((rootId) => sql`${rootId}`),
@@ -114,21 +155,28 @@ export async function getDescendantTreeRows(
 
       union all
 
-      select child.id, child.name, child.icon, child.color, child.parent_id
+      select child.id, child.name, child.icon, child.color, child.is_four_plus_one_eligible, child.image_upload_id, child.parent_id
       from product_category as child
       inner join category_tree on child.parent_id = category_tree.id
     )
     select distinct
-      id,
-      name,
-      icon,
-      color,
-      parent_id as "parentId"
+      category_tree.id,
+      category_tree.name,
+      category_tree.icon,
+      category_tree.color,
+      category_tree.is_four_plus_one_eligible as "isFourPlusOneEligible",
+      category_tree.parent_id as "parentId",
+      image.id as "imageId",
+      image.name as "imageName",
+      image.path as "imagePath",
+      image.visibility as "imageVisibility",
+      image.mime_type as "imageMimeType"
     from category_tree
-    order by name asc, id asc
+    left join upload as image on image.id = category_tree.image_upload_id
+    order by category_tree.name asc, category_tree.id asc
   `);
 
-  return result.rows;
+  return result.rows.map(mapProductCategoryTreeRow);
 }
 
 export async function getMatchedRootIds(
@@ -166,8 +214,8 @@ export async function getMatchedAncestorRows(
   }
 
   const result = await database.execute<ProductCategoryTreeRow>(sql`
-    with recursive matched_paths(id, name, icon, color, parent_id, source_id) as (
-      select id, name, icon, color, parent_id, id as source_id
+    with recursive matched_paths(id, name, icon, color, is_four_plus_one_eligible, image_upload_id, parent_id, source_id) as (
+      select id, name, icon, color, is_four_plus_one_eligible, image_upload_id, parent_id, id as source_id
       from product_category
       where ${searchWhere}
 
@@ -178,6 +226,8 @@ export async function getMatchedAncestorRows(
         parent.name,
         parent.icon,
         parent.color,
+        parent.is_four_plus_one_eligible,
+        parent.image_upload_id,
         parent.parent_id,
         matched_paths.source_id
       from product_category as parent
@@ -193,9 +243,16 @@ export async function getMatchedAncestorRows(
       matched_paths.name,
       matched_paths.icon,
       matched_paths.color,
-      matched_paths.parent_id as "parentId"
+      matched_paths.is_four_plus_one_eligible as "isFourPlusOneEligible",
+      matched_paths.parent_id as "parentId",
+      image.id as "imageId",
+      image.name as "imageName",
+      image.path as "imagePath",
+      image.visibility as "imageVisibility",
+      image.mime_type as "imageMimeType"
     from matched_paths
     inner join matched_roots on matched_roots.source_id = matched_paths.source_id
+    left join upload as image on image.id = matched_paths.image_upload_id
     where matched_roots.root_id in (${sql.join(
       rootIds.map((rootId) => sql`${rootId}`),
       sql`, `,
@@ -203,5 +260,5 @@ export async function getMatchedAncestorRows(
     order by matched_paths.name asc, matched_paths.id asc
   `);
 
-  return result.rows;
+  return result.rows.map(mapProductCategoryTreeRow);
 }

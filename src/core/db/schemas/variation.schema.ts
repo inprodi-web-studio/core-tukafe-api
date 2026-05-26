@@ -14,12 +14,14 @@ import { generateTimestamps } from "@core/utils";
 import { ingredientsDB } from "./ingredient.schema";
 import { productsDB } from "./product.schema";
 import { suppliesDB } from "./supply.schema";
+import { uploadsDB } from "./upload.schema";
 
 const variationGroups = pgTable(
   "variation_group",
   {
     id: text("id").primaryKey(),
     name: text("name").notNull(),
+    customerLabel: text("customer_label"),
     sortOrder: integer("sort_order").notNull().default(0),
     ...generateTimestamps(),
   },
@@ -38,6 +40,10 @@ const variationGroupOptions = pgTable(
       .notNull()
       .references(() => variationGroups.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
+    customerDescription: text("customer_description"),
+    imageUploadId: text("image_upload_id").references(() => uploadsDB.id, {
+      onDelete: "restrict",
+    }),
     sortOrder: integer("sort_order").notNull().default(0),
     ...generateTimestamps(),
   },
@@ -49,6 +55,7 @@ const variationGroupOptions = pgTable(
     ),
     check("variation_group_option_sort_order_non_negative_check", sql`${table.sortOrder} >= 0`),
     index("variation_group_option_group_id_idx").on(table.variationGroupId),
+    index("variation_group_option_image_upload_id_idx").on(table.imageUploadId),
   ],
 );
 
@@ -217,6 +224,10 @@ export const variationGroupOptionsRelations = relations(
     group: one(variationGroupsDB, {
       fields: [variationGroupOptionsDB.variationGroupId],
       references: [variationGroupsDB.id],
+    }),
+    image: one(uploadsDB, {
+      fields: [variationGroupOptionsDB.imageUploadId],
+      references: [uploadsDB.id],
     }),
     selections: many(variationSelectionsDB),
   }),

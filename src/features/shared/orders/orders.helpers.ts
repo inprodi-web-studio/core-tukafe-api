@@ -1,5 +1,10 @@
-import { normalizeString } from "@core/utils";
-import type { CreateOrderParams, NormalizedCreateOrderParams } from "./orders.types";
+import { normalizeString, validation } from "@core/utils";
+import type {
+  CreateOrderParams,
+  CreateOrderTipParams,
+  NormalizedCreateOrderParams,
+  NormalizedCreateOrderTipParams,
+} from "./orders.types";
 
 function normalizeNullableText(value?: string | null): string | null {
   const normalizedValue = normalizeString(value, { trim: true, collapseWhitespace: true });
@@ -7,23 +12,81 @@ function normalizeNullableText(value?: string | null): string | null {
   return normalizedValue.length > 0 ? normalizedValue : null;
 }
 
+function normalizeOrderTipInput(tip?: CreateOrderTipParams | null): NormalizedCreateOrderTipParams {
+  if (!tip || tip.type === "none") {
+    return {
+      type: "none",
+      rateBps: null,
+      amountCents: null,
+    };
+  }
+
+  if (tip.type === "percentage") {
+    return {
+      type: "percentage",
+      rateBps: tip.rateBps,
+      amountCents: null,
+    };
+  }
+
+  return {
+    type: "amount",
+    rateBps: null,
+    amountCents: tip.amountCents,
+  };
+}
+
 export function normalizeCreateOrderInput({
   comment,
   items,
+  customerId,
+  couponCode,
+  tip,
   ...rest
 }: CreateOrderParams): NormalizedCreateOrderParams {
-  return {
-    ...rest,
-    comment: normalizeNullableText(comment),
-    items: items.map((item) => ({
+  const normalizedItems = items.map((item) => {
+    const clientItemId = normalizeString(item.clientItemId, {
+      trim: true,
+      collapseWhitespace: true,
+      maxLength: 120,
+    });
+
+    return {
       ...item,
       variationId: item.variationId ?? null,
       comment: normalizeNullableText(item.comment),
+      clientItemId: clientItemId.length > 0 ? clientItemId : null,
+      redeemFreeUnits: item.redeemFreeUnits ?? 0,
       modifiers: (item.modifiers ?? []).map((modifier) => ({
         modifierOptionId: modifier.modifierOptionId,
         quantity: modifier.quantity ?? 1,
       })),
-    })),
+    };
+  });
+
+  const hasManualClientItemIds = normalizedItems.some((item) => item.clientItemId !== null);
+
+  if (hasManualClientItemIds && normalizedItems.some((item) => item.clientItemId === null)) {
+    throw validation(
+      "order.manualPromotion.clientItemIdRequired",
+      "All items must include clientItemId when manual promotion mode is used",
+    );
+  }
+
+  return {
+    ...rest,
+    customerId: customerId ?? null,
+    couponCode:
+      normalizeString(couponCode, {
+        trim: true,
+        uppercase: true,
+        collapseWhitespace: true,
+        removeWhitespace: true,
+        maxLength: 64,
+      }) || null,
+    comment: normalizeNullableText(comment),
+    tip: normalizeOrderTipInput(tip),
+    items: normalizedItems,
   };
 }
 
@@ -55,7 +118,7 @@ export function resolveVariationName(variation: {
     .map((selection) => selection.option.name)
     .join(" / ");
 
-  return selectionName || variation.customerDescription || variation.kitchenName || null;
+  return variation.kitchenName || selectionName || variation.customerDescription || null;
 }
 
 export function buildOrderFolioPrefix(date: Date): string {
@@ -75,4 +138,68 @@ export function calculateExtendedPriceCents(unitPriceCents: number, quantity: nu
 
 export function calculateTaxAmountCents(subtotalCents: number, taxRateBps: number): number {
   return Math.round((subtotalCents * taxRateBps) / 10000);
+}
+
+export function calculateIncludedTaxBreakdown(
+  grossTotalCents: number,
+  taxRatesBps: number[],
+): {
+  subtotalCents: number;
+  taxAmountsCents: number[];
+} {
+  const normalizedGrossTotalCents = Math.max(0, Math.round(grossTotalCents));
+  const normalizedTaxRatesBps = taxRatesBps.map((rate) => Math.max(0, Math.trunc(rate)));
+  const totalTaxRateBps = normalizedTaxRatesBps.reduce(
+    (accumulator, rate) => accumulator + rate,
+    0,
+  );
+
+  if (normalizedGrossTotalCents <= 0 || totalTaxRateBps <= 0) {
+    return {
+      subtotalCents: normalizedGrossTotalCents,
+      taxAmountsCents: normalizedTaxRatesBps.map(() => 0),
+    };
+  }
+
+  const subtotalCents = Math.round((normalizedGrossTotalCents * 10000) / (10000 + totalTaxRateBps));
+  const includedTaxTotalCents = normalizedGrossTotalCents - subtotalCents;
+  let remainingTaxCents = includedTaxTotalCents;
+
+  const taxAmountsCents = normalizedTaxRatesBps.map((rate, index) => {
+    if (rate <= 0) {
+      return 0;
+    }
+
+    const isLastTax = index === normalizedTaxRatesBps.length - 1;
+    if (isLastTax) {
+      return remainingTaxCents;
+    }
+
+    const taxAmountCents = Math.min(
+      remainingTaxCents,
+      Math.round((includedTaxTotalCents * rate) / totalTaxRateBps),
+    );
+    remainingTaxCents -= taxAmountCents;
+    return taxAmountCents;
+  });
+
+  return {
+    subtotalCents,
+    taxAmountsCents,
+  };
+}
+
+export function calculateTipCents(
+  tip: NormalizedCreateOrderTipParams,
+  totalBeforeTipCents: number,
+): number {
+  if (tip.type === "none") {
+    return 0;
+  }
+
+  if (tip.type === "amount") {
+    return tip.amountCents ?? 0;
+  }
+
+  return Math.round((totalBeforeTipCents * (tip.rateBps ?? 0)) / 10000);
 }

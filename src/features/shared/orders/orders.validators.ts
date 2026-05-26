@@ -1,5 +1,11 @@
 import { variationsDB } from "@core/db/schemas";
-import type { orderItemModifiersDB, orderItemsDB, orderItemTaxesDB } from "@core/db/schemas";
+import type {
+  orderItemModifiersDB,
+  orderItemsDB,
+  orderItemTaxesDB,
+  WorkOrderModifierSnapshot,
+  WorkOrderVariationSelectionSnapshot,
+} from "@core/db/schemas";
 import {
   assertUniqueValues,
   generateNanoId,
@@ -11,8 +17,8 @@ import {
 import { and, inArray, isNull } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
 import {
+  calculateIncludedTaxBreakdown,
   calculateExtendedPriceCents,
-  calculateTaxAmountCents,
   resolveVariationName,
 } from "./orders.helpers";
 import type { NormalizedCreateOrderItemParams } from "./orders.types";
@@ -24,6 +30,7 @@ type OrderItemTaxInsert = typeof orderItemTaxesDB.$inferInsert;
 interface ProductModifierConfig {
   id: string;
   name: string;
+  kitchenName: string | null;
   minSelect: number;
   maxSelect: number | null;
   multiSelect: boolean;
@@ -33,15 +40,22 @@ interface ProductModifierConfig {
 interface ModifierOptionLookupValue {
   modifierId: string;
   modifierName: string;
+  modifierKitchenName: string | null;
   optionId: string;
   optionName: string;
+  optionKitchenName: string | null;
   optionPriceCents: number;
 }
 
 interface ProductLookup {
   id: string;
   name: string;
+  kitchenName: string | null;
   priceCents: number | null;
+  categoryId: string | null;
+  category: {
+    isFourPlusOneEligible: boolean;
+  } | null;
   unit: {
     id: string;
     name: string;
@@ -65,10 +79,13 @@ interface SelectedVariationLookup {
   customerDescription: string | null;
   selections: Array<{
     group: {
+      id: string;
       name: string;
+      customerLabel: string | null;
       sortOrder: number;
     };
     option: {
+      id: string;
       name: string;
     };
   }>;
@@ -86,6 +103,17 @@ export interface PreparedOrderItem {
   item: Omit<OrderItemInsert, "orderId">;
   modifiers: OrderItemModifierInsert[];
   taxes: OrderItemTaxInsert[];
+  workOrderSnapshot: {
+    productKitchenName: string | null;
+    variationSelections: WorkOrderVariationSelectionSnapshot[];
+    modifiers: WorkOrderModifierSnapshot[];
+  };
+  isPromotionEligible: boolean;
+  productCategoryId: string | null;
+  sourceClientItemId: string | null;
+  requestedRedeemFreeUnits: number;
+  lineType: "paid" | "free";
+  displayUnitPriceCents: number;
 }
 
 export interface PreparedOrderPayload {
@@ -97,6 +125,34 @@ export interface PreparedOrderPayload {
 
 function resolveAllowedDecimalPlaces(unitPrecision: number): number {
   return Math.max(0, Math.min(unitPrecision, MAX_SUPPORTED_DECIMAL_PLACES));
+}
+
+function buildWorkOrderVariationSelections(
+  variation: SelectedVariationLookup | null,
+): WorkOrderVariationSelectionSnapshot[] {
+  if (!variation) {
+    return [];
+  }
+
+  return [...variation.selections]
+    .sort((left, right) => {
+      if (left.group.sortOrder !== right.group.sortOrder) {
+        return left.group.sortOrder - right.group.sortOrder;
+      }
+
+      if (left.group.name !== right.group.name) {
+        return left.group.name.localeCompare(right.group.name);
+      }
+
+      return left.option.name.localeCompare(right.option.name);
+    })
+    .map((selection) => ({
+      groupId: selection.group.id,
+      groupName: selection.group.name,
+      groupCustomerLabel: selection.group.customerLabel,
+      optionId: selection.option.id,
+      optionName: selection.option.name,
+    }));
 }
 
 export async function validateOrderOrganization(
@@ -178,9 +234,16 @@ export async function buildOrderValidationContext(
         columns: {
           id: true,
           name: true,
+          kitchenName: true,
           priceCents: true,
+          categoryId: true,
         },
         with: {
+          category: {
+            columns: {
+              isFourPlusOneEligible: true,
+            },
+          },
           unit: {
             columns: {
               id: true,
@@ -212,7 +275,9 @@ export async function buildOrderValidationContext(
           productId: variationsDB.productId,
         })
         .from(variationsDB)
-        .where(and(inArray(variationsDB.productId, uniqueProductIds), isNull(variationsDB.deletedAt))),
+        .where(
+          and(inArray(variationsDB.productId, uniqueProductIds), isNull(variationsDB.deletedAt)),
+        ),
       uniqueVariationIds.length > 0
         ? fastify.db.query.variationsDB.findMany({
             where(table, { and, inArray, isNull }) {
@@ -235,12 +300,15 @@ export async function buildOrderValidationContext(
                 with: {
                   group: {
                     columns: {
+                      id: true,
                       name: true,
+                      customerLabel: true,
                       sortOrder: true,
                     },
                   },
                   option: {
                     columns: {
+                      id: true,
                       name: true,
                     },
                   },
@@ -262,6 +330,7 @@ export async function buildOrderValidationContext(
             columns: {
               id: true,
               name: true,
+              kitchenName: true,
               multiSelect: true,
               minSelect: true,
               maxSelect: true,
@@ -271,6 +340,7 @@ export async function buildOrderValidationContext(
                 columns: {
                   id: true,
                   name: true,
+                  kitchenName: true,
                   priceCents: true,
                 },
               },
@@ -311,6 +381,7 @@ export async function buildOrderValidationContext(
     productModifierConfigs.push({
       id: productModifier.modifier.id,
       name: productModifier.modifier.name,
+      kitchenName: productModifier.modifier.kitchenName,
       minSelect: productModifier.modifier.minSelect,
       maxSelect: productModifier.modifier.maxSelect,
       multiSelect: productModifier.modifier.multiSelect,
@@ -325,8 +396,10 @@ export async function buildOrderValidationContext(
       modifierOptionLookup.set(modifierOption.id, {
         modifierId: productModifier.modifier.id,
         modifierName: productModifier.modifier.name,
+        modifierKitchenName: productModifier.modifier.kitchenName,
         optionId: modifierOption.id,
         optionName: modifierOption.name,
+        optionKitchenName: modifierOption.kitchenName,
         optionPriceCents: modifierOption.priceCents,
       });
     }
@@ -360,8 +433,21 @@ export async function buildOrderValidationContext(
 export function validateAndPrepareOrderPayload(
   items: NormalizedCreateOrderItemParams[],
   context: OrderValidationContext,
+  options?: {
+    enforceModifierMinSelect?: boolean;
+  },
 ): PreparedOrderPayload {
+  const enforceModifierMinSelect = options?.enforceModifierMinSelect ?? false;
   const preparedOrderItems: PreparedOrderItem[] = [];
+  const hasManualPromotionMode = items.some((item) => item.clientItemId !== null);
+
+  if (hasManualPromotionMode) {
+    assertUniqueValues(
+      items.map((item) => item.clientItemId),
+      "order.manualPromotion.duplicateClientItemId",
+      "Manual promotion mode requires unique clientItemId values per item",
+    );
+  }
 
   for (const [itemIndex, itemInput] of items.entries()) {
     const itemPosition = itemIndex + 1;
@@ -379,7 +465,8 @@ export function validateAndPrepareOrderPayload(
       );
     }
 
-    const productVariationIds = context.variationIdsByProductId.get(product.id) ?? new Set<string>();
+    const productVariationIds =
+      context.variationIdsByProductId.get(product.id) ?? new Set<string>();
     const hasVariations = productVariationIds.size > 0;
 
     if (hasVariations && !itemInput.variationId) {
@@ -420,16 +507,34 @@ export function validateAndPrepareOrderPayload(
       );
     }
 
+    if (itemInput.redeemFreeUnits > 0) {
+      if (!Number.isInteger(itemInput.quantity)) {
+        throw validation(
+          "order.manualPromotion.invalidQuantity",
+          `Item #${itemPosition} must have integer quantity when redeemFreeUnits is provided`,
+        );
+      }
+
+      if (itemInput.redeemFreeUnits > itemInput.quantity) {
+        throw validation(
+          "order.manualPromotion.invalidRedeemFreeUnits",
+          `Item #${itemPosition} redeemFreeUnits cannot exceed quantity`,
+        );
+      }
+    }
+
     assertUniqueValues(
       itemInput.modifiers.map((modifier) => modifier.modifierOptionId),
       "orderItem.duplicateModifierOption",
       `Item #${itemPosition} contains duplicated modifier options`,
     );
 
-    const modifierOptionLookup = context.modifierOptionLookupByProductId.get(product.id) ?? new Map();
+    const modifierOptionLookup =
+      context.modifierOptionLookupByProductId.get(product.id) ?? new Map();
     const selectedModifierOptionsByModifierId = new Map<string, ModifierOptionLookupValue[]>();
     const orderItemId = generateNanoId();
     const modifierRows: OrderItemModifierInsert[] = [];
+    const workOrderModifierSnapshots: WorkOrderModifierSnapshot[] = [];
     let modifiersSubtotalCents = 0;
 
     for (const [modifierIndex, selectedModifier] of itemInput.modifiers.entries()) {
@@ -465,6 +570,15 @@ export function validateAndPrepareOrderPayload(
         totalPriceCents,
         sortOrder: modifierIndex,
       });
+      workOrderModifierSnapshots.push({
+        modifierId: modifierOption.modifierId,
+        modifierName: modifierOption.modifierName,
+        modifierKitchenName: modifierOption.modifierKitchenName,
+        modifierOptionId: modifierOption.optionId,
+        modifierOptionName: modifierOption.optionName,
+        modifierOptionKitchenName: modifierOption.optionKitchenName,
+        quantity: selectedModifier.quantity,
+      });
     }
 
     const productModifiers = context.productModifierConfigsByProductId.get(product.id) ?? [];
@@ -472,7 +586,7 @@ export function validateAndPrepareOrderPayload(
       const selectedModifierCount =
         selectedModifierOptionsByModifierId.get(productModifier.id)?.length ?? 0;
 
-      if (selectedModifierCount < productModifier.minSelect) {
+      if (enforceModifierMinSelect && selectedModifierCount < productModifier.minSelect) {
         throw validation(
           "orderItem.missingRequiredModifier",
           `Item #${itemPosition} requires at least ${productModifier.minSelect} selection(s) for modifier "${productModifier.name}"`,
@@ -494,19 +608,27 @@ export function validateAndPrepareOrderPayload(
       }
     }
 
-    const productSubtotalCents = calculateExtendedPriceCents(unitPriceCents, itemInput.quantity);
-    const subtotalCents = productSubtotalCents + modifiersSubtotalCents;
-    const taxRows: OrderItemTaxInsert[] = product.taxes.map(({ tax }) => ({
+    const productGrossTotalCents = calculateExtendedPriceCents(unitPriceCents, itemInput.quantity);
+    const grossTotalCents = productGrossTotalCents + modifiersSubtotalCents;
+    const displayUnitPriceCents =
+      unitPriceCents +
+      (itemInput.quantity > 0 ? Math.round(modifiersSubtotalCents / itemInput.quantity) : 0);
+    const includedTaxBreakdown = calculateIncludedTaxBreakdown(
+      grossTotalCents,
+      product.taxes.map(({ tax }) => tax.rate),
+    );
+    const taxRows: OrderItemTaxInsert[] = product.taxes.map(({ tax }, taxIndex) => ({
       orderItemId,
       taxId: tax.id,
       taxName: tax.name,
       taxRate: tax.rate,
-      taxAmountCents: calculateTaxAmountCents(subtotalCents, tax.rate),
+      taxAmountCents: includedTaxBreakdown.taxAmountsCents[taxIndex] ?? 0,
     }));
     const taxesCents = taxRows.reduce(
       (accumulator, taxRow) => accumulator + taxRow.taxAmountCents,
       0,
     );
+    const subtotalCents = grossTotalCents - taxesCents;
 
     preparedOrderItems.push({
       item: {
@@ -523,13 +645,28 @@ export function validateAndPrepareOrderPayload(
         comment: itemInput.comment,
         unitPriceCents,
         modifiersSubtotalCents,
+        freeUnits: 0,
+        promotionCode: null,
+        promotionDiscountCents: 0,
+        couponDiscountCents: 0,
         subtotalCents,
         taxesCents,
-        grandTotalCents: subtotalCents + taxesCents,
+        grandTotalCents: grossTotalCents,
         sortOrder: itemIndex,
       },
       modifiers: modifierRows,
       taxes: taxRows,
+      workOrderSnapshot: {
+        productKitchenName: product.kitchenName,
+        variationSelections: buildWorkOrderVariationSelections(selectedVariation ?? null),
+        modifiers: workOrderModifierSnapshots,
+      },
+      isPromotionEligible: product.category?.isFourPlusOneEligible ?? false,
+      productCategoryId: product.categoryId,
+      sourceClientItemId: hasManualPromotionMode ? itemInput.clientItemId : null,
+      requestedRedeemFreeUnits: hasManualPromotionMode ? itemInput.redeemFreeUnits : 0,
+      lineType: "paid",
+      displayUnitPriceCents,
     });
   }
 

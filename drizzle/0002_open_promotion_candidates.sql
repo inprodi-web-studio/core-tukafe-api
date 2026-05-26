@@ -1,0 +1,2 @@
+alter table "customer_order_promotion_state"
+drop constraint if exists "customer_order_promotion_state_candidate_ids_max_length_check";

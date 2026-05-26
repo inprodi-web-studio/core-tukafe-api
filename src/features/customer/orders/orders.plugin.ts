@@ -13,6 +13,7 @@ const customerOrdersServicesPlugin: FastifyPluginAsync = async (fastify) => {
   const ordersService = customerOrdersService(fastify);
 
   fastify.customer.orders = {
+    preview: ordersService.preview,
     create: ordersService.create,
   };
 };
