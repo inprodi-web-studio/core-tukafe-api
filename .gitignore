@@ -4,6 +4,7 @@ node_modules
 # bun
 .bun/
 bun.lockb
+bun.lock
 
 # output
 out
@@ -53,3 +54,4 @@ pnpm-debug.log*
 # bun
 .bun
 bun.lockb
+bun.lock
