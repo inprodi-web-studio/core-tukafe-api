@@ -1,5 +1,36 @@
 import { z } from "zod";
 
+const booleanEnv = (defaultValue: boolean) =>
+  z.preprocess((value) => {
+    if (value === undefined || value === "") {
+      return defaultValue;
+    }
+
+    if (typeof value === "string") {
+      const normalized = value.trim().toLowerCase();
+
+      if (normalized === "true") {
+        return true;
+      }
+
+      if (normalized === "false") {
+        return false;
+      }
+    }
+
+    return value;
+  }, z.boolean());
+
+const certificateEnv = z.preprocess((value) => {
+  if (typeof value !== "string") {
+    return value;
+  }
+
+  const normalized = value.trim().replace(/\\n/g, "\n");
+
+  return normalized.length > 0 ? normalized : undefined;
+}, z.string().optional());
+
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   PORT: z.coerce.number().int().positive().default(3000),
@@ -7,6 +38,8 @@ const envSchema = z.object({
   API_URL: z.url(),
   HOST: z.string().nonempty().default("0.0.0.0"),
   DATABASE_URL: z.string().nonempty(),
+  DATABASE_SSL_REJECT_UNAUTHORIZED: booleanEnv(true),
+  DATABASE_SSL_CA_CERT: certificateEnv,
   BETTER_AUTH_SECRET: z.string().min(32),
   GCP_PROJECT_ID: z.string().trim().optional(),
   GCP_CLIENT_EMAIL: z.string().trim().optional(),
