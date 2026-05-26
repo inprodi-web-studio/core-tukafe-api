@@ -105,6 +105,10 @@ await server.register(authPlugin);
 await server.register(featureNamespacesPlugin);
 await server.register(workOrderRealtimePlugin);
 
+server.get("/health", async () => ({
+  status: "ok",
+}));
+
 await server.register(adminAuthServicesPlugin);
 await server.register(adminApiKeysServicesPlugin);
 await server.register(adminProductcategoriesServicesPlugin);
