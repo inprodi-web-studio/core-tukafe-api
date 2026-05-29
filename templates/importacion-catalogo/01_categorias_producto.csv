@@ -1,3 +1,3 @@
-nombre_categoria,categoria_padre,icono,color_hex,aplica_4_mas_1
-Café,,CoffeeBeanIcon,#12b886,SI
-Matcha,,PintGlassIcon,#40c057,SI
+nombre_categoria,categoria_padre,icono,color_hex,aplica_4_mas_1,archivo_imagen
+Café,,CoffeeBeanIcon,#12b886,SI,hot_americano
+Matcha,,PintGlassIcon,#40c057,SI,hot_matcha

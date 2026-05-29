@@ -36,6 +36,12 @@ Estas plantillas estan disenadas para que operacion capture datos sin campos tec
 - `precio_mxn` y `costo_por_unidad` se capturan en decimal con punto (`.`), no coma.
 - `unidad_venta` y `unidad_base` deben coincidir con una unidad existente en el sistema
   (por ejemplo: `pza`, `ml`, `g`, `kg`, `l`).
+- En `01_categorias_producto.csv`, `archivo_imagen` es opcional:
+  - si lo llenas, usa nombre de archivo (ej. `categoria-cafe.png`) o ruta absoluta
+  - si lo dejas vacio y usas `--images-dir`, el script intenta buscar una imagen por nombre de categoría
+- En `02_productos.csv`, `archivo_imagen` es opcional:
+  - si lo llenas, usa nombre de archivo (ej. `americano-frio.png`) o ruta absoluta
+  - si lo dejas vacio y usas `--images-dir`, el script intenta buscar una imagen por nombre de producto
 
 ## Reglas de productos, variaciones y recetas
 
@@ -114,6 +120,7 @@ Opcionalmente pueden pasar parametros:
 ```bash
 node --env-file=.env --import tsx scripts/import-catalog-from-csv.ts \
   --api-url http://localhost:3000 \
+  --images-dir ./templates/importacion-catalogo/imagenes-productos \
   --email amurillo@inprodi.com.mx \
   --password Asdf123456
 ```
@@ -127,11 +134,13 @@ Notas:
 - Si una unidad no existe (`ml`, `pza`, etc.), la crea automaticamente y la reutiliza.
 - El script aplica normalizacion basica de texto para corregir artefactos de acentos/mojibake comunes (por ejemplo `Caf�` -> `Café`, `Fr�o` -> `Frío`).
 - Si encuentra un registro existente (conflicto), intenta reutilizarlo por nombre legible.
+- Si usas `--images-dir`, el script sube imagenes a `/api/admin/uploads` y asigna `imageUploadId` al crear categorías y productos.
+- Si una categoría o producto ya existe, no se actualiza su imagen (la importación actual solo crea registros).
 
 ## Campos requeridos por archivo
 
-- `01_categorias_producto.csv`: `nombre_categoria`, `icono`, `color_hex`
-- `02_productos.csv`: `nombre_producto`, `tipo_producto`, `unidad_venta` + `precio_mxn` si no hay variaciones
+- `01_categorias_producto.csv`: `nombre_categoria`, `icono`, `color_hex` (`archivo_imagen` opcional)
+- `02_productos.csv`: `nombre_producto`, `tipo_producto`, `unidad_venta` + `precio_mxn` si no hay variaciones (`archivo_imagen` opcional)
 - `03_categorias_ingrediente.csv`: `nombre_categoria`, `icono`, `color_hex`
 - `04_ingredientes.csv`: `nombre_ingrediente`, `categoria_ingrediente`, `unidad_base`, `costo_por_unidad`
 - `05_categorias_insumo.csv`: `nombre_categoria`, `icono`, `color_hex`

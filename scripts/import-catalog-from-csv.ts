@@ -17,6 +17,7 @@ interface ImportConfig {
   csvDir: string;
   email: string;
   password: string;
+  imagesDir: string | null;
 }
 
 interface NamedEntity {
@@ -82,6 +83,11 @@ interface TaxItem {
   id: string;
   name: string;
   rate: number;
+}
+
+interface UploadResponseItem {
+  id: string;
+  name: string;
 }
 
 interface RecipePayload {
@@ -168,11 +174,21 @@ class ApiClient {
   }
 
   async post<T>(pathname: string, body: unknown) {
-    const { data } = await this.request<T>("POST", pathname, body);
+    const { data } = await this.request<T>("POST", pathname, body, "json");
     return data;
   }
 
-  private async request<T>(method: string, pathname: string, body?: unknown) {
+  async postMultipart<T>(pathname: string, formData: FormData) {
+    const { data } = await this.request<T>("POST", pathname, formData, "form");
+    return data;
+  }
+
+  private async request<T>(
+    method: string,
+    pathname: string,
+    body?: unknown,
+    bodyType: "json" | "form" = "json",
+  ) {
     const headers = new Headers();
     headers.set("accept", "application/json");
 
@@ -180,7 +196,7 @@ class ApiClient {
       headers.set("cookie", this.cookieHeader);
     }
 
-    if (body !== undefined) {
+    if (body !== undefined && bodyType === "json") {
       headers.set("content-type", "application/json");
     }
 
@@ -190,7 +206,12 @@ class ApiClient {
       response = await fetch(`${this.baseUrl}${pathname}`, {
         method,
         headers,
-        body: body !== undefined ? JSON.stringify(body) : undefined,
+        body:
+          body === undefined
+            ? undefined
+            : bodyType === "json"
+              ? JSON.stringify(body)
+              : (body as FormData),
       });
     } catch (error) {
       throw new Error(
@@ -880,6 +901,213 @@ function resolveCategoryIdByPath(
   return selectedNode?.id ?? null;
 }
 
+function getOptionalCell(row: CsvRow, key: string) {
+  if (!(key in row)) {
+    return "";
+  }
+
+  return cleanText(row[key]);
+}
+
+const IMAGE_EXTENSION_TO_MIME: Record<string, string> = {
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".png": "image/png",
+  ".webp": "image/webp",
+  ".avif": "image/avif",
+  ".gif": "image/gif",
+};
+
+function getImageMimeType(filePath: string) {
+  const extension = path.extname(filePath).toLowerCase();
+  return IMAGE_EXTENSION_TO_MIME[extension] ?? null;
+}
+
+function isSupportedImageFile(filePath: string) {
+  return getImageMimeType(filePath) !== null;
+}
+
+async function fileExists(filePath: string) {
+  try {
+    const stats = await fs.stat(filePath);
+    return stats.isFile();
+  } catch {
+    return false;
+  }
+}
+
+async function listImageFiles(imagesDir: string) {
+  const found: string[] = [];
+
+  async function walk(currentPath: string): Promise<void> {
+    const entries = await fs.readdir(currentPath, { withFileTypes: true });
+
+    for (const entry of entries) {
+      const fullPath = path.join(currentPath, entry.name);
+
+      if (entry.isDirectory()) {
+        await walk(fullPath);
+        continue;
+      }
+
+      if (entry.isFile() && isSupportedImageFile(fullPath)) {
+        found.push(fullPath);
+      }
+    }
+  }
+
+  await walk(imagesDir);
+  return found;
+}
+
+function buildImageIndex(imagePaths: string[]) {
+  const byCanonicalStem = new Map<string, string[]>();
+
+  for (const imagePath of imagePaths) {
+    const stem = path.parse(imagePath).name;
+    const key = canonicalize(stem);
+    const current = byCanonicalStem.get(key) ?? [];
+    current.push(imagePath);
+    byCanonicalStem.set(key, current);
+  }
+
+  return byCanonicalStem;
+}
+
+async function resolveImagePathForEntity({
+  entityName,
+  entityLabel,
+  imageHint,
+  imagesDir,
+  csvDir,
+  imageIndex,
+  context,
+}: {
+  entityName: string;
+  entityLabel: string;
+  imageHint: string;
+  imagesDir: string | null;
+  csvDir: string;
+  imageIndex: Map<string, string[]>;
+  context: string;
+}) {
+  const normalizedHint = cleanText(imageHint);
+
+  if (normalizedHint.length > 0) {
+    const candidatePaths: string[] = [];
+
+    if (path.isAbsolute(normalizedHint)) {
+      candidatePaths.push(normalizedHint);
+    } else {
+      if (imagesDir) {
+        candidatePaths.push(path.join(imagesDir, normalizedHint));
+      }
+      candidatePaths.push(path.join(csvDir, normalizedHint));
+      candidatePaths.push(path.resolve(process.cwd(), normalizedHint));
+    }
+
+    const expandedCandidates: string[] = [];
+    for (const candidatePath of candidatePaths) {
+      expandedCandidates.push(candidatePath);
+
+      if (path.extname(candidatePath).length === 0) {
+        for (const extension of Object.keys(IMAGE_EXTENSION_TO_MIME)) {
+          expandedCandidates.push(`${candidatePath}${extension}`);
+        }
+      }
+    }
+
+    const dedupedCandidates = [...new Set(expandedCandidates)];
+
+    for (const candidatePath of dedupedCandidates) {
+      if (await fileExists(candidatePath)) {
+        if (!isSupportedImageFile(candidatePath)) {
+          throw new Error(
+            `La imagen "${candidatePath}" no tiene extensión soportada (${context}). Usa jpg, jpeg, png, webp, avif o gif.`,
+          );
+        }
+
+        return candidatePath;
+      }
+    }
+
+    if (imagesDir) {
+      const hintMatches = imageIndex.get(canonicalize(normalizedHint)) ?? [];
+
+      if (hintMatches.length === 1) {
+        return hintMatches[0] ?? null;
+      }
+
+      if (hintMatches.length > 1) {
+        throw new Error(
+          `Coincidencia ambigua de imagen "${normalizedHint}" para ${entityLabel} "${entityName}" (${context}): ${hintMatches.join(", ")}`,
+        );
+      }
+    }
+
+    throw new Error(
+      `No se encontró archivo de imagen "${normalizedHint}" para ${entityLabel} "${entityName}" (${context}).`,
+    );
+  }
+
+  if (!imagesDir) {
+    return null;
+  }
+
+  const matches = imageIndex.get(canonicalize(entityName)) ?? [];
+
+  if (matches.length > 1) {
+    throw new Error(
+      `Coincidencia ambigua de imagen para ${entityLabel} "${entityName}" (${context}): ${matches.join(", ")}`,
+    );
+  }
+
+  return matches[0] ?? null;
+}
+
+async function uploadImageAsset({
+  api,
+  imagePath,
+  cache,
+}: {
+  api: ApiClient;
+  imagePath: string;
+  cache: Map<string, string>;
+}) {
+  const absolutePath = path.resolve(imagePath);
+  const cachedUploadId = cache.get(absolutePath);
+
+  if (cachedUploadId) {
+    return cachedUploadId;
+  }
+
+  const fileBuffer = await fs.readFile(absolutePath);
+  if (fileBuffer.length === 0) {
+    throw new Error(`La imagen "${absolutePath}" está vacía.`);
+  }
+
+  const mimeType = getImageMimeType(absolutePath) ?? "application/octet-stream";
+  const fileName = path.basename(absolutePath);
+
+  const form = new FormData();
+  form.set("visibility", "PUBLIC");
+  form.set("optimizeImage", "true");
+  form.set("optimizationQuality", "85");
+  form.set("maxWidth", "1600");
+  form.set("maxHeight", "1600");
+  form.append("file", new Blob([fileBuffer], { type: mimeType }), fileName);
+
+  const response = await api.postMultipart<{ data: UploadResponseItem[] }>("/api/admin/uploads", form);
+  const uploadId = response.data[0]?.id;
+
+  if (!uploadId) {
+    throw new Error(`No se recibió upload id para la imagen "${absolutePath}".`);
+  }
+
+  cache.set(absolutePath, uploadId);
+  return uploadId;
+}
+
 function parseArgs() {
   const args = process.argv.slice(2);
   const options = new Map<string, string>();
@@ -925,6 +1153,10 @@ function parseArgs() {
       options.get("password") ??
       process.env.CATALOG_IMPORT_ADMIN_PASSWORD ??
       "Asdf123456",
+    imagesDir:
+      options.get("images-dir") ??
+      process.env.CATALOG_IMPORT_IMAGES_DIR ??
+      "",
   };
 }
 
@@ -938,6 +1170,7 @@ Opciones:
   --csv-dir <ruta>            Carpeta de CSV (default: templates/importacion-catalogo)
   --email <correo>            Usuario admin para login
   --password <password>       Password admin para login
+  --images-dir <ruta>         Carpeta de imágenes de categorías/productos (opcional)
   --help                      Mostrar ayuda
 `.trim());
 }
@@ -1195,6 +1428,10 @@ function mapByName<T extends NamedEntity>(rows: T[]) {
   return new Map(rows.map((row) => [row.name, row]));
 }
 
+function buildCategoryKey(name: string, parentId: string | null) {
+  return `${canonicalize(name)}::${parentId ?? "__root__"}`;
+}
+
 function findByName<T extends NamedEntity>(
   target: string,
   rows: T[],
@@ -1241,13 +1478,27 @@ async function main() {
     csvDir: parsed.csvDir,
     email: parsed.email,
     password: parsed.password,
+    imagesDir: cleanText(parsed.imagesDir).length > 0 ? path.resolve(parsed.imagesDir) : null,
   };
+
+  if (!config.imagesDir) {
+    const implicitImagesDir = path.resolve(process.cwd(), "templates/imagenes-productos");
+    try {
+      const stats = await fs.stat(implicitImagesDir);
+      if (stats.isDirectory()) {
+        config.imagesDir = implicitImagesDir;
+      }
+    } catch {
+      // no-op: keep images disabled unless explicitly configured
+    }
+  }
 
   console.log("==========================================");
   console.log("Importador de catálogo TuKafe");
   console.log("==========================================");
   console.log(`API URL: ${config.apiUrl}`);
   console.log(`CSV DIR: ${config.csvDir}`);
+  console.log(`IMAGES DIR: ${config.imagesDir ?? "(no configurado)"}`);
   console.log(`Admin: ${config.email}`);
   console.log(`Org objetivo: Pop Up`);
   console.log(`Tax obligatorio: IVA`);
@@ -1274,6 +1525,24 @@ async function main() {
     }
     return found;
   };
+
+  const uploadedImageIdByPath = new Map<string, string>();
+  let imageIndex = new Map<string, string[]>();
+
+  if (config.imagesDir) {
+    try {
+      const stats = await fs.stat(config.imagesDir);
+      if (!stats.isDirectory()) {
+        throw new Error();
+      }
+    } catch {
+      throw new Error(`La carpeta de imágenes no existe o no es válida: ${config.imagesDir}`);
+    }
+
+    const imageFiles = await listImageFiles(config.imagesDir);
+    imageIndex = buildImageIndex(imageFiles);
+    console.log(`Imágenes detectadas: ${imageFiles.length}`);
+  }
 
   const api = new ApiClient(config.apiUrl);
   await api.get<{ status: string }>("/health");
@@ -1303,8 +1572,10 @@ async function main() {
     data: ProductCategoryNode[];
   }>("/api/admin/products/categories");
   const productCategoryNameToId = new Map<string, string>();
+  const existingCategoryKeys = new Set<string>();
   for (const item of flattenProductCategories(productCategoryTree.data)) {
     productCategoryNameToId.set(item.name, item.id);
+    existingCategoryKeys.add(buildCategoryKey(item.name, item.parentId));
   }
 
   const pendingProductCategories = [...productCategoriesTable.rows];
@@ -1327,6 +1598,16 @@ async function main() {
       }
 
       const name = getCell(productCategoriesTable, row, "nombre_categoria", { required: true });
+      const imageHint = getOptionalCell(row, "archivo_imagen");
+      const imagePath = await resolveImagePathForEntity({
+        entityName: name,
+        entityLabel: "categoría",
+        imageHint,
+        imagesDir: config.imagesDir,
+        csvDir: config.csvDir,
+        imageIndex,
+        context: `${productCategoriesTable.fileName}:${row.__line}`,
+      });
       const parentNameRaw = getCell(productCategoriesTable, row, "categoria_padre");
       const icon = getCell(productCategoriesTable, row, "icono", { required: true });
       const color = getCell(productCategoriesTable, row, "color_hex", { required: true });
@@ -1354,6 +1635,26 @@ async function main() {
         }
       }
 
+      const categoryKey = buildCategoryKey(name, parentId);
+      if (existingCategoryKeys.has(categoryKey)) {
+        if (imagePath) {
+          console.log(
+            `  - Imagen omitida para categoría "${name}" porque ya existe y no se actualiza en importación.`,
+          );
+        }
+        pendingProductCategories.splice(index, 1);
+        progressed = true;
+        continue;
+      }
+
+      const imageUploadId = imagePath
+        ? await uploadImageAsset({
+            api,
+            imagePath,
+            cache: uploadedImageIdByPath,
+          })
+        : null;
+
       const created = await ensureCreate(
         () =>
           api.post<{
@@ -1365,7 +1666,7 @@ async function main() {
             color,
             isFourPlusOneEligible,
             parentId,
-            imageUploadId: null,
+            imageUploadId,
           }),
         async () => {
           const latest = await api.get<{
@@ -1397,6 +1698,10 @@ async function main() {
       );
 
       productCategoryNameToId.set(created.name, created.id);
+      existingCategoryKeys.add(categoryKey);
+      if (imagePath && imageUploadId) {
+        console.log(`  + Imagen asignada a categoría "${created.name}" (${path.basename(imagePath)}).`);
+      }
       pendingProductCategories.splice(index, 1);
       progressed = true;
     }
@@ -2093,6 +2398,16 @@ async function main() {
 
   for (const productRow of productsTable.rows) {
     const productName = getCell(productsTable, productRow, "nombre_producto", { required: true });
+    const imageHint = getOptionalCell(productRow, "archivo_imagen");
+    const imagePath = await resolveImagePathForEntity({
+      entityName: productName,
+      entityLabel: "producto",
+      imageHint,
+      imagesDir: config.imagesDir,
+      csvDir: config.csvDir,
+      imageIndex,
+      context: `${productsTable.fileName}:${productRow.__line}`,
+    });
     const productTypeRaw = getCell(productsTable, productRow, "tipo_producto", { required: true });
     const productType = productTypeRaw.toLowerCase();
 
@@ -2106,6 +2421,11 @@ async function main() {
       (product) => canonicalize(product.name) === canonicalize(productName),
     );
     if (existing) {
+      if (imagePath) {
+        console.log(
+          `  - Imagen omitida para "${productName}" porque el producto ya existe (solo se carga imagen en creación).`,
+        );
+      }
       importedProductsByName.set(productName, existing);
       continue;
     }
@@ -2291,6 +2611,13 @@ async function main() {
     const finalPrice = variationPayloads.length > 0 ? undefined : price;
     const finalRecipe =
       variationPayloads.length > 0 ? undefined : baseRecipe;
+    const imageUploadId = imagePath
+      ? await uploadImageAsset({
+          api,
+          imagePath,
+          cache: uploadedImageIdByPath,
+        })
+      : null;
 
     const payload = {
       name: productName,
@@ -2300,7 +2627,7 @@ async function main() {
       kitchenDescription: toNullable(getCell(productsTable, productRow, "descripcion_cocina")),
       unitId: unit.id,
       categoryId,
-      imageUploadId: null,
+      imageUploadId,
       taxIds: [ivaTax.id],
       organizationIds,
       ...(modifierIds.length > 0 ? { modifierIds } : {}),
@@ -2314,6 +2641,10 @@ async function main() {
       () => api.post<{ id: string; name: string }>("/api/admin/products", payload),
       async () => findByName(productName, existingProducts, "producto", "conflicto"),
     );
+
+    if (imagePath && imageUploadId) {
+      console.log(`  + Imagen asignada a "${productName}" (${path.basename(imagePath)}).`);
+    }
 
     importedProductsByName.set(productName, created);
     existingProducts.push(created);
