@@ -1,0 +1,12 @@
+nombre_producto,precio_mxn,tipo_producto,ruta_categoria_producto,unidad_venta,nombre_en_cocina,descripcion_cliente,descripcion_cocina
+Americano Caliente,70,assembled,Café,Pieza,Americano Caliente,,
+Americano Frío,70,assembled,Café,Pieza,Americano Frío,,
+Capuccino,86,assembled,Café,Pieza,Capuccino,,
+Latte Caliente,66,assembled,Café,Pieza,Latte Caliente,,
+Latte Frío,66,assembled,Café,Pieza,Latte Frío,,
+Mocha Blanco Caliente,78,assembled,Café,Pieza,Mocha Blanco Caliente,,
+Mocha Blanco Frío,78,assembled,Café,Pieza,Mocha Blanco Frío,,
+Mocha Caliente,78,assembled,Café,Pieza,Mocha Caliente,,
+Mocha Frío,78,assembled,Café,Pieza,Mocha Frío,,
+Matcha Ceremonial Caliente,99,assembled,Matcha,Pieza,Matcha Ceremonial Caliente,,
+Matcha Ceremonial Frío,99,assembled,Matcha,Pieza,Matcha Ceremonial Frío,,

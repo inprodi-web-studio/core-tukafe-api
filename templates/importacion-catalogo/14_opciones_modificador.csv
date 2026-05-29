@@ -1,0 +1,16 @@
+nombre_modificador,nombre_opcion,nombre_opcion_cocina,nombre_opcion_cliente,precio_extra_mxn,opcion_default,orden_opcion
+Leche,Leche Entera,Leche Entera,Leche Entera,0,NO,1
+Leche,Leche Light,Leche Light,Leche Light,0,NO,2
+Leche,Leche Deslactosada,Leche Deslactosada,Leche Deslactosada,0,NO,3
+Leche,Leche de Almendra,Leche de Almendra,Leche de Almendra,12,NO,4
+Leche,Leche de Avena,Leche de Avena,Leche de Avena,12,NO,5
+Leche,Leche de Coco,Leche de Coco,Leche de Coco,12,NO,6
+Shot Extra,Con Shot Extra,Con Shot Extra,"Si, un shot extra",20,NO,1
+Sabor, Vainilla Sugar Free, Vainilla Sugar Free, Vainilla Sugar Free,12,NO,1
+Sabor,Caramelo Sugar Free,Caramelo Sugar Free,Caramelo Sugar Free,12,NO,2
+Sabor,Vainilla,Vainilla,Vainilla,12,NO,3
+Sabor,Caramelo,Caramelo,Caramelo,12,NO,4
+Sabor,Lotus,Lotus,Lotus,12,NO,5
+Cold Foam,Fresa,Fresa,Fresa,15,NO,1
+Cold Foam,Vainilla,Vainilla,Vainilla,15,NO,2
+Cold Foam,Vainilla Sugar Free,Vainilla Sugar Free,Vainilla Sugar Free,15,NO,3

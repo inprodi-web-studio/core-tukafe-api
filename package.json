@@ -10,6 +10,8 @@
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:seed": "node --import tsx scripts/seed-admin.ts",
+    "catalog:import": "node --env-file=.env --import tsx scripts/import-catalog-from-csv.ts",
+    "catalog:rollback": "node --env-file=.env --import tsx scripts/rollback-catalog-import.ts",
     "promo:backfill": "node --import tsx scripts/backfill-order-promotion-state.ts",
     "db:studio": "drizzle-kit studio",
     "auth:generate": "better-auth generate --config ./src/core/config/auth.config.ts",

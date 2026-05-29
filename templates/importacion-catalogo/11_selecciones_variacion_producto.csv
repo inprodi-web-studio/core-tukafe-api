@@ -1,0 +1,55 @@
+nombre_producto,alias_variacion,nombre_grupo_variacion,nombre_opcion
+Capuccino,capuccino_leche_entera,Tipo de Leche,Leche Entera
+Capuccino,capuccino_leche_light,Tipo de Leche,Leche Light
+Capuccino,capuccino_leche_deslactosada,Tipo de Leche,Leche Deslactosada
+Capuccino,capuccino_leche_almendra,Tipo de Leche,Leche de Almendra
+Capuccino,capuccino_leche_avena,Tipo de Leche,Leche de Avena
+Capuccino,capuccino_leche_coco,Tipo de Leche,Leche de Coco
+Latte Caliente,latte_caliente_leche_entera,Tipo de Leche,Leche Entera
+Latte Caliente,latte_caliente_leche_light,Tipo de Leche,Leche Light
+Latte Caliente,latte_caliente_leche_deslactosada,Tipo de Leche,Leche Deslactosada
+Latte Caliente,latte_caliente_leche_almendra,Tipo de Leche,Leche de Almendra
+Latte Caliente,latte_caliente_leche_avena,Tipo de Leche,Leche de Avena
+Latte Caliente,latte_caliente_leche_coco,Tipo de Leche,Leche de Coco
+Latte Frío,latte_frio_leche_entera,Tipo de Leche,Leche Entera
+Latte Frío,latte_frio_leche_light,Tipo de Leche,Leche Light
+Latte Frío,latte_frio_leche_deslactosada,Tipo de Leche,Leche Deslactosada
+Latte Frío,latte_frio_leche_almendra,Tipo de Leche,Leche de Almendra
+Latte Frío,latte_frio_leche_avena,Tipo de Leche,Leche de Avena
+Latte Frío,latte_frio_leche_coco,Tipo de Leche,Leche de Coco
+Mocha Blanco Caliente,mocha_blanco_caliente_leche_entera,Tipo de Leche,Leche Entera
+Mocha Blanco Caliente,mocha_blanco_caliente_leche_light,Tipo de Leche,Leche Light
+Mocha Blanco Caliente,mocha_blanco_caliente_leche_deslactosada,Tipo de Leche,Leche Deslactosada
+Mocha Blanco Caliente,mocha_blanco_caliente_leche_almendra,Tipo de Leche,Leche de Almendra
+Mocha Blanco Caliente,mocha_blanco_caliente_leche_avena,Tipo de Leche,Leche de Avena
+Mocha Blanco Caliente,mocha_blanco_caliente_leche_coco,Tipo de Leche,Leche de Coco
+Mocha Blanco Frío,mocha_blanco_frio_leche_entera,Tipo de Leche,Leche Entera
+Mocha Blanco Frío,mocha_blanco_frio_leche_light,Tipo de Leche,Leche Light
+Mocha Blanco Frío,mocha_blanco_frio_leche_deslactosada,Tipo de Leche,Leche Deslactosada
+Mocha Blanco Frío,mocha_blanco_frio_leche_almendra,Tipo de Leche,Leche de Almendra
+Mocha Blanco Frío,mocha_blanco_frio_leche_avena,Tipo de Leche,Leche de Avena
+Mocha Blanco Frío,mocha_blanco_frio_leche_coco,Tipo de Leche,Leche de Coco
+Mocha Caliente,mocha_caliente_leche_entera,Tipo de Leche,Leche Entera
+Mocha Caliente,mocha_caliente_leche_light,Tipo de Leche,Leche Light
+Mocha Caliente,mocha_caliente_leche_deslactosada,Tipo de Leche,Leche Deslactosada
+Mocha Caliente,mocha_caliente_leche_almendra,Tipo de Leche,Leche de Almendra
+Mocha Caliente,mocha_caliente_leche_avena,Tipo de Leche,Leche de Avena
+Mocha Caliente,mocha_caliente_leche_coco,Tipo de Leche,Leche de Coco
+Mocha Frío,mocha_frio_leche_entera,Tipo de Leche,Leche Entera
+Mocha Frío,mocha_frio_leche_light,Tipo de Leche,Leche Light
+Mocha Frío,mocha_frio_leche_deslactosada,Tipo de Leche,Leche Deslactosada
+Mocha Frío,mocha_frio_leche_almendra,Tipo de Leche,Leche de Almendra
+Mocha Frío,mocha_frio_leche_avena,Tipo de Leche,Leche de Avena
+Mocha Frío,mocha_frio_leche_coco,Tipo de Leche,Leche de Coco
+Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_entera,Tipo de Leche,Leche Entera
+Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_light,Tipo de Leche,Leche Light
+Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_deslactosada,Tipo de Leche,Leche Deslactosada
+Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_almendra,Tipo de Leche,Leche de Almendra
+Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_avena,Tipo de Leche,Leche de Avena
+Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_coco,Tipo de Leche,Leche de Coco
+Matcha Ceremonial Frío,Matcha_ceremonial_frio_leche_entera,Tipo de Leche,Leche Entera
+Matcha Ceremonial Frío,Matcha_ceremonial_frio_leche_light,Tipo de Leche,Leche Light
+Matcha Ceremonial Frío,Matcha_ceremonial_frio_leche_deslactosada,Tipo de Leche,Leche Deslactosada
+Matcha Ceremonial Frío,Matcha_ceremonial_frio_leche_almendra,Tipo de Leche,Leche de Almendra
+Matcha Ceremonial Frío,Matcha_ceremonial_frio_leche_avena,Tipo de Leche,Leche de Avena
+Matcha Ceremonial Frío,Matcha_ceremonial_frio_leche_coco,Tipo de Leche,Leche de Coco

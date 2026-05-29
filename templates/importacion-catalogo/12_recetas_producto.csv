@@ -1,0 +1,227 @@
+nivel_receta,nombre_producto,alias_variacion,descripcion_receta,tipo_componente,nombre_componente,cantidad
+producto,Americano Caliente,,,ingrediente,Café Tukafe Distinción,30
+producto,Americano Caliente,,,insumo,Vaso Caliente 12 Oz,1
+producto,Americano Frío,,,ingrediente,Café Tukafe Distinción,30
+producto,Americano Frío,,,insumo,Vaso Frío 16 Oz,1
+variacion,Capuccino,capuccino_leche_entera,,ingrediente,Café Tukafe Distinción,15
+variacion,Capuccino,capuccino_leche_entera,,ingrediente,Leche Bove Barista Entera,260
+variacion,Capuccino,capuccino_leche_entera,,insumo,Vaso Caliente 12 Oz,1
+variacion,Capuccino,capuccino_leche_light,,ingrediente,Café Tukafe Distinción,15
+variacion,Capuccino,capuccino_leche_light,,ingrediente,Leche Bove Barista Light,260
+variacion,Capuccino,capuccino_leche_light,,insumo,Vaso Caliente 12 Oz,1
+variacion,Capuccino,capuccino_leche_deslactosada,,ingrediente,Café Tukafe Distinción,15
+variacion,Capuccino,capuccino_leche_deslactosada,,ingrediente,Leche Bove Barista Deslactosada,260
+variacion,Capuccino,capuccino_leche_deslactosada,,insumo,Vaso Caliente 12 Oz,1
+variacion,Capuccino,capuccino_leche_almendra,,ingrediente,Café Tukafe Distinción,15
+variacion,Capuccino,capuccino_leche_almendra,,ingrediente,Gud Almendra Barista,260
+variacion,Capuccino,capuccino_leche_almendra,,insumo,Vaso Caliente 12 Oz,1
+variacion,Capuccino,capuccino_leche_avena,,ingrediente,Café Tukafe Distinción,15
+variacion,Capuccino,capuccino_leche_avena,,ingrediente,Gud Avena Barista,260
+variacion,Capuccino,capuccino_leche_avena,,insumo,Vaso Caliente 12 Oz,1
+variacion,Capuccino,capuccino_leche_coco,,ingrediente,Café Tukafe Distinción,15
+variacion,Capuccino,capuccino_leche_coco,,ingrediente,Leche de Coco,260
+variacion,Capuccino,capuccino_leche_coco,,insumo,Vaso Caliente 12 Oz,1
+variacion,Latte Caliente,latte_caliente_leche_entera,,ingrediente,Café Tukafe Distinción,14
+variacion,Latte Caliente,latte_caliente_leche_entera,,ingrediente,Leche Bove Barista Entera,260
+variacion,Latte Caliente,latte_caliente_leche_entera,,insumo,Vaso Caliente 12 Oz,1
+variacion,Latte Caliente,latte_caliente_leche_light,,ingrediente,Café Tukafe Distinción,14
+variacion,Latte Caliente,latte_caliente_leche_light,,ingrediente,Leche Bove Barista Light,260
+variacion,Latte Caliente,latte_caliente_leche_light,,insumo,Vaso Caliente 12 Oz,1
+variacion,Latte Caliente,latte_caliente_leche_deslactosada,,ingrediente,Café Tukafe Distinción,14
+variacion,Latte Caliente,latte_caliente_leche_deslactosada,,ingrediente,Leche Bove Barista Deslactosada,260
+variacion,Latte Caliente,latte_caliente_leche_deslactosada,,insumo,Vaso Caliente 12 Oz,1
+variacion,Latte Caliente,latte_caliente_leche_almendra,,ingrediente,Café Tukafe Distinción,14
+variacion,Latte Caliente,latte_caliente_leche_almendra,,ingrediente,Gud Almendra Barista,260
+variacion,Latte Caliente,latte_caliente_leche_almendra,,insumo,Vaso Caliente 12 Oz,1
+variacion,Latte Caliente,latte_caliente_leche_avena,,ingrediente,Café Tukafe Distinción,14
+variacion,Latte Caliente,latte_caliente_leche_avena,,ingrediente,Gud Avena Barista,260
+variacion,Latte Caliente,latte_caliente_leche_avena,,insumo,Vaso Caliente 12 Oz,1
+variacion,Latte Caliente,latte_caliente_leche_coco,,ingrediente,Café Tukafe Distinción,14
+variacion,Latte Caliente,latte_caliente_leche_coco,,ingrediente,Leche de Coco,260
+variacion,Latte Caliente,latte_caliente_leche_coco,,insumo,Vaso Caliente 12 Oz,1
+variacion,Latte Frío,latte_frio_leche_entera,,ingrediente,Café Tukafe Distinción,14
+variacion,Latte Frío,latte_frio_leche_entera,,ingrediente,Leche Bove Barista Entera,260
+variacion,Latte Frío,latte_frio_leche_entera,,insumo,Vaso Frío 16 Oz,1
+variacion,Latte Frío,latte_frio_leche_light,,ingrediente,Café Tukafe Distinción,14
+variacion,Latte Frío,latte_frio_leche_light,,ingrediente,Leche Bove Barista Light,260
+variacion,Latte Frío,latte_frio_leche_light,,insumo,Vaso Frío 16 Oz,1
+variacion,Latte Frío,latte_frio_leche_deslactosada,,ingrediente,Café Tukafe Distinción,14
+variacion,Latte Frío,latte_frio_leche_deslactosada,,ingrediente,Leche Bove Barista Deslactosada,260
+variacion,Latte Frío,latte_frio_leche_deslactosada,,insumo,Vaso Frío 16 Oz,1
+variacion,Latte Frío,latte_frio_leche_almendra,,ingrediente,Café Tukafe Distinción,14
+variacion,Latte Frío,latte_frio_leche_almendra,,ingrediente,Gud Almendra Barista,260
+variacion,Latte Frío,latte_frio_leche_almendra,,insumo,Vaso Frío 16 Oz,1
+variacion,Latte Frío,latte_frio_leche_avena,,ingrediente,Café Tukafe Distinción,14
+variacion,Latte Frío,latte_frio_leche_avena,,ingrediente,Gud Avena Barista,260
+variacion,Latte Frío,latte_frio_leche_avena,,insumo,Vaso Frío 16 Oz,1
+variacion,Latte Frío,latte_frio_leche_coco,,ingrediente,Café Tukafe Distinción,14
+variacion,Latte Frío,latte_frio_leche_coco,,ingrediente,Leche de Coco,260
+variacion,Latte Frío,latte_frio_leche_coco,,insumo,Vaso Frío 16 Oz,1
+variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_entera,,ingrediente,Café Tukafe Distinción,14
+variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_entera,,ingrediente,Jarabe Routin 1883 Chocolate Blanco,30
+variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_entera,,ingrediente,Saborizante Routin Chocolate Blanco,22
+variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_entera,,ingrediente,Leche Bove Barista Entera,260
+variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_entera,,insumo,Vaso Caliente 12 Oz,1
+variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_light,,ingrediente,Café Tukafe Distinción,14
+variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_light,,ingrediente,Jarabe Routin 1883 Chocolate Blanco,30
+variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_light,,ingrediente,Saborizante Routin Chocolate Blanco,22
+variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_light,,ingrediente,Leche Bove Barista Light,260
+variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_light,,insumo,Vaso Caliente 12 Oz,1
+variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_deslactosada,,ingrediente,Café Tukafe Distinción,14
+variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_deslactosada,,ingrediente,Jarabe Routin 1883 Chocolate Blanco,30
+variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_deslactosada,,ingrediente,Saborizante Routin Chocolate Blanco,22
+variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_deslactosada,,ingrediente,Leche Bove Barista Deslactosada,260
+variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_deslactosada,,insumo,Vaso Caliente 12 Oz,1
+variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_almendra,,ingrediente,Café Tukafe Distinción,14
+variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_almendra,,ingrediente,Jarabe Routin 1883 Chocolate Blanco,30
+variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_almendra,,ingrediente,Saborizante Routin Chocolate Blanco,22
+variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_almendra,,ingrediente,Gud Almendra Barista,260
+variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_almendra,,insumo,Vaso Caliente 12 Oz,1
+variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_avena,,ingrediente,Café Tukafe Distinción,14
+variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_avena,,ingrediente,Jarabe Routin 1883 Chocolate Blanco,30
+variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_avena,,ingrediente,Saborizante Routin Chocolate Blanco,22
+variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_avena,,ingrediente,Gud Avena Barista,260
+variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_avena,,insumo,Vaso Caliente 12 Oz,1
+variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_coco,,ingrediente,Café Tukafe Distinción,14
+variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_coco,,ingrediente,Jarabe Routin 1883 Chocolate Blanco,30
+variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_coco,,ingrediente,Saborizante Routin Chocolate Blanco,22
+variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_coco,,ingrediente,Leche de Coco,260
+variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_coco,,insumo,Vaso Caliente 12 Oz,1
+variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_entera,,ingrediente,Café Tukafe Distinción,14
+variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_entera,,ingrediente,Jarabe Routin 1883 Chocolate Blanco,30
+variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_entera,,ingrediente,Saborizante Routin Chocolate Blanco,22
+variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_entera,,ingrediente,Leche Bove Barista Entera,260
+variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_entera,,insumo,Vaso Frío 16 Oz,1
+variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_light,,ingrediente,Café Tukafe Distinción,14
+variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_light,,ingrediente,Jarabe Routin 1883 Chocolate Blanco,30
+variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_light,,ingrediente,Saborizante Routin Chocolate Blanco,22
+variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_light,,ingrediente,Leche Bove Barista Light,260
+variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_light,,insumo,Vaso Frío 16 Oz,1
+variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_deslactosada,,ingrediente,Café Tukafe Distinción,14
+variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_deslactosada,,ingrediente,Jarabe Routin 1883 Chocolate Blanco,30
+variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_deslactosada,,ingrediente,Saborizante Routin Chocolate Blanco,22
+variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_deslactosada,,ingrediente,Leche Bove Barista Deslactosada,260
+variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_deslactosada,,insumo,Vaso Frío 16 Oz,1
+variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_almendra,,ingrediente,Café Tukafe Distinción,14
+variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_almendra,,ingrediente,Jarabe Routin 1883 Chocolate Blanco,30
+variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_almendra,,ingrediente,Saborizante Routin Chocolate Blanco,22
+variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_almendra,,ingrediente,Gud Almendra Barista,260
+variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_almendra,,insumo,Vaso Frío 16 Oz,1
+variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_avena,,ingrediente,Café Tukafe Distinción,14
+variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_avena,,ingrediente,Jarabe Routin 1883 Chocolate Blanco,30
+variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_avena,,ingrediente,Saborizante Routin Chocolate Blanco,22
+variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_avena,,ingrediente,Gud Avena Barista,260
+variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_avena,,insumo,Vaso Frío 16 Oz,1
+variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_coco,,ingrediente,Café Tukafe Distinción,14
+variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_coco,,ingrediente,Jarabe Routin 1883 Chocolate Blanco,30
+variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_coco,,ingrediente,Saborizante Routin Chocolate Blanco,22
+variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_coco,,ingrediente,Leche de Coco,260
+variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_coco,,insumo,Vaso Frío 16 Oz,1
+variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_entera,,ingrediente,Matcha Ceremonial,3
+variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_entera,,ingrediente,Miel de Agave,15
+variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_entera,,ingrediente,Leche Bove Barista Entera,260
+variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_entera,,insumo,Vaso Caliente 12 Oz,1
+variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_light,,ingrediente,Matcha Ceremonial,3
+variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_light,,ingrediente,Miel de Agave,15
+variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_light,,ingrediente,Leche Bove Barista Light,260
+variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_light,,insumo,Vaso Caliente 12 Oz,1
+variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_deslactosada,,ingrediente,Matcha Ceremonial,3
+variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_deslactosada,,ingrediente,Miel de Agave,15
+variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_deslactosada,,ingrediente,Leche Bove Barista Deslactosada,260
+variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_deslactosada,,insumo,Vaso Caliente 12 Oz,1
+variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_almendra,,ingrediente,Matcha Ceremonial,3
+variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_almendra,,ingrediente,Miel de Agave,15
+variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_almendra,,ingrediente,Gud Almendra Barista,260
+variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_almendra,,insumo,Vaso Caliente 12 Oz,1
+variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_avena,,ingrediente,Matcha Ceremonial,3
+variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_avena,,ingrediente,Miel de Agave,15
+variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_avena,,ingrediente,Gud Avena Barista,260
+variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_avena,,insumo,Vaso Caliente 12 Oz,1
+variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_coco,,ingrediente,Matcha Ceremonial,3
+variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_coco,,ingrediente,Miel de Agave,15
+variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_coco,,ingrediente,Leche de Coco,260
+variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_coco,,insumo,Vaso Caliente 12 Oz,1
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_entera,,ingrediente,Matcha Ceremonial,3
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_entera,,ingrediente,Miel de Agave,15
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_entera,,ingrediente,Leche Bove Barista Entera,260
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_entera,,insumo,Vaso Frío 16 Oz,1
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_light,,ingrediente,Matcha Ceremonial,3
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_light,,ingrediente,Miel de Agave,15
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_light,,ingrediente,Leche Bove Barista Light,260
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_light,,insumo,Vaso Frío 16 Oz,1
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_deslactosada,,ingrediente,Matcha Ceremonial,3
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_deslactosada,,ingrediente,Miel de Agave,15
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_deslactosada,,ingrediente,Leche Bove Barista Deslactosada,260
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_deslactosada,,insumo,Vaso Frío 16 Oz,1
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_almendra,,ingrediente,Matcha Ceremonial,3
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_almendra,,ingrediente,Miel de Agave,15
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_almendra,,ingrediente,Gud Almendra Barista,260
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_almendra,,insumo,Vaso Frío 16 Oz,1
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_avena,,ingrediente,Matcha Ceremonial,3
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_avena,,ingrediente,Miel de Agave,15
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_avena,,ingrediente,Gud Avena Barista,260
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_avena,,insumo,Vaso Frío 16 Oz,1
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_coco,,ingrediente,Matcha Ceremonial,3
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_coco,,ingrediente,Miel de Agave,15
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_coco,,ingrediente,Leche de Coco,260
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_coco,,insumo,Vaso Frío 16 Oz,1
+variacion,Mocha Caliente,mocha_caliente_leche_entera,,ingrediente,Café Tukafe Distinción,14
+variacion,Mocha Caliente,mocha_caliente_leche_entera,,ingrediente,Jarabe Routin 1883 Chocolate Oscuro,30
+variacion,Mocha Caliente,mocha_caliente_leche_entera,,ingrediente,Saborizante Routin Chocolate Oscuro,22
+variacion,Mocha Caliente,mocha_caliente_leche_entera,,ingrediente,Leche Bove Barista Entera,260
+variacion,Mocha Caliente,mocha_caliente_leche_entera,,insumo,Vaso Caliente 12 Oz,1
+variacion,Mocha Caliente,mocha_caliente_leche_light,,ingrediente,Café Tukafe Distinción,14
+variacion,Mocha Caliente,mocha_caliente_leche_light,,ingrediente,Jarabe Routin 1883 Chocolate Oscuro,30
+variacion,Mocha Caliente,mocha_caliente_leche_light,,ingrediente,Saborizante Routin Chocolate Oscuro,22
+variacion,Mocha Caliente,mocha_caliente_leche_light,,ingrediente,Leche Bove Barista Light,260
+variacion,Mocha Caliente,mocha_caliente_leche_light,,insumo,Vaso Caliente 12 Oz,1
+variacion,Mocha Caliente,mocha_caliente_leche_deslactosada,,ingrediente,Café Tukafe Distinción,14
+variacion,Mocha Caliente,mocha_caliente_leche_deslactosada,,ingrediente,Jarabe Routin 1883 Chocolate Oscuro,30
+variacion,Mocha Caliente,mocha_caliente_leche_deslactosada,,ingrediente,Saborizante Routin Chocolate Oscuro,22
+variacion,Mocha Caliente,mocha_caliente_leche_deslactosada,,ingrediente,Leche Bove Barista Deslactosada,260
+variacion,Mocha Caliente,mocha_caliente_leche_deslactosada,,insumo,Vaso Caliente 12 Oz,1
+variacion,Mocha Caliente,mocha_caliente_leche_almendra,,ingrediente,Café Tukafe Distinción,14
+variacion,Mocha Caliente,mocha_caliente_leche_almendra,,ingrediente,Jarabe Routin 1883 Chocolate Oscuro,30
+variacion,Mocha Caliente,mocha_caliente_leche_almendra,,ingrediente,Saborizante Routin Chocolate Oscuro,22
+variacion,Mocha Caliente,mocha_caliente_leche_almendra,,ingrediente,Gud Almendra Barista,260
+variacion,Mocha Caliente,mocha_caliente_leche_almendra,,insumo,Vaso Caliente 12 Oz,1
+variacion,Mocha Caliente,mocha_caliente_leche_avena,,ingrediente,Café Tukafe Distinción,14
+variacion,Mocha Caliente,mocha_caliente_leche_avena,,ingrediente,Jarabe Routin 1883 Chocolate Oscuro,30
+variacion,Mocha Caliente,mocha_caliente_leche_avena,,ingrediente,Saborizante Routin Chocolate Oscuro,22
+variacion,Mocha Caliente,mocha_caliente_leche_avena,,ingrediente,Gud Avena Barista,260
+variacion,Mocha Caliente,mocha_caliente_leche_avena,,insumo,Vaso Caliente 12 Oz,1
+variacion,Mocha Caliente,mocha_caliente_leche_coco,,ingrediente,Café Tukafe Distinción,14
+variacion,Mocha Caliente,mocha_caliente_leche_coco,,ingrediente,Jarabe Routin 1883 Chocolate Oscuro,30
+variacion,Mocha Caliente,mocha_caliente_leche_coco,,ingrediente,Saborizante Routin Chocolate Oscuro,22
+variacion,Mocha Caliente,mocha_caliente_leche_coco,,ingrediente,Leche de Coco,260
+variacion,Mocha Caliente,mocha_caliente_leche_coco,,insumo,Vaso Caliente 12 Oz,1
+variacion,Mocha Frío,mocha_frio_leche_entera,,ingrediente,Café Tukafe Distinción,14
+variacion,Mocha Frío,mocha_frio_leche_entera,,ingrediente,Jarabe Routin 1883 Chocolate Oscuro,30
+variacion,Mocha Frío,mocha_frio_leche_entera,,ingrediente,Saborizante Routin Chocolate Oscuro,22
+variacion,Mocha Frío,mocha_frio_leche_entera,,ingrediente,Leche Bove Barista Entera,260
+variacion,Mocha Frío,mocha_frio_leche_entera,,insumo,Vaso Frío 16 Oz,1
+variacion,Mocha Frío,mocha_frio_leche_light,,ingrediente,Café Tukafe Distinción,14
+variacion,Mocha Frío,mocha_frio_leche_light,,ingrediente,Jarabe Routin 1883 Chocolate Oscuro,30
+variacion,Mocha Frío,mocha_frio_leche_light,,ingrediente,Saborizante Routin Chocolate Oscuro,22
+variacion,Mocha Frío,mocha_frio_leche_light,,ingrediente,Leche Bove Barista Light,260
+variacion,Mocha Frío,mocha_frio_leche_light,,insumo,Vaso Frío 16 Oz,1
+variacion,Mocha Frío,mocha_frio_leche_deslactosada,,ingrediente,Café Tukafe Distinción,14
+variacion,Mocha Frío,mocha_frio_leche_deslactosada,,ingrediente,Jarabe Routin 1883 Chocolate Oscuro,30
+variacion,Mocha Frío,mocha_frio_leche_deslactosada,,ingrediente,Saborizante Routin Chocolate Oscuro,22
+variacion,Mocha Frío,mocha_frio_leche_deslactosada,,ingrediente,Leche Bove Barista Deslactosada,260
+variacion,Mocha Frío,mocha_frio_leche_deslactosada,,insumo,Vaso Frío 16 Oz,1
+variacion,Mocha Frío,mocha_frio_leche_almendra,,ingrediente,Café Tukafe Distinción,14
+variacion,Mocha Frío,mocha_frio_leche_almendra,,ingrediente,Jarabe Routin 1883 Chocolate Oscuro,30
+variacion,Mocha Frío,mocha_frio_leche_almendra,,ingrediente,Saborizante Routin Chocolate Oscuro,22
+variacion,Mocha Frío,mocha_frio_leche_almendra,,ingrediente,Gud Almendra Barista,260
+variacion,Mocha Frío,mocha_frio_leche_almendra,,insumo,Vaso Frío 16 Oz,1
+variacion,Mocha Frío,mocha_frio_leche_avena,,ingrediente,Café Tukafe Distinción,14
+variacion,Mocha Frío,mocha_frio_leche_avena,,ingrediente,Jarabe Routin 1883 Chocolate Oscuro,30
+variacion,Mocha Frío,mocha_frio_leche_avena,,ingrediente,Saborizante Routin Chocolate Oscuro,22
+variacion,Mocha Frío,mocha_frio_leche_avena,,ingrediente,Gud Avena Barista,260
+variacion,Mocha Frío,mocha_frio_leche_avena,,insumo,Vaso Frío 16 Oz,1
+variacion,Mocha Frío,mocha_frio_leche_coco,,ingrediente,Café Tukafe Distinción,14
+variacion,Mocha Frío,mocha_frio_leche_coco,,ingrediente,Jarabe Routin 1883 Chocolate Oscuro,30
+variacion,Mocha Frío,mocha_frio_leche_coco,,ingrediente,Saborizante Routin Chocolate Oscuro,22
+variacion,Mocha Frío,mocha_frio_leche_coco,,ingrediente,Leche de Coco,260
+variacion,Mocha Frío,mocha_frio_leche_coco,,insumo,Vaso Frío 16 Oz,1

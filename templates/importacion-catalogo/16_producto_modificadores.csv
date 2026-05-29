@@ -1,0 +1,18 @@
+nombre_producto,nombre_modificador,orden_en_producto
+Americano Caliente,Leche,1
+Americano Caliente,Shot Extra,2
+Americano Caliente,Sabor,3
+Americano Frío,Leche,1
+Americano Frío,Shot Extra,2
+Americano Frío,Sabor,3
+Capuccino,Shot Extra,1
+Capuccino,Sabor,1
+Latte Caliente,Shot Extra,1
+Latte Caliente,Sabor,2
+Latte Frío,Shot Extra,1
+Latte Frío,Sabor,2
+Mocha Blanco Caliente,Shot Extra,1
+Mocha Blanco Frío,Shot Extra,1
+Mocha Caliente,Shot Extra,1
+Mocha Frío,Shot Extra,1
+Matcha Ceremonial,Cold Foam,1

@@ -1,0 +1,5 @@
+nombre_modificador,nombre_en_cocina,etiqueta_cliente,seleccion_multiple,minimo_selecciones,maximo_selecciones
+Leche,Leche Extra,¿Quieres agregar leche?,NO,0,1
+Shot Extra,Show Extra,¿Quieres un shot extra de café?,NO,0,1
+Sabor,Saborizante,¿Quieres agregar algún sabor?,NO,0,1
+Cold Foam,Cold Foam,¿Quieres cold foam?,NO,0,1

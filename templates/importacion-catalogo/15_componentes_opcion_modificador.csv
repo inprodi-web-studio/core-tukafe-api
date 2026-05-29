@@ -1,0 +1,16 @@
+nombre_modificador,nombre_opcion,tipo_componente,nombre_componente,cantidad
+Leche,Leche Entera,ingrediente,Leche Bove Barista Entera,50
+Leche,Leche Light,ingrediente,Leche Bove Barista Light,50
+Leche,Leche Deslactosada,ingrediente,Leche Bove Barista Deslactosada,50
+Leche,Leche de Almendra,ingrediente,Gud Almendra Barista,50
+Leche,Leche de Avena,ingrediente,Gud Avena Barista,50
+Leche,Leche de Coco,ingrediente,Leche de Coco,50
+Shot Extra,Con Shot Extra,ingrediente,Café Tukafe Distinción,15
+Sabor, Vainilla Sugar Free,ingrediente,Saborizante Routin Vainilla Sugar Free,22
+Sabor,Caramelo Sugar Free,ingrediente,Saborizante Routin Caramelo Sugar Free,22
+Sabor,Vainilla,ingrediente,Saborizante Routin Vainilla Francesa,22
+Sabor,Caramelo,ingrediente,Saborizante Routin Caramelo,22
+Sabor,Lotus,ingrediente,Saborizante Routin Lotus,22
+Cold Foam,Fresa,ingrediente,Saborizante Routin Fresa,30
+Cold Foam,Vainilla,ingrediente,Saborizante Routin Vainilla Francesa,30
+Cold Foam,Vainilla Sugar Free,ingrediente,Saborizante Routin Vainilla Sugar Free,30
