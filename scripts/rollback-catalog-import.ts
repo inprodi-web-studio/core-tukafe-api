@@ -210,7 +210,7 @@ function parseArgs() {
   if (options.has("help")) {
     console.log(`
 Uso:
-  node --env-file=.env --import tsx scripts/rollback-catalog-import.ts [opciones]
+  node --import tsx scripts/rollback-catalog-import.ts [opciones]
 
 Opciones:
   --csv-dir <ruta>     Carpeta CSV (default: templates/importacion-catalogo)

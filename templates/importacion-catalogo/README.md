@@ -118,7 +118,16 @@ yarn catalog:import
 Opcionalmente pueden pasar parametros:
 
 ```bash
-node --env-file=.env --import tsx scripts/import-catalog-from-csv.ts \
+yarn catalog:import --api-url http://localhost:3000 \
+  --images-dir ./templates/importacion-catalogo/imagenes-productos \
+  --email amurillo@inprodi.com.mx \
+  --password Asdf123456
+```
+
+Tambien pueden usar ejecucion directa:
+
+```bash
+node --import tsx scripts/import-catalog-from-csv.ts \
   --api-url http://localhost:3000 \
   --images-dir ./templates/importacion-catalogo/imagenes-productos \
   --email amurillo@inprodi.com.mx \
@@ -136,6 +145,7 @@ Notas:
 - Si encuentra un registro existente (conflicto), intenta reutilizarlo por nombre legible.
 - Si usas `--images-dir`, el script sube imagenes a `/api/admin/uploads` y asigna `imageUploadId` al crear categorías y productos.
 - Si una categoría o producto ya existe, no se actualiza su imagen (la importación actual solo crea registros).
+- `yarn catalog:import` usa `.env` solo si existe; en ambientes desplegados sin archivo `.env`, toma variables del entorno del contenedor.
 
 ## Campos requeridos por archivo
 

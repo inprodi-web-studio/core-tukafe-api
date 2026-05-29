@@ -1163,7 +1163,7 @@ function parseArgs() {
 function printHelp() {
   console.log(`
 Uso:
-  node --env-file=.env --import tsx scripts/import-catalog-from-csv.ts [opciones]
+  node --import tsx scripts/import-catalog-from-csv.ts [opciones]
 
 Opciones:
   --api-url <url>             Base URL del API (default: API_URL/PUBLIC_URL o http://localhost:3000)
