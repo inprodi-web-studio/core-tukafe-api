@@ -8,10 +8,16 @@ export const loginBodySchema = z
     password: z.string().min(8),
   })
   .strict()
-  .refine((data) => Boolean(data.email) !== Boolean(data.phone), {
-    message: "Provide either email or phone",
-    path: ["email"],
-  });
+  .refine(
+    (data) => {
+      console.log(data);
+      return Boolean(data.email) !== Boolean(data.phone);
+    },
+    {
+      message: "Provide either email or phone",
+      path: ["email"],
+    },
+  );
 
 export type LoginBody = z.infer<typeof loginBodySchema>;
 
