@@ -16,6 +16,7 @@ export interface GuestProductCategory {
   icon: string;
   color: string;
   isFourPlusOneEligible: boolean;
+  isCashbackEligible: boolean;
   parentId: string | null;
   image: GuestProductImage | null;
 }
@@ -26,7 +27,7 @@ export type GuestProductTax = Pick<Tax, "id" | "name" | "rate">;
 
 export type GuestProductOrganization = Pick<
   Organization,
-  "id" | "name" | "slug" | "address" | "logo"
+  "id" | "name" | "slug" | "address" | "latitude" | "longitude" | "logo"
 >;
 
 export type GuestProductVariationGroupOption = Pick<
@@ -58,11 +59,13 @@ export interface GuestProductListItem {
   id: string;
   name: string;
   priceCents: number | null;
+  isFeatured: boolean;
   customerDescription: string | null;
   productType: ProductType;
   image: GuestProductImage | null;
   unit: GuestProductUnit;
   category: GuestProductCategory | null;
+  categories: GuestProductCategory[];
   organizations: GuestProductOrganization[];
   taxes: GuestProductTax[];
   variationGroups: GuestProductVariationGroup[];
@@ -72,6 +75,7 @@ export interface GuestProductListItem {
 export interface GuestProductConfigurationProduct {
   id: string;
   name: string;
+  isFeatured: boolean;
   productType: ProductType;
   image: GuestProductImage | null;
 }
@@ -116,7 +120,13 @@ export interface GuestProductConfigurationVariationStep extends GuestProductConf
 export interface GuestProductConfigurationModifierStep extends GuestProductConfigurationStepBase {
   type: "modifier";
   multiSelect: boolean;
+  visibleWhen: GuestProductConfigurationModifierVisibilityCondition[];
   options: GuestProductConfigurationModifierOption[];
+}
+
+export interface GuestProductConfigurationModifierVisibilityCondition {
+  variationGroupId: string;
+  variationOptionId: string;
 }
 
 export type GuestProductConfigurationStep =
@@ -150,7 +160,21 @@ export interface GuestProductCustomerOrderCount {
 }
 
 export interface GuestProductsService {
-  list(): Promise<GuestProductListItem[]>;
+  list(input?: {
+    organizationId?: string | null;
+    categoryId?: string | null;
+  }): Promise<GuestProductListItem[]>;
+  listPopular(input?: {
+    limit?: number;
+    windowDays?: number;
+    organizationId?: string | null;
+  }): Promise<GuestProductListItem[]>;
+  listRecommended(input: {
+    customerId: string;
+    organizationId: string;
+    limit?: number;
+    windowDays?: number;
+  }): Promise<GuestProductListItem[]>;
   getConfiguration(productId: string): Promise<GuestProductConfiguration>;
   getCustomerProductOrderCount(
     productId: string,

@@ -15,6 +15,10 @@ const customerOrdersServicesPlugin: FastifyPluginAsync = async (fastify) => {
   fastify.customer.orders = {
     preview: ordersService.preview,
     create: ordersService.create,
+    get: ordersService.get,
+    createStripePaymentSheet: ordersService.createStripePaymentSheet,
+    confirmStripePaymentAttempt: ordersService.confirmStripePaymentAttempt,
+    handleStripePaymentIntent: ordersService.handleStripePaymentIntent,
   };
 };
 

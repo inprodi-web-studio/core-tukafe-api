@@ -1,8 +1,12 @@
-import { workOrdersDB } from "@core/db/schemas";
+import { orderItemsDB, productsDB, uploadsDB, workOrdersDB } from "@core/db/schemas";
 import { buildFuzzySearch, conflict, notFound, paginate } from "@core/utils";
-import { and, asc, desc, eq, type SQL, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, type SQL, sql } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
-import type { AdminWorkOrdersService, WorkOrderListStatus } from "./workOrders.types";
+import type {
+  AdminWorkOrdersService,
+  WorkOrderListStatus,
+  WorkOrderResponse,
+} from "./workOrders.types";
 
 function getDefaultOrderBy(status: WorkOrderListStatus): [SQL, ...SQL[]] {
   if (status === "completed") {
@@ -18,6 +22,56 @@ function getDefaultOrderBy(status: WorkOrderListStatus): [SQL, ...SQL[]] {
   }
 
   return [asc(workOrdersDB.createdAt), asc(workOrdersDB.id)];
+}
+
+async function attachProductImages(
+  fastify: FastifyInstance,
+  workOrders: (typeof workOrdersDB.$inferSelect)[],
+): Promise<WorkOrderResponse[]> {
+  const orderItemIds = [...new Set(workOrders.map((workOrder) => workOrder.orderItemId))];
+
+  if (orderItemIds.length === 0) {
+    return workOrders.map((workOrder) => ({
+      ...workOrder,
+      productImage: null,
+    }));
+  }
+
+  const imageRows = await fastify.db
+    .select({
+      orderItemId: orderItemsDB.id,
+      imageId: uploadsDB.id,
+      imageName: uploadsDB.name,
+      imagePath: uploadsDB.path,
+      imageVisibility: uploadsDB.visibility,
+      imageMimeType: uploadsDB.mimeType,
+    })
+    .from(orderItemsDB)
+    .innerJoin(productsDB, eq(orderItemsDB.productId, productsDB.id))
+    .leftJoin(uploadsDB, eq(productsDB.imageUploadId, uploadsDB.id))
+    .where(inArray(orderItemsDB.id, orderItemIds));
+
+  const imagesByOrderItemId = new Map<string, WorkOrderResponse["productImage"]>();
+
+  for (const row of imageRows) {
+    imagesByOrderItemId.set(
+      row.orderItemId,
+      row.imageId
+        ? {
+            id: row.imageId,
+            name: row.imageName ?? "",
+            path: row.imagePath ?? "",
+            visibility: row.imageVisibility ?? "PUBLIC",
+            mimeType: row.imageMimeType ?? "",
+          }
+        : null,
+    );
+  }
+
+  return workOrders.map((workOrder) => ({
+    ...workOrder,
+    productImage: imagesByOrderItemId.get(workOrder.orderItemId) ?? null,
+  }));
 }
 
 export function adminWorkOrdersService(fastify: FastifyInstance): AdminWorkOrdersService {
@@ -36,7 +90,7 @@ export function adminWorkOrdersService(fastify: FastifyInstance): AdminWorkOrder
         tieBreakers: defaultOrderBy,
       });
 
-      return paginate({
+      const paginatedWorkOrders = await paginate({
         executor: fastify.db,
         createQuery: () => {
           const filters = [eq(workOrdersDB.organizationId, organizationId)];
@@ -58,6 +112,11 @@ export function adminWorkOrdersService(fastify: FastifyInstance): AdminWorkOrder
         page,
         pageSize,
       });
+
+      return {
+        ...paginatedWorkOrders,
+        data: await attachProductImages(fastify, paginatedWorkOrders.data),
+      };
     },
 
     async complete({ organizationId, workOrderId, completedByUserId }) {

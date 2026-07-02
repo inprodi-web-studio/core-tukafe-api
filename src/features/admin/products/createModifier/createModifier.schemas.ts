@@ -8,6 +8,17 @@ export const paramsSchema = z.object({
 export const createModifierBodySchema = z
   .object({
     modifierId: z.nanoid(),
+    optionIds: z.array(z.nanoid()).min(1).nullish(),
+    visibleWhen: z
+      .array(
+        z
+          .object({
+            variationGroupId: z.nanoid(),
+            variationOptionId: z.nanoid(),
+          })
+          .strict(),
+      )
+      .optional(),
   })
   .strict();
 

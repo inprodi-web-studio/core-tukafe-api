@@ -1,227 +1,1852 @@
 nivel_receta,nombre_producto,alias_variacion,descripcion_receta,tipo_componente,nombre_componente,cantidad
-producto,Americano Caliente,,,ingrediente,Café Tukafe Distinción,30
-producto,Americano Caliente,,,insumo,Vaso Caliente 12 Oz,1
-producto,Americano Frío,,,ingrediente,Café Tukafe Distinción,30
-producto,Americano Frío,,,insumo,Vaso Frío 16 Oz,1
-variacion,Capuccino,capuccino_leche_entera,,ingrediente,Café Tukafe Distinción,15
-variacion,Capuccino,capuccino_leche_entera,,ingrediente,Leche Bove Barista Entera,260
-variacion,Capuccino,capuccino_leche_entera,,insumo,Vaso Caliente 12 Oz,1
-variacion,Capuccino,capuccino_leche_light,,ingrediente,Café Tukafe Distinción,15
-variacion,Capuccino,capuccino_leche_light,,ingrediente,Leche Bove Barista Light,260
-variacion,Capuccino,capuccino_leche_light,,insumo,Vaso Caliente 12 Oz,1
-variacion,Capuccino,capuccino_leche_deslactosada,,ingrediente,Café Tukafe Distinción,15
-variacion,Capuccino,capuccino_leche_deslactosada,,ingrediente,Leche Bove Barista Deslactosada,260
-variacion,Capuccino,capuccino_leche_deslactosada,,insumo,Vaso Caliente 12 Oz,1
-variacion,Capuccino,capuccino_leche_almendra,,ingrediente,Café Tukafe Distinción,15
-variacion,Capuccino,capuccino_leche_almendra,,ingrediente,Gud Almendra Barista,260
-variacion,Capuccino,capuccino_leche_almendra,,insumo,Vaso Caliente 12 Oz,1
-variacion,Capuccino,capuccino_leche_avena,,ingrediente,Café Tukafe Distinción,15
-variacion,Capuccino,capuccino_leche_avena,,ingrediente,Gud Avena Barista,260
-variacion,Capuccino,capuccino_leche_avena,,insumo,Vaso Caliente 12 Oz,1
-variacion,Capuccino,capuccino_leche_coco,,ingrediente,Café Tukafe Distinción,15
-variacion,Capuccino,capuccino_leche_coco,,ingrediente,Leche de Coco,260
-variacion,Capuccino,capuccino_leche_coco,,insumo,Vaso Caliente 12 Oz,1
-variacion,Latte Caliente,latte_caliente_leche_entera,,ingrediente,Café Tukafe Distinción,14
-variacion,Latte Caliente,latte_caliente_leche_entera,,ingrediente,Leche Bove Barista Entera,260
-variacion,Latte Caliente,latte_caliente_leche_entera,,insumo,Vaso Caliente 12 Oz,1
-variacion,Latte Caliente,latte_caliente_leche_light,,ingrediente,Café Tukafe Distinción,14
-variacion,Latte Caliente,latte_caliente_leche_light,,ingrediente,Leche Bove Barista Light,260
-variacion,Latte Caliente,latte_caliente_leche_light,,insumo,Vaso Caliente 12 Oz,1
-variacion,Latte Caliente,latte_caliente_leche_deslactosada,,ingrediente,Café Tukafe Distinción,14
-variacion,Latte Caliente,latte_caliente_leche_deslactosada,,ingrediente,Leche Bove Barista Deslactosada,260
-variacion,Latte Caliente,latte_caliente_leche_deslactosada,,insumo,Vaso Caliente 12 Oz,1
-variacion,Latte Caliente,latte_caliente_leche_almendra,,ingrediente,Café Tukafe Distinción,14
-variacion,Latte Caliente,latte_caliente_leche_almendra,,ingrediente,Gud Almendra Barista,260
-variacion,Latte Caliente,latte_caliente_leche_almendra,,insumo,Vaso Caliente 12 Oz,1
-variacion,Latte Caliente,latte_caliente_leche_avena,,ingrediente,Café Tukafe Distinción,14
-variacion,Latte Caliente,latte_caliente_leche_avena,,ingrediente,Gud Avena Barista,260
-variacion,Latte Caliente,latte_caliente_leche_avena,,insumo,Vaso Caliente 12 Oz,1
-variacion,Latte Caliente,latte_caliente_leche_coco,,ingrediente,Café Tukafe Distinción,14
-variacion,Latte Caliente,latte_caliente_leche_coco,,ingrediente,Leche de Coco,260
-variacion,Latte Caliente,latte_caliente_leche_coco,,insumo,Vaso Caliente 12 Oz,1
-variacion,Latte Frío,latte_frio_leche_entera,,ingrediente,Café Tukafe Distinción,14
-variacion,Latte Frío,latte_frio_leche_entera,,ingrediente,Leche Bove Barista Entera,260
-variacion,Latte Frío,latte_frio_leche_entera,,insumo,Vaso Frío 16 Oz,1
-variacion,Latte Frío,latte_frio_leche_light,,ingrediente,Café Tukafe Distinción,14
-variacion,Latte Frío,latte_frio_leche_light,,ingrediente,Leche Bove Barista Light,260
-variacion,Latte Frío,latte_frio_leche_light,,insumo,Vaso Frío 16 Oz,1
-variacion,Latte Frío,latte_frio_leche_deslactosada,,ingrediente,Café Tukafe Distinción,14
-variacion,Latte Frío,latte_frio_leche_deslactosada,,ingrediente,Leche Bove Barista Deslactosada,260
-variacion,Latte Frío,latte_frio_leche_deslactosada,,insumo,Vaso Frío 16 Oz,1
-variacion,Latte Frío,latte_frio_leche_almendra,,ingrediente,Café Tukafe Distinción,14
-variacion,Latte Frío,latte_frio_leche_almendra,,ingrediente,Gud Almendra Barista,260
-variacion,Latte Frío,latte_frio_leche_almendra,,insumo,Vaso Frío 16 Oz,1
-variacion,Latte Frío,latte_frio_leche_avena,,ingrediente,Café Tukafe Distinción,14
-variacion,Latte Frío,latte_frio_leche_avena,,ingrediente,Gud Avena Barista,260
-variacion,Latte Frío,latte_frio_leche_avena,,insumo,Vaso Frío 16 Oz,1
-variacion,Latte Frío,latte_frio_leche_coco,,ingrediente,Café Tukafe Distinción,14
-variacion,Latte Frío,latte_frio_leche_coco,,ingrediente,Leche de Coco,260
-variacion,Latte Frío,latte_frio_leche_coco,,insumo,Vaso Frío 16 Oz,1
-variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_entera,,ingrediente,Café Tukafe Distinción,14
-variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_entera,,ingrediente,Jarabe Routin 1883 Chocolate Blanco,30
-variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_entera,,ingrediente,Saborizante Routin Chocolate Blanco,22
-variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_entera,,ingrediente,Leche Bove Barista Entera,260
-variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_entera,,insumo,Vaso Caliente 12 Oz,1
-variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_light,,ingrediente,Café Tukafe Distinción,14
-variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_light,,ingrediente,Jarabe Routin 1883 Chocolate Blanco,30
-variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_light,,ingrediente,Saborizante Routin Chocolate Blanco,22
-variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_light,,ingrediente,Leche Bove Barista Light,260
-variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_light,,insumo,Vaso Caliente 12 Oz,1
-variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_deslactosada,,ingrediente,Café Tukafe Distinción,14
-variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_deslactosada,,ingrediente,Jarabe Routin 1883 Chocolate Blanco,30
-variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_deslactosada,,ingrediente,Saborizante Routin Chocolate Blanco,22
-variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_deslactosada,,ingrediente,Leche Bove Barista Deslactosada,260
-variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_deslactosada,,insumo,Vaso Caliente 12 Oz,1
-variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_almendra,,ingrediente,Café Tukafe Distinción,14
-variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_almendra,,ingrediente,Jarabe Routin 1883 Chocolate Blanco,30
-variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_almendra,,ingrediente,Saborizante Routin Chocolate Blanco,22
-variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_almendra,,ingrediente,Gud Almendra Barista,260
-variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_almendra,,insumo,Vaso Caliente 12 Oz,1
-variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_avena,,ingrediente,Café Tukafe Distinción,14
-variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_avena,,ingrediente,Jarabe Routin 1883 Chocolate Blanco,30
-variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_avena,,ingrediente,Saborizante Routin Chocolate Blanco,22
-variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_avena,,ingrediente,Gud Avena Barista,260
-variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_avena,,insumo,Vaso Caliente 12 Oz,1
-variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_coco,,ingrediente,Café Tukafe Distinción,14
-variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_coco,,ingrediente,Jarabe Routin 1883 Chocolate Blanco,30
-variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_coco,,ingrediente,Saborizante Routin Chocolate Blanco,22
-variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_coco,,ingrediente,Leche de Coco,260
-variacion,Mocha Blanco Caliente,mocha_blanco_caliente_leche_coco,,insumo,Vaso Caliente 12 Oz,1
-variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_entera,,ingrediente,Café Tukafe Distinción,14
-variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_entera,,ingrediente,Jarabe Routin 1883 Chocolate Blanco,30
-variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_entera,,ingrediente,Saborizante Routin Chocolate Blanco,22
-variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_entera,,ingrediente,Leche Bove Barista Entera,260
-variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_entera,,insumo,Vaso Frío 16 Oz,1
-variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_light,,ingrediente,Café Tukafe Distinción,14
-variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_light,,ingrediente,Jarabe Routin 1883 Chocolate Blanco,30
-variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_light,,ingrediente,Saborizante Routin Chocolate Blanco,22
-variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_light,,ingrediente,Leche Bove Barista Light,260
-variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_light,,insumo,Vaso Frío 16 Oz,1
-variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_deslactosada,,ingrediente,Café Tukafe Distinción,14
-variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_deslactosada,,ingrediente,Jarabe Routin 1883 Chocolate Blanco,30
-variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_deslactosada,,ingrediente,Saborizante Routin Chocolate Blanco,22
-variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_deslactosada,,ingrediente,Leche Bove Barista Deslactosada,260
-variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_deslactosada,,insumo,Vaso Frío 16 Oz,1
-variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_almendra,,ingrediente,Café Tukafe Distinción,14
-variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_almendra,,ingrediente,Jarabe Routin 1883 Chocolate Blanco,30
-variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_almendra,,ingrediente,Saborizante Routin Chocolate Blanco,22
-variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_almendra,,ingrediente,Gud Almendra Barista,260
-variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_almendra,,insumo,Vaso Frío 16 Oz,1
-variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_avena,,ingrediente,Café Tukafe Distinción,14
-variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_avena,,ingrediente,Jarabe Routin 1883 Chocolate Blanco,30
-variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_avena,,ingrediente,Saborizante Routin Chocolate Blanco,22
-variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_avena,,ingrediente,Gud Avena Barista,260
-variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_avena,,insumo,Vaso Frío 16 Oz,1
-variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_coco,,ingrediente,Café Tukafe Distinción,14
-variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_coco,,ingrediente,Jarabe Routin 1883 Chocolate Blanco,30
-variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_coco,,ingrediente,Saborizante Routin Chocolate Blanco,22
-variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_coco,,ingrediente,Leche de Coco,260
-variacion,Mocha Blanco Frío,mocha_blanco_frio_leche_coco,,insumo,Vaso Frío 16 Oz,1
-variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_entera,,ingrediente,Matcha Ceremonial,3
-variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_entera,,ingrediente,Miel de Agave,15
-variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_entera,,ingrediente,Leche Bove Barista Entera,260
-variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_entera,,insumo,Vaso Caliente 12 Oz,1
-variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_light,,ingrediente,Matcha Ceremonial,3
-variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_light,,ingrediente,Miel de Agave,15
-variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_light,,ingrediente,Leche Bove Barista Light,260
-variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_light,,insumo,Vaso Caliente 12 Oz,1
-variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_deslactosada,,ingrediente,Matcha Ceremonial,3
-variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_deslactosada,,ingrediente,Miel de Agave,15
-variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_deslactosada,,ingrediente,Leche Bove Barista Deslactosada,260
-variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_deslactosada,,insumo,Vaso Caliente 12 Oz,1
-variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_almendra,,ingrediente,Matcha Ceremonial,3
-variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_almendra,,ingrediente,Miel de Agave,15
-variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_almendra,,ingrediente,Gud Almendra Barista,260
-variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_almendra,,insumo,Vaso Caliente 12 Oz,1
-variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_avena,,ingrediente,Matcha Ceremonial,3
-variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_avena,,ingrediente,Miel de Agave,15
-variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_avena,,ingrediente,Gud Avena Barista,260
-variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_avena,,insumo,Vaso Caliente 12 Oz,1
-variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_coco,,ingrediente,Matcha Ceremonial,3
-variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_coco,,ingrediente,Miel de Agave,15
-variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_coco,,ingrediente,Leche de Coco,260
-variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_leche_coco,,insumo,Vaso Caliente 12 Oz,1
-variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_entera,,ingrediente,Matcha Ceremonial,3
-variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_entera,,ingrediente,Miel de Agave,15
-variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_entera,,ingrediente,Leche Bove Barista Entera,260
-variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_entera,,insumo,Vaso Frío 16 Oz,1
-variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_light,,ingrediente,Matcha Ceremonial,3
-variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_light,,ingrediente,Miel de Agave,15
-variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_light,,ingrediente,Leche Bove Barista Light,260
-variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_light,,insumo,Vaso Frío 16 Oz,1
-variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_deslactosada,,ingrediente,Matcha Ceremonial,3
-variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_deslactosada,,ingrediente,Miel de Agave,15
-variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_deslactosada,,ingrediente,Leche Bove Barista Deslactosada,260
-variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_deslactosada,,insumo,Vaso Frío 16 Oz,1
-variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_almendra,,ingrediente,Matcha Ceremonial,3
-variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_almendra,,ingrediente,Miel de Agave,15
-variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_almendra,,ingrediente,Gud Almendra Barista,260
-variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_almendra,,insumo,Vaso Frío 16 Oz,1
-variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_avena,,ingrediente,Matcha Ceremonial,3
-variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_avena,,ingrediente,Miel de Agave,15
-variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_avena,,ingrediente,Gud Avena Barista,260
-variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_avena,,insumo,Vaso Frío 16 Oz,1
-variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_coco,,ingrediente,Matcha Ceremonial,3
-variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_coco,,ingrediente,Miel de Agave,15
-variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_coco,,ingrediente,Leche de Coco,260
-variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_leche_coco,,insumo,Vaso Frío 16 Oz,1
-variacion,Mocha Caliente,mocha_caliente_leche_entera,,ingrediente,Café Tukafe Distinción,14
-variacion,Mocha Caliente,mocha_caliente_leche_entera,,ingrediente,Jarabe Routin 1883 Chocolate Oscuro,30
-variacion,Mocha Caliente,mocha_caliente_leche_entera,,ingrediente,Saborizante Routin Chocolate Oscuro,22
-variacion,Mocha Caliente,mocha_caliente_leche_entera,,ingrediente,Leche Bove Barista Entera,260
-variacion,Mocha Caliente,mocha_caliente_leche_entera,,insumo,Vaso Caliente 12 Oz,1
-variacion,Mocha Caliente,mocha_caliente_leche_light,,ingrediente,Café Tukafe Distinción,14
-variacion,Mocha Caliente,mocha_caliente_leche_light,,ingrediente,Jarabe Routin 1883 Chocolate Oscuro,30
-variacion,Mocha Caliente,mocha_caliente_leche_light,,ingrediente,Saborizante Routin Chocolate Oscuro,22
-variacion,Mocha Caliente,mocha_caliente_leche_light,,ingrediente,Leche Bove Barista Light,260
-variacion,Mocha Caliente,mocha_caliente_leche_light,,insumo,Vaso Caliente 12 Oz,1
-variacion,Mocha Caliente,mocha_caliente_leche_deslactosada,,ingrediente,Café Tukafe Distinción,14
-variacion,Mocha Caliente,mocha_caliente_leche_deslactosada,,ingrediente,Jarabe Routin 1883 Chocolate Oscuro,30
-variacion,Mocha Caliente,mocha_caliente_leche_deslactosada,,ingrediente,Saborizante Routin Chocolate Oscuro,22
-variacion,Mocha Caliente,mocha_caliente_leche_deslactosada,,ingrediente,Leche Bove Barista Deslactosada,260
-variacion,Mocha Caliente,mocha_caliente_leche_deslactosada,,insumo,Vaso Caliente 12 Oz,1
-variacion,Mocha Caliente,mocha_caliente_leche_almendra,,ingrediente,Café Tukafe Distinción,14
-variacion,Mocha Caliente,mocha_caliente_leche_almendra,,ingrediente,Jarabe Routin 1883 Chocolate Oscuro,30
-variacion,Mocha Caliente,mocha_caliente_leche_almendra,,ingrediente,Saborizante Routin Chocolate Oscuro,22
-variacion,Mocha Caliente,mocha_caliente_leche_almendra,,ingrediente,Gud Almendra Barista,260
-variacion,Mocha Caliente,mocha_caliente_leche_almendra,,insumo,Vaso Caliente 12 Oz,1
-variacion,Mocha Caliente,mocha_caliente_leche_avena,,ingrediente,Café Tukafe Distinción,14
-variacion,Mocha Caliente,mocha_caliente_leche_avena,,ingrediente,Jarabe Routin 1883 Chocolate Oscuro,30
-variacion,Mocha Caliente,mocha_caliente_leche_avena,,ingrediente,Saborizante Routin Chocolate Oscuro,22
-variacion,Mocha Caliente,mocha_caliente_leche_avena,,ingrediente,Gud Avena Barista,260
-variacion,Mocha Caliente,mocha_caliente_leche_avena,,insumo,Vaso Caliente 12 Oz,1
-variacion,Mocha Caliente,mocha_caliente_leche_coco,,ingrediente,Café Tukafe Distinción,14
-variacion,Mocha Caliente,mocha_caliente_leche_coco,,ingrediente,Jarabe Routin 1883 Chocolate Oscuro,30
-variacion,Mocha Caliente,mocha_caliente_leche_coco,,ingrediente,Saborizante Routin Chocolate Oscuro,22
-variacion,Mocha Caliente,mocha_caliente_leche_coco,,ingrediente,Leche de Coco,260
-variacion,Mocha Caliente,mocha_caliente_leche_coco,,insumo,Vaso Caliente 12 Oz,1
-variacion,Mocha Frío,mocha_frio_leche_entera,,ingrediente,Café Tukafe Distinción,14
-variacion,Mocha Frío,mocha_frio_leche_entera,,ingrediente,Jarabe Routin 1883 Chocolate Oscuro,30
-variacion,Mocha Frío,mocha_frio_leche_entera,,ingrediente,Saborizante Routin Chocolate Oscuro,22
-variacion,Mocha Frío,mocha_frio_leche_entera,,ingrediente,Leche Bove Barista Entera,260
-variacion,Mocha Frío,mocha_frio_leche_entera,,insumo,Vaso Frío 16 Oz,1
-variacion,Mocha Frío,mocha_frio_leche_light,,ingrediente,Café Tukafe Distinción,14
-variacion,Mocha Frío,mocha_frio_leche_light,,ingrediente,Jarabe Routin 1883 Chocolate Oscuro,30
-variacion,Mocha Frío,mocha_frio_leche_light,,ingrediente,Saborizante Routin Chocolate Oscuro,22
-variacion,Mocha Frío,mocha_frio_leche_light,,ingrediente,Leche Bove Barista Light,260
-variacion,Mocha Frío,mocha_frio_leche_light,,insumo,Vaso Frío 16 Oz,1
-variacion,Mocha Frío,mocha_frio_leche_deslactosada,,ingrediente,Café Tukafe Distinción,14
-variacion,Mocha Frío,mocha_frio_leche_deslactosada,,ingrediente,Jarabe Routin 1883 Chocolate Oscuro,30
-variacion,Mocha Frío,mocha_frio_leche_deslactosada,,ingrediente,Saborizante Routin Chocolate Oscuro,22
-variacion,Mocha Frío,mocha_frio_leche_deslactosada,,ingrediente,Leche Bove Barista Deslactosada,260
-variacion,Mocha Frío,mocha_frio_leche_deslactosada,,insumo,Vaso Frío 16 Oz,1
-variacion,Mocha Frío,mocha_frio_leche_almendra,,ingrediente,Café Tukafe Distinción,14
-variacion,Mocha Frío,mocha_frio_leche_almendra,,ingrediente,Jarabe Routin 1883 Chocolate Oscuro,30
-variacion,Mocha Frío,mocha_frio_leche_almendra,,ingrediente,Saborizante Routin Chocolate Oscuro,22
-variacion,Mocha Frío,mocha_frio_leche_almendra,,ingrediente,Gud Almendra Barista,260
-variacion,Mocha Frío,mocha_frio_leche_almendra,,insumo,Vaso Frío 16 Oz,1
-variacion,Mocha Frío,mocha_frio_leche_avena,,ingrediente,Café Tukafe Distinción,14
-variacion,Mocha Frío,mocha_frio_leche_avena,,ingrediente,Jarabe Routin 1883 Chocolate Oscuro,30
-variacion,Mocha Frío,mocha_frio_leche_avena,,ingrediente,Saborizante Routin Chocolate Oscuro,22
-variacion,Mocha Frío,mocha_frio_leche_avena,,ingrediente,Gud Avena Barista,260
-variacion,Mocha Frío,mocha_frio_leche_avena,,insumo,Vaso Frío 16 Oz,1
-variacion,Mocha Frío,mocha_frio_leche_coco,,ingrediente,Café Tukafe Distinción,14
-variacion,Mocha Frío,mocha_frio_leche_coco,,ingrediente,Jarabe Routin 1883 Chocolate Oscuro,30
-variacion,Mocha Frío,mocha_frio_leche_coco,,ingrediente,Saborizante Routin Chocolate Oscuro,22
-variacion,Mocha Frío,mocha_frio_leche_coco,,ingrediente,Leche de Coco,260
-variacion,Mocha Frío,mocha_frio_leche_coco,,insumo,Vaso Frío 16 Oz,1
+variacion,Espresso,distincion_sencillo,,ingrediente,Café Tukafe Distinción,14
+variacion,Espresso,distincion_sencillo,,insumo,Vaso de Doble Pared 8 oz,1
+variacion,Espresso,distincion_doble,,ingrediente,Café Tukafe Distinción,28
+variacion,Espresso,distincion_doble,,insumo,Vaso de Doble Pared 8 oz,1
+variacion,Espresso,tradicion_sencillo,,ingrediente,Café Tukafe Tradición,14
+variacion,Espresso,tradicion_sencillo,,insumo,Vaso de Doble Pared 8 oz,1
+variacion,Espresso,tradicion_doble,,ingrediente,Café Tukafe Tradición,28
+variacion,Espresso,tradicion_doble,,insumo,Vaso de Doble Pared 8 oz,1
+variacion,Americano Caliente,americano_tradicion,,ingrediente,Café Tukafe Tradición,30
+variacion,Americano Caliente,americano_tradicion,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Americano Caliente,americano_distincion,,ingrediente,Café Tukafe Distinción,30
+variacion,Americano Caliente,americano_distincion,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Americano Frío,americano_frio_tradicion_vaso,,ingrediente,Café Tukafe Tradición,30
+variacion,Americano Frío,americano_frio_tradicion_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Americano Frío,americano_frio_tradicion_lata,,ingrediente,Café Tukafe Tradición,30
+variacion,Americano Frío,americano_frio_tradicion_lata,,insumo,Lata Pet,1
+variacion,Americano Frío,americano_frio_distincion_vaso,,ingrediente,Café Tukafe Distinción,30
+variacion,Americano Frío,americano_frio_distincion_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Americano Frío,americano_frio_distincion_lata,,ingrediente,Café Tukafe Distinción,30
+variacion,Americano Frío,americano_frio_distincion_lata,,insumo,Lata Pet,1
+variacion,Capuccino,capuccino_tradicion_entera,,ingrediente,Café Tukafe Tradición,15
+variacion,Capuccino,capuccino_tradicion_entera,,ingrediente,Leche Bové Barista Entera,260
+variacion,Capuccino,capuccino_tradicion_entera,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Capuccino,capuccino_tradicion_light,,ingrediente,Café Tukafe Tradición,15
+variacion,Capuccino,capuccino_tradicion_light,,ingrediente,Leche Bové Barista Light,260
+variacion,Capuccino,capuccino_tradicion_light,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Capuccino,capuccino_tradicion_deslactosada,,ingrediente,Café Tukafe Tradición,15
+variacion,Capuccino,capuccino_tradicion_deslactosada,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Capuccino,capuccino_tradicion_deslactosada,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Capuccino,capuccino_tradicion_almendra,,ingrediente,Café Tukafe Tradición,15
+variacion,Capuccino,capuccino_tradicion_almendra,,ingrediente,GÜD Almendra Barista,260
+variacion,Capuccino,capuccino_tradicion_almendra,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Capuccino,capuccino_tradicion_avena,,ingrediente,Café Tukafe Tradición,15
+variacion,Capuccino,capuccino_tradicion_avena,,ingrediente,GÜD Avena Barista,260
+variacion,Capuccino,capuccino_tradicion_avena,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Capuccino,capuccino_tradicion_coco,,ingrediente,Café Tukafe Tradición,15
+variacion,Capuccino,capuccino_tradicion_coco,,ingrediente,Leche de Coco,260
+variacion,Capuccino,capuccino_tradicion_coco,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Capuccino,capuccino_tradicion_soya_vainilla,,ingrediente,Café Tukafe Tradición,15
+variacion,Capuccino,capuccino_tradicion_soya_vainilla,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Capuccino,capuccino_tradicion_soya_vainilla,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Capuccino,capuccino_distincion_entera,,ingrediente,Café Tukafe Distinción,15
+variacion,Capuccino,capuccino_distincion_entera,,ingrediente,Leche Bové Barista Entera,260
+variacion,Capuccino,capuccino_distincion_entera,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Capuccino,capuccino_distincion_light,,ingrediente,Café Tukafe Distinción,15
+variacion,Capuccino,capuccino_distincion_light,,ingrediente,Leche Bové Barista Light,260
+variacion,Capuccino,capuccino_distincion_light,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Capuccino,capuccino_distincion_deslactosada,,ingrediente,Café Tukafe Distinción,15
+variacion,Capuccino,capuccino_distincion_deslactosada,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Capuccino,capuccino_distincion_deslactosada,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Capuccino,capuccino_distincion_almendra,,ingrediente,Café Tukafe Distinción,15
+variacion,Capuccino,capuccino_distincion_almendra,,ingrediente,GÜD Almendra Barista,260
+variacion,Capuccino,capuccino_distincion_almendra,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Capuccino,capuccino_distincion_avena,,ingrediente,Café Tukafe Distinción,15
+variacion,Capuccino,capuccino_distincion_avena,,ingrediente,GÜD Avena Barista,260
+variacion,Capuccino,capuccino_distincion_avena,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Capuccino,capuccino_distincion_coco,,ingrediente,Café Tukafe Distinción,15
+variacion,Capuccino,capuccino_distincion_coco,,ingrediente,Leche de Coco,260
+variacion,Capuccino,capuccino_distincion_coco,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Capuccino,capuccino_distincion_soya_vainilla,,ingrediente,Café Tukafe Distinción,15
+variacion,Capuccino,capuccino_distincion_soya_vainilla,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Capuccino,capuccino_distincion_soya_vainilla,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Latte Caliente,latte_caliente_tradicion_entera,,ingrediente,Café Tukafe Tradición,14
+variacion,Latte Caliente,latte_caliente_tradicion_entera,,ingrediente,Leche Bové Barista Entera,260
+variacion,Latte Caliente,latte_caliente_tradicion_entera,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Latte Caliente,latte_caliente_tradicion_light,,ingrediente,Café Tukafe Tradición,14
+variacion,Latte Caliente,latte_caliente_tradicion_light,,ingrediente,Leche Bové Barista Light,260
+variacion,Latte Caliente,latte_caliente_tradicion_light,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Latte Caliente,latte_caliente_tradicion_deslactosada,,ingrediente,Café Tukafe Tradición,14
+variacion,Latte Caliente,latte_caliente_tradicion_deslactosada,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Latte Caliente,latte_caliente_tradicion_deslactosada,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Latte Caliente,latte_caliente_tradicion_almendra,,ingrediente,Café Tukafe Tradición,14
+variacion,Latte Caliente,latte_caliente_tradicion_almendra,,ingrediente,GÜD Almendra Barista,260
+variacion,Latte Caliente,latte_caliente_tradicion_almendra,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Latte Caliente,latte_caliente_tradicion_avena,,ingrediente,Café Tukafe Tradición,14
+variacion,Latte Caliente,latte_caliente_tradicion_avena,,ingrediente,GÜD Avena Barista,260
+variacion,Latte Caliente,latte_caliente_tradicion_avena,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Latte Caliente,latte_caliente_tradicion_coco,,ingrediente,Café Tukafe Tradición,14
+variacion,Latte Caliente,latte_caliente_tradicion_coco,,ingrediente,Leche de Coco,260
+variacion,Latte Caliente,latte_caliente_tradicion_coco,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Latte Caliente,latte_caliente_tradicion_soya_vainilla,,ingrediente,Café Tukafe Tradición,14
+variacion,Latte Caliente,latte_caliente_tradicion_soya_vainilla,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Latte Caliente,latte_caliente_tradicion_soya_vainilla,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Latte Caliente,latte_caliente_distincion_entera,,ingrediente,Café Tukafe Distinción,14
+variacion,Latte Caliente,latte_caliente_distincion_entera,,ingrediente,Leche Bové Barista Entera,260
+variacion,Latte Caliente,latte_caliente_distincion_entera,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Latte Caliente,latte_caliente_distincion_light,,ingrediente,Café Tukafe Distinción,14
+variacion,Latte Caliente,latte_caliente_distincion_light,,ingrediente,Leche Bové Barista Light,260
+variacion,Latte Caliente,latte_caliente_distincion_light,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Latte Caliente,latte_caliente_distincion_deslactosada,,ingrediente,Café Tukafe Distinción,14
+variacion,Latte Caliente,latte_caliente_distincion_deslactosada,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Latte Caliente,latte_caliente_distincion_deslactosada,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Latte Caliente,latte_caliente_distincion_almendra,,ingrediente,Café Tukafe Distinción,14
+variacion,Latte Caliente,latte_caliente_distincion_almendra,,ingrediente,GÜD Almendra Barista,260
+variacion,Latte Caliente,latte_caliente_distincion_almendra,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Latte Caliente,latte_caliente_distincion_avena,,ingrediente,Café Tukafe Distinción,14
+variacion,Latte Caliente,latte_caliente_distincion_avena,,ingrediente,GÜD Avena Barista,260
+variacion,Latte Caliente,latte_caliente_distincion_avena,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Latte Caliente,latte_caliente_distincion_coco,,ingrediente,Café Tukafe Distinción,14
+variacion,Latte Caliente,latte_caliente_distincion_coco,,ingrediente,Leche de Coco,260
+variacion,Latte Caliente,latte_caliente_distincion_coco,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Latte Caliente,latte_caliente_distincion_soya_vainilla,,ingrediente,Café Tukafe Distinción,14
+variacion,Latte Caliente,latte_caliente_distincion_soya_vainilla,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Latte Caliente,latte_caliente_distincion_soya_vainilla,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Latte Frío,latte_frio_tradicion_entera_vaso,,ingrediente,Café Tukafe Tradición,14
+variacion,Latte Frío,latte_frio_tradicion_entera_vaso,,ingrediente,Leche Bové Barista Entera,260
+variacion,Latte Frío,latte_frio_tradicion_entera_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Latte Frío,latte_frio_tradicion_light_vaso,,ingrediente,Café Tukafe Tradición,14
+variacion,Latte Frío,latte_frio_tradicion_light_vaso,,ingrediente,Leche Bové Barista Light,260
+variacion,Latte Frío,latte_frio_tradicion_light_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Latte Frío,latte_frio_tradicion_deslactosada_vaso,,ingrediente,Café Tukafe Tradición,14
+variacion,Latte Frío,latte_frio_tradicion_deslactosada_vaso,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Latte Frío,latte_frio_tradicion_deslactosada_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Latte Frío,latte_frio_tradicion_almendra_vaso,,ingrediente,Café Tukafe Tradición,14
+variacion,Latte Frío,latte_frio_tradicion_almendra_vaso,,ingrediente,GÜD Almendra Barista,260
+variacion,Latte Frío,latte_frio_tradicion_almendra_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Latte Frío,latte_frio_tradicion_avena_vaso,,ingrediente,Café Tukafe Tradición,14
+variacion,Latte Frío,latte_frio_tradicion_avena_vaso,,ingrediente,GÜD Avena Barista,260
+variacion,Latte Frío,latte_frio_tradicion_avena_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Latte Frío,latte_frio_tradicion_coco_vaso,,ingrediente,Café Tukafe Tradición,14
+variacion,Latte Frío,latte_frio_tradicion_coco_vaso,,ingrediente,Leche de Coco,260
+variacion,Latte Frío,latte_frio_tradicion_coco_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Latte Frío,latte_frio_tradicion_soya_vainilla_vaso,,ingrediente,Café Tukafe Tradición,14
+variacion,Latte Frío,latte_frio_tradicion_soya_vainilla_vaso,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Latte Frío,latte_frio_tradicion_soya_vainilla_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Latte Frío,latte_frio_distincion_entera_vaso,,ingrediente,Café Tukafe Distinción,14
+variacion,Latte Frío,latte_frio_distincion_entera_vaso,,ingrediente,Leche Bové Barista Entera,260
+variacion,Latte Frío,latte_frio_distincion_entera_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Latte Frío,latte_frio_distincion_light_vaso,,ingrediente,Café Tukafe Distinción,14
+variacion,Latte Frío,latte_frio_distincion_light_vaso,,ingrediente,Leche Bové Barista Light,260
+variacion,Latte Frío,latte_frio_distincion_light_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Latte Frío,latte_frio_distincion_deslactosada_vaso,,ingrediente,Café Tukafe Distinción,14
+variacion,Latte Frío,latte_frio_distincion_deslactosada_vaso,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Latte Frío,latte_frio_distincion_deslactosada_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Latte Frío,latte_frio_distincion_almendra_vaso,,ingrediente,Café Tukafe Distinción,14
+variacion,Latte Frío,latte_frio_distincion_almendra_vaso,,ingrediente,GÜD Almendra Barista,260
+variacion,Latte Frío,latte_frio_distincion_almendra_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Latte Frío,latte_frio_distincion_avena_vaso,,ingrediente,Café Tukafe Distinción,14
+variacion,Latte Frío,latte_frio_distincion_avena_vaso,,ingrediente,GÜD Avena Barista,260
+variacion,Latte Frío,latte_frio_distincion_avena_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Latte Frío,latte_frio_distincion_coco_vaso,,ingrediente,Café Tukafe Distinción,14
+variacion,Latte Frío,latte_frio_distincion_coco_vaso,,ingrediente,Leche de Coco,260
+variacion,Latte Frío,latte_frio_distincion_coco_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Latte Frío,latte_frio_distincion_soya_vainilla_vaso,,ingrediente,Café Tukafe Distinción,14
+variacion,Latte Frío,latte_frio_distincion_soya_vainilla_vaso,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Latte Frío,latte_frio_distincion_soya_vainilla_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Latte Frío,latte_frio_tradicion_entera_lata,,ingrediente,Café Tukafe Tradición,14
+variacion,Latte Frío,latte_frio_tradicion_entera_lata,,ingrediente,Leche Bové Barista Entera,260
+variacion,Latte Frío,latte_frio_tradicion_entera_lata,,insumo,Lata Pet,1
+variacion,Latte Frío,latte_frio_tradicion_light_lata,,ingrediente,Café Tukafe Tradición,14
+variacion,Latte Frío,latte_frio_tradicion_light_lata,,ingrediente,Leche Bové Barista Light,260
+variacion,Latte Frío,latte_frio_tradicion_light_lata,,insumo,Lata Pet,1
+variacion,Latte Frío,latte_frio_tradicion_deslactosada_lata,,ingrediente,Café Tukafe Tradición,14
+variacion,Latte Frío,latte_frio_tradicion_deslactosada_lata,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Latte Frío,latte_frio_tradicion_deslactosada_lata,,insumo,Lata Pet,1
+variacion,Latte Frío,latte_frio_tradicion_almendra_lata,,ingrediente,Café Tukafe Tradición,14
+variacion,Latte Frío,latte_frio_tradicion_almendra_lata,,ingrediente,GÜD Almendra Barista,260
+variacion,Latte Frío,latte_frio_tradicion_almendra_lata,,insumo,Lata Pet,1
+variacion,Latte Frío,latte_frio_tradicion_avena_lata,,ingrediente,Café Tukafe Tradición,14
+variacion,Latte Frío,latte_frio_tradicion_avena_lata,,ingrediente,GÜD Avena Barista,260
+variacion,Latte Frío,latte_frio_tradicion_avena_lata,,insumo,Lata Pet,1
+variacion,Latte Frío,latte_frio_tradicion_coco_lata,,ingrediente,Café Tukafe Tradición,14
+variacion,Latte Frío,latte_frio_tradicion_coco_lata,,ingrediente,Leche de Coco,260
+variacion,Latte Frío,latte_frio_tradicion_coco_lata,,insumo,Lata Pet,1
+variacion,Latte Frío,latte_frio_tradicion_soya_vainilla_lata,,ingrediente,Café Tukafe Tradición,14
+variacion,Latte Frío,latte_frio_tradicion_soya_vainilla_lata,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Latte Frío,latte_frio_tradicion_soya_vainilla_lata,,insumo,Lata Pet,1
+variacion,Latte Frío,latte_frio_distincion_entera_lata,,ingrediente,Café Tukafe Distinción,14
+variacion,Latte Frío,latte_frio_distincion_entera_lata,,ingrediente,Leche Bové Barista Entera,260
+variacion,Latte Frío,latte_frio_distincion_entera_lata,,insumo,Lata Pet,1
+variacion,Latte Frío,latte_frio_distincion_light_lata,,ingrediente,Café Tukafe Distinción,14
+variacion,Latte Frío,latte_frio_distincion_light_lata,,ingrediente,Leche Bové Barista Light,260
+variacion,Latte Frío,latte_frio_distincion_light_lata,,insumo,Lata Pet,1
+variacion,Latte Frío,latte_frio_distincion_deslactosada_lata,,ingrediente,Café Tukafe Distinción,14
+variacion,Latte Frío,latte_frio_distincion_deslactosada_lata,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Latte Frío,latte_frio_distincion_deslactosada_lata,,insumo,Lata Pet,1
+variacion,Latte Frío,latte_frio_distincion_almendra_lata,,ingrediente,Café Tukafe Distinción,14
+variacion,Latte Frío,latte_frio_distincion_almendra_lata,,ingrediente,GÜD Almendra Barista,260
+variacion,Latte Frío,latte_frio_distincion_almendra_lata,,insumo,Lata Pet,1
+variacion,Latte Frío,latte_frio_distincion_avena_lata,,ingrediente,Café Tukafe Distinción,14
+variacion,Latte Frío,latte_frio_distincion_avena_lata,,ingrediente,GÜD Avena Barista,260
+variacion,Latte Frío,latte_frio_distincion_avena_lata,,insumo,Lata Pet,1
+variacion,Latte Frío,latte_frio_distincion_coco_lata,,ingrediente,Café Tukafe Distinción,14
+variacion,Latte Frío,latte_frio_distincion_coco_lata,,ingrediente,Leche de Coco,260
+variacion,Latte Frío,latte_frio_distincion_coco_lata,,insumo,Lata Pet,1
+variacion,Latte Frío,latte_frio_distincion_soya_vainilla_lata,,ingrediente,Café Tukafe Distinción,14
+variacion,Latte Frío,latte_frio_distincion_soya_vainilla_lata,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Latte Frío,latte_frio_distincion_soya_vainilla_lata,,insumo,Lata Pet,1
+variacion,Latte Frappé,latte_frappe_tradicion_entera,,ingrediente,Café Tukafe Tradición,15
+variacion,Latte Frappé,latte_frappe_tradicion_entera,,ingrediente,Leche Bové Barista Entera,30
+variacion,Latte Frappé,latte_frappe_tradicion_entera,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Latte Frappé,latte_frappe_tradicion_entera,,insumo,Vaso Pet 16oz,1
+variacion,Latte Frappé,latte_frappe_tradicion_light,,ingrediente,Café Tukafe Tradición,15
+variacion,Latte Frappé,latte_frappe_tradicion_light,,ingrediente,Leche Bové Barista Light,30
+variacion,Latte Frappé,latte_frappe_tradicion_light,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Latte Frappé,latte_frappe_tradicion_light,,insumo,Vaso Pet 16oz,1
+variacion,Latte Frappé,latte_frappe_tradicion_deslactosada,,ingrediente,Café Tukafe Tradición,15
+variacion,Latte Frappé,latte_frappe_tradicion_deslactosada,,ingrediente,Leche Bové Barista Deslactosada,30
+variacion,Latte Frappé,latte_frappe_tradicion_deslactosada,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Latte Frappé,latte_frappe_tradicion_deslactosada,,insumo,Vaso Pet 16oz,1
+variacion,Latte Frappé,latte_frappe_tradicion_almendra,,ingrediente,Café Tukafe Tradición,15
+variacion,Latte Frappé,latte_frappe_tradicion_almendra,,ingrediente,GÜD Almendra Barista,30
+variacion,Latte Frappé,latte_frappe_tradicion_almendra,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Latte Frappé,latte_frappe_tradicion_almendra,,insumo,Vaso Pet 16oz,1
+variacion,Latte Frappé,latte_frappe_tradicion_avena,,ingrediente,Café Tukafe Tradición,15
+variacion,Latte Frappé,latte_frappe_tradicion_avena,,ingrediente,GÜD Avena Barista,30
+variacion,Latte Frappé,latte_frappe_tradicion_avena,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Latte Frappé,latte_frappe_tradicion_avena,,insumo,Vaso Pet 16oz,1
+variacion,Latte Frappé,latte_frappe_tradicion_coco,,ingrediente,Café Tukafe Tradición,15
+variacion,Latte Frappé,latte_frappe_tradicion_coco,,ingrediente,Leche de Coco,30
+variacion,Latte Frappé,latte_frappe_tradicion_coco,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Latte Frappé,latte_frappe_tradicion_coco,,insumo,Vaso Pet 16oz,1
+variacion,Latte Frappé,latte_frappe_tradicion_soya_vainilla,,ingrediente,Café Tukafe Tradición,15
+variacion,Latte Frappé,latte_frappe_tradicion_soya_vainilla,,ingrediente,GÜD Soya Barista Vainilla,30
+variacion,Latte Frappé,latte_frappe_tradicion_soya_vainilla,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Latte Frappé,latte_frappe_tradicion_soya_vainilla,,insumo,Vaso Pet 16oz,1
+variacion,Latte Frappé,latte_frappe_distincion_entera,,ingrediente,Café Tukafe Distinción,15
+variacion,Latte Frappé,latte_frappe_distincion_entera,,ingrediente,Leche Bové Barista Entera,30
+variacion,Latte Frappé,latte_frappe_distincion_entera,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Latte Frappé,latte_frappe_distincion_entera,,insumo,Vaso Pet 16oz,1
+variacion,Latte Frappé,latte_frappe_distincion_light,,ingrediente,Café Tukafe Distinción,15
+variacion,Latte Frappé,latte_frappe_distincion_light,,ingrediente,Leche Bové Barista Light,30
+variacion,Latte Frappé,latte_frappe_distincion_light,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Latte Frappé,latte_frappe_distincion_light,,insumo,Vaso Pet 16oz,1
+variacion,Latte Frappé,latte_frappe_distincion_deslactosada,,ingrediente,Café Tukafe Distinción,15
+variacion,Latte Frappé,latte_frappe_distincion_deslactosada,,ingrediente,Leche Bové Barista Deslactosada,30
+variacion,Latte Frappé,latte_frappe_distincion_deslactosada,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Latte Frappé,latte_frappe_distincion_deslactosada,,insumo,Vaso Pet 16oz,1
+variacion,Latte Frappé,latte_frappe_distincion_almendra,,ingrediente,Café Tukafe Distinción,15
+variacion,Latte Frappé,latte_frappe_distincion_almendra,,ingrediente,GÜD Almendra Barista,30
+variacion,Latte Frappé,latte_frappe_distincion_almendra,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Latte Frappé,latte_frappe_distincion_almendra,,insumo,Vaso Pet 16oz,1
+variacion,Latte Frappé,latte_frappe_distincion_avena,,ingrediente,Café Tukafe Distinción,15
+variacion,Latte Frappé,latte_frappe_distincion_avena,,ingrediente,GÜD Avena Barista,30
+variacion,Latte Frappé,latte_frappe_distincion_avena,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Latte Frappé,latte_frappe_distincion_avena,,insumo,Vaso Pet 16oz,1
+variacion,Latte Frappé,latte_frappe_distincion_coco,,ingrediente,Café Tukafe Distinción,15
+variacion,Latte Frappé,latte_frappe_distincion_coco,,ingrediente,Leche de Coco,30
+variacion,Latte Frappé,latte_frappe_distincion_coco,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Latte Frappé,latte_frappe_distincion_coco,,insumo,Vaso Pet 16oz,1
+variacion,Latte Frappé,latte_frappe_distincion_soya_vainilla,,ingrediente,Café Tukafe Distinción,15
+variacion,Latte Frappé,latte_frappe_distincion_soya_vainilla,,ingrediente,GÜD Soya Barista Vainilla,30
+variacion,Latte Frappé,latte_frappe_distincion_soya_vainilla,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Latte Frappé,latte_frappe_distincion_soya_vainilla,,insumo,Vaso Pet 16oz,1
+variacion,Mocha Caliente,mocha_caliente_entera,,ingrediente,Café Tukafe Tradición,14
+variacion,Mocha Caliente,mocha_caliente_entera,,ingrediente,Routin 1883 Chocolate Oscuro,20
+variacion,Mocha Caliente,mocha_caliente_entera,,ingrediente,Routin Chocolate Oscuro,22
+variacion,Mocha Caliente,mocha_caliente_entera,,ingrediente,Leche Bové Barista Entera,260
+variacion,Mocha Caliente,mocha_caliente_entera,,insumo,Vaso de Doble Pared 8 oz,1
+variacion,Mocha Caliente,mocha_caliente_light,,ingrediente,Café Tukafe Tradición,14
+variacion,Mocha Caliente,mocha_caliente_light,,ingrediente,Routin 1883 Chocolate Oscuro,20
+variacion,Mocha Caliente,mocha_caliente_light,,ingrediente,Routin Chocolate Oscuro,22
+variacion,Mocha Caliente,mocha_caliente_light,,ingrediente,Leche Bové Barista Light,260
+variacion,Mocha Caliente,mocha_caliente_light,,insumo,Vaso de Doble Pared 8 oz,1
+variacion,Mocha Caliente,mocha_caliente_deslactosada,,ingrediente,Café Tukafe Tradición,14
+variacion,Mocha Caliente,mocha_caliente_deslactosada,,ingrediente,Routin 1883 Chocolate Oscuro,20
+variacion,Mocha Caliente,mocha_caliente_deslactosada,,ingrediente,Routin Chocolate Oscuro,22
+variacion,Mocha Caliente,mocha_caliente_deslactosada,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Mocha Caliente,mocha_caliente_deslactosada,,insumo,Vaso de Doble Pared 8 oz,1
+variacion,Mocha Caliente,mocha_caliente_almendra,,ingrediente,Café Tukafe Tradición,14
+variacion,Mocha Caliente,mocha_caliente_almendra,,ingrediente,Routin 1883 Chocolate Oscuro,20
+variacion,Mocha Caliente,mocha_caliente_almendra,,ingrediente,Routin Chocolate Oscuro,22
+variacion,Mocha Caliente,mocha_caliente_almendra,,ingrediente,GÜD Almendra Barista,260
+variacion,Mocha Caliente,mocha_caliente_almendra,,insumo,Vaso de Doble Pared 8 oz,1
+variacion,Mocha Caliente,mocha_caliente_avena,,ingrediente,Café Tukafe Tradición,14
+variacion,Mocha Caliente,mocha_caliente_avena,,ingrediente,Routin 1883 Chocolate Oscuro,20
+variacion,Mocha Caliente,mocha_caliente_avena,,ingrediente,Routin Chocolate Oscuro,22
+variacion,Mocha Caliente,mocha_caliente_avena,,ingrediente,GÜD Avena Barista,260
+variacion,Mocha Caliente,mocha_caliente_avena,,insumo,Vaso de Doble Pared 8 oz,1
+variacion,Mocha Caliente,mocha_caliente_coco,,ingrediente,Café Tukafe Tradición,14
+variacion,Mocha Caliente,mocha_caliente_coco,,ingrediente,Routin 1883 Chocolate Oscuro,20
+variacion,Mocha Caliente,mocha_caliente_coco,,ingrediente,Routin Chocolate Oscuro,22
+variacion,Mocha Caliente,mocha_caliente_coco,,ingrediente,Leche de Coco,260
+variacion,Mocha Caliente,mocha_caliente_coco,,insumo,Vaso de Doble Pared 8 oz,1
+variacion,Mocha Caliente,mocha_caliente_soya_vainilla,,ingrediente,Café Tukafe Tradición,14
+variacion,Mocha Caliente,mocha_caliente_soya_vainilla,,ingrediente,Routin 1883 Chocolate Oscuro,20
+variacion,Mocha Caliente,mocha_caliente_soya_vainilla,,ingrediente,Routin Chocolate Oscuro,22
+variacion,Mocha Caliente,mocha_caliente_soya_vainilla,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Mocha Caliente,mocha_caliente_soya_vainilla,,insumo,Vaso de Doble Pared 8 oz,1
+variacion,Mocha Frío,mocha_frio_entera_vaso,,ingrediente,Café Tukafe Tradición,14
+variacion,Mocha Frío,mocha_frio_entera_vaso,,ingrediente,Routin 1883 Chocolate Oscuro,20
+variacion,Mocha Frío,mocha_frio_entera_vaso,,ingrediente,Routin Chocolate Oscuro,22
+variacion,Mocha Frío,mocha_frio_entera_vaso,,ingrediente,Leche Bové Barista Entera,260
+variacion,Mocha Frío,mocha_frio_entera_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Mocha Frío,mocha_frio_light_vaso,,ingrediente,Café Tukafe Tradición,14
+variacion,Mocha Frío,mocha_frio_light_vaso,,ingrediente,Routin 1883 Chocolate Oscuro,20
+variacion,Mocha Frío,mocha_frio_light_vaso,,ingrediente,Routin Chocolate Oscuro,22
+variacion,Mocha Frío,mocha_frio_light_vaso,,ingrediente,Leche Bové Barista Light,260
+variacion,Mocha Frío,mocha_frio_light_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Mocha Frío,mocha_frio_deslactosada_vaso,,ingrediente,Café Tukafe Tradición,14
+variacion,Mocha Frío,mocha_frio_deslactosada_vaso,,ingrediente,Routin 1883 Chocolate Oscuro,20
+variacion,Mocha Frío,mocha_frio_deslactosada_vaso,,ingrediente,Routin Chocolate Oscuro,22
+variacion,Mocha Frío,mocha_frio_deslactosada_vaso,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Mocha Frío,mocha_frio_deslactosada_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Mocha Frío,mocha_frio_almendra_vaso,,ingrediente,Café Tukafe Tradición,14
+variacion,Mocha Frío,mocha_frio_almendra_vaso,,ingrediente,Routin 1883 Chocolate Oscuro,20
+variacion,Mocha Frío,mocha_frio_almendra_vaso,,ingrediente,Routin Chocolate Oscuro,22
+variacion,Mocha Frío,mocha_frio_almendra_vaso,,ingrediente,GÜD Almendra Barista,260
+variacion,Mocha Frío,mocha_frio_almendra_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Mocha Frío,mocha_frio_avena_vaso,,ingrediente,Café Tukafe Tradición,14
+variacion,Mocha Frío,mocha_frio_avena_vaso,,ingrediente,Routin 1883 Chocolate Oscuro,20
+variacion,Mocha Frío,mocha_frio_avena_vaso,,ingrediente,Routin Chocolate Oscuro,22
+variacion,Mocha Frío,mocha_frio_avena_vaso,,ingrediente,GÜD Avena Barista,260
+variacion,Mocha Frío,mocha_frio_avena_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Mocha Frío,mocha_frio_coco_vaso,,ingrediente,Café Tukafe Tradición,14
+variacion,Mocha Frío,mocha_frio_coco_vaso,,ingrediente,Routin 1883 Chocolate Oscuro,20
+variacion,Mocha Frío,mocha_frio_coco_vaso,,ingrediente,Routin Chocolate Oscuro,22
+variacion,Mocha Frío,mocha_frio_coco_vaso,,ingrediente,Leche de Coco,260
+variacion,Mocha Frío,mocha_frio_coco_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Mocha Frío,mocha_frio_soya_vainilla_vaso,,ingrediente,Café Tukafe Tradición,14
+variacion,Mocha Frío,mocha_frio_soya_vainilla_vaso,,ingrediente,Routin 1883 Chocolate Oscuro,20
+variacion,Mocha Frío,mocha_frio_soya_vainilla_vaso,,ingrediente,Routin Chocolate Oscuro,22
+variacion,Mocha Frío,mocha_frio_soya_vainilla_vaso,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Mocha Frío,mocha_frio_soya_vainilla_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Mocha Frío,mocha_frio_entera_lata,,ingrediente,Café Tukafe Tradición,14
+variacion,Mocha Frío,mocha_frio_entera_lata,,ingrediente,Routin 1883 Chocolate Oscuro,20
+variacion,Mocha Frío,mocha_frio_entera_lata,,ingrediente,Routin Chocolate Oscuro,22
+variacion,Mocha Frío,mocha_frio_entera_lata,,ingrediente,Leche Bové Barista Entera,260
+variacion,Mocha Frío,mocha_frio_entera_lata,,insumo,Lata Pet,1
+variacion,Mocha Frío,mocha_frio_light_lata,,ingrediente,Café Tukafe Tradición,14
+variacion,Mocha Frío,mocha_frio_light_lata,,ingrediente,Routin 1883 Chocolate Oscuro,20
+variacion,Mocha Frío,mocha_frio_light_lata,,ingrediente,Routin Chocolate Oscuro,22
+variacion,Mocha Frío,mocha_frio_light_lata,,ingrediente,Leche Bové Barista Light,260
+variacion,Mocha Frío,mocha_frio_light_lata,,insumo,Lata Pet,1
+variacion,Mocha Frío,mocha_frio_deslactosada_lata,,ingrediente,Café Tukafe Tradición,14
+variacion,Mocha Frío,mocha_frio_deslactosada_lata,,ingrediente,Routin 1883 Chocolate Oscuro,20
+variacion,Mocha Frío,mocha_frio_deslactosada_lata,,ingrediente,Routin Chocolate Oscuro,22
+variacion,Mocha Frío,mocha_frio_deslactosada_lata,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Mocha Frío,mocha_frio_deslactosada_lata,,insumo,Lata Pet,1
+variacion,Mocha Frío,mocha_frio_almendra_lata,,ingrediente,Café Tukafe Tradición,14
+variacion,Mocha Frío,mocha_frio_almendra_lata,,ingrediente,Routin 1883 Chocolate Oscuro,20
+variacion,Mocha Frío,mocha_frio_almendra_lata,,ingrediente,Routin Chocolate Oscuro,22
+variacion,Mocha Frío,mocha_frio_almendra_lata,,ingrediente,GÜD Almendra Barista,260
+variacion,Mocha Frío,mocha_frio_almendra_lata,,insumo,Lata Pet,1
+variacion,Mocha Frío,mocha_frio_avena_lata,,ingrediente,Café Tukafe Tradición,14
+variacion,Mocha Frío,mocha_frio_avena_lata,,ingrediente,Routin 1883 Chocolate Oscuro,20
+variacion,Mocha Frío,mocha_frio_avena_lata,,ingrediente,Routin Chocolate Oscuro,22
+variacion,Mocha Frío,mocha_frio_avena_lata,,ingrediente,GÜD Avena Barista,260
+variacion,Mocha Frío,mocha_frio_avena_lata,,insumo,Lata Pet,1
+variacion,Mocha Frío,mocha_frio_coco_lata,,ingrediente,Café Tukafe Tradición,14
+variacion,Mocha Frío,mocha_frio_coco_lata,,ingrediente,Routin 1883 Chocolate Oscuro,20
+variacion,Mocha Frío,mocha_frio_coco_lata,,ingrediente,Routin Chocolate Oscuro,22
+variacion,Mocha Frío,mocha_frio_coco_lata,,ingrediente,Leche de Coco,260
+variacion,Mocha Frío,mocha_frio_coco_lata,,insumo,Lata Pet,1
+variacion,Mocha Frío,mocha_frio_soya_vainilla_lata,,ingrediente,Café Tukafe Tradición,14
+variacion,Mocha Frío,mocha_frio_soya_vainilla_lata,,ingrediente,Routin 1883 Chocolate Oscuro,20
+variacion,Mocha Frío,mocha_frio_soya_vainilla_lata,,ingrediente,Routin Chocolate Oscuro,22
+variacion,Mocha Frío,mocha_frio_soya_vainilla_lata,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Mocha Frío,mocha_frio_soya_vainilla_lata,,insumo,Lata Pet,1
+variacion,Mocha Frappé,mocha_frappe_entera,,ingrediente,Café Tukafe Tradición,15
+variacion,Mocha Frappé,mocha_frappe_entera,,ingrediente,Leche Bové Barista Entera,30
+variacion,Mocha Frappé,mocha_frappe_entera,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Mocha Frappé,mocha_frappe_entera,,ingrediente,Routin Chocolate Oscuro,30
+variacion,Mocha Frappé,mocha_frappe_entera,,insumo,Vaso Pet 16oz,1
+variacion,Mocha Frappé,mocha_frappe_light,,ingrediente,Café Tukafe Tradición,15
+variacion,Mocha Frappé,mocha_frappe_light,,ingrediente,Leche Bové Barista Light,30
+variacion,Mocha Frappé,mocha_frappe_light,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Mocha Frappé,mocha_frappe_light,,ingrediente,Routin Chocolate Oscuro,30
+variacion,Mocha Frappé,mocha_frappe_light,,insumo,Vaso Pet 16oz,1
+variacion,Mocha Frappé,mocha_frappe_deslactosada,,ingrediente,Café Tukafe Tradición,15
+variacion,Mocha Frappé,mocha_frappe_deslactosada,,ingrediente,Leche Bové Barista Deslactosada,30
+variacion,Mocha Frappé,mocha_frappe_deslactosada,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Mocha Frappé,mocha_frappe_deslactosada,,ingrediente,Routin Chocolate Oscuro,30
+variacion,Mocha Frappé,mocha_frappe_deslactosada,,insumo,Vaso Pet 16oz,1
+variacion,Mocha Frappé,mocha_frappe_almendra,,ingrediente,Café Tukafe Tradición,15
+variacion,Mocha Frappé,mocha_frappe_almendra,,ingrediente,GÜD Almendra Barista,30
+variacion,Mocha Frappé,mocha_frappe_almendra,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Mocha Frappé,mocha_frappe_almendra,,ingrediente,Routin Chocolate Oscuro,30
+variacion,Mocha Frappé,mocha_frappe_almendra,,insumo,Vaso Pet 16oz,1
+variacion,Mocha Frappé,mocha_frappe_avena,,ingrediente,Café Tukafe Tradición,15
+variacion,Mocha Frappé,mocha_frappe_avena,,ingrediente,GÜD Avena Barista,30
+variacion,Mocha Frappé,mocha_frappe_avena,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Mocha Frappé,mocha_frappe_avena,,ingrediente,Routin Chocolate Oscuro,30
+variacion,Mocha Frappé,mocha_frappe_avena,,insumo,Vaso Pet 16oz,1
+variacion,Mocha Frappé,mocha_frappe_coco,,ingrediente,Café Tukafe Tradición,15
+variacion,Mocha Frappé,mocha_frappe_coco,,ingrediente,Leche de Coco,30
+variacion,Mocha Frappé,mocha_frappe_coco,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Mocha Frappé,mocha_frappe_coco,,ingrediente,Routin Chocolate Oscuro,30
+variacion,Mocha Frappé,mocha_frappe_coco,,insumo,Vaso Pet 16oz,1
+variacion,Mocha Frappé,mocha_frappe_soya_vainilla,,ingrediente,Café Tukafe Tradición,15
+variacion,Mocha Frappé,mocha_frappe_soya_vainilla,,ingrediente,GÜD Soya Barista Vainilla,30
+variacion,Mocha Frappé,mocha_frappe_soya_vainilla,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Mocha Frappé,mocha_frappe_soya_vainilla,,ingrediente,Routin Chocolate Oscuro,30
+variacion,Mocha Frappé,mocha_frappe_soya_vainilla,,insumo,Vaso Pet 16oz,1
+variacion,Coco Coffee Foam,coco_foam_agua_vaso,,ingrediente,Café Tukafe Tradición,30
+variacion,Coco Coffee Foam,coco_foam_agua_vaso,,ingrediente,Crema para Batir,60
+variacion,Coco Coffee Foam,coco_foam_agua_vaso,,ingrediente,GÜD Agua de Coco,250
+variacion,Coco Coffee Foam,coco_foam_agua_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Coco Coffee Foam,coco_foam_leche_vaso,,ingrediente,Café Tukafe Tradición,30
+variacion,Coco Coffee Foam,coco_foam_leche_vaso,,ingrediente,Crema para Batir,60
+variacion,Coco Coffee Foam,coco_foam_leche_vaso,,ingrediente,Leche de Coco,250
+variacion,Coco Coffee Foam,coco_foam_leche_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Coco Coffee Foam,coco_foam_agua_lata,,ingrediente,Café Tukafe Tradición,30
+variacion,Coco Coffee Foam,coco_foam_agua_lata,,ingrediente,Crema para Batir,60
+variacion,Coco Coffee Foam,coco_foam_agua_lata,,ingrediente,GÜD Agua de Coco,250
+variacion,Coco Coffee Foam,coco_foam_agua_lata,,insumo,Lata Pet,1
+variacion,Coco Coffee Foam,coco_foam_leche_lata,,ingrediente,Café Tukafe Tradición,30
+variacion,Coco Coffee Foam,coco_foam_leche_lata,,ingrediente,Crema para Batir,60
+variacion,Coco Coffee Foam,coco_foam_leche_lata,,ingrediente,Leche de Coco,250
+variacion,Coco Coffee Foam,coco_foam_leche_lata,,insumo,Lata Pet,1
+variacion,Lotus Cold Foam,lotus_foam_entera_vaso,,ingrediente,Café Tukafe Tradición,14
+variacion,Lotus Cold Foam,lotus_foam_entera_vaso,,ingrediente,Crema para Batir,60
+variacion,Lotus Cold Foam,lotus_foam_entera_vaso,,ingrediente,Galletas Lotus para Frappé,1
+variacion,Lotus Cold Foam,lotus_foam_entera_vaso,,ingrediente,Routin Lotus,20
+variacion,Lotus Cold Foam,lotus_foam_entera_vaso,,ingrediente,Leche Bové Barista Entera,260
+variacion,Lotus Cold Foam,lotus_foam_entera_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Lotus Cold Foam,lotus_foam_entera_lata,,ingrediente,Café Tukafe Tradición,14
+variacion,Lotus Cold Foam,lotus_foam_entera_lata,,ingrediente,Crema para Batir,60
+variacion,Lotus Cold Foam,lotus_foam_entera_lata,,ingrediente,Galletas Lotus para Frappé,1
+variacion,Lotus Cold Foam,lotus_foam_entera_lata,,ingrediente,Routin Lotus,20
+variacion,Lotus Cold Foam,lotus_foam_entera_lata,,ingrediente,Leche Bové Barista Entera,260
+variacion,Lotus Cold Foam,lotus_foam_entera_lata,,insumo,Lata Pet,1
+variacion,Lotus Cold Foam,lotus_foam_light_vaso,,ingrediente,Café Tukafe Tradición,14
+variacion,Lotus Cold Foam,lotus_foam_light_vaso,,ingrediente,Crema para Batir,60
+variacion,Lotus Cold Foam,lotus_foam_light_vaso,,ingrediente,Galletas Lotus para Frappé,1
+variacion,Lotus Cold Foam,lotus_foam_light_vaso,,ingrediente,Routin Lotus,20
+variacion,Lotus Cold Foam,lotus_foam_light_vaso,,ingrediente,Leche Bové Barista Light,260
+variacion,Lotus Cold Foam,lotus_foam_light_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Lotus Cold Foam,lotus_foam_deslactosada_vaso,,ingrediente,Café Tukafe Tradición,14
+variacion,Lotus Cold Foam,lotus_foam_deslactosada_vaso,,ingrediente,Crema para Batir,60
+variacion,Lotus Cold Foam,lotus_foam_deslactosada_vaso,,ingrediente,Galletas Lotus para Frappé,1
+variacion,Lotus Cold Foam,lotus_foam_deslactosada_vaso,,ingrediente,Routin Lotus,20
+variacion,Lotus Cold Foam,lotus_foam_deslactosada_vaso,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Lotus Cold Foam,lotus_foam_deslactosada_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Lotus Cold Foam,lotus_foam_almendra_vaso,,ingrediente,Café Tukafe Tradición,14
+variacion,Lotus Cold Foam,lotus_foam_almendra_vaso,,ingrediente,Crema para Batir,60
+variacion,Lotus Cold Foam,lotus_foam_almendra_vaso,,ingrediente,Galletas Lotus para Frappé,1
+variacion,Lotus Cold Foam,lotus_foam_almendra_vaso,,ingrediente,Routin Lotus,20
+variacion,Lotus Cold Foam,lotus_foam_almendra_vaso,,ingrediente,GÜD Almendra Barista,260
+variacion,Lotus Cold Foam,lotus_foam_almendra_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Lotus Cold Foam,lotus_foam_avena_vaso,,ingrediente,Café Tukafe Tradición,14
+variacion,Lotus Cold Foam,lotus_foam_avena_vaso,,ingrediente,Crema para Batir,60
+variacion,Lotus Cold Foam,lotus_foam_avena_vaso,,ingrediente,Galletas Lotus para Frappé,1
+variacion,Lotus Cold Foam,lotus_foam_avena_vaso,,ingrediente,Routin Lotus,20
+variacion,Lotus Cold Foam,lotus_foam_avena_vaso,,ingrediente,GÜD Avena Barista,260
+variacion,Lotus Cold Foam,lotus_foam_avena_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Lotus Cold Foam,lotus_foam_coco_vaso,,ingrediente,Café Tukafe Tradición,14
+variacion,Lotus Cold Foam,lotus_foam_coco_vaso,,ingrediente,Crema para Batir,60
+variacion,Lotus Cold Foam,lotus_foam_coco_vaso,,ingrediente,Galletas Lotus para Frappé,1
+variacion,Lotus Cold Foam,lotus_foam_coco_vaso,,ingrediente,Routin Lotus,20
+variacion,Lotus Cold Foam,lotus_foam_coco_vaso,,ingrediente,Leche de Coco,260
+variacion,Lotus Cold Foam,lotus_foam_coco_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Lotus Cold Foam,lotus_foam_soya_vainilla_vaso,,ingrediente,Café Tukafe Tradición,14
+variacion,Lotus Cold Foam,lotus_foam_soya_vainilla_vaso,,ingrediente,Crema para Batir,60
+variacion,Lotus Cold Foam,lotus_foam_soya_vainilla_vaso,,ingrediente,Galletas Lotus para Frappé,1
+variacion,Lotus Cold Foam,lotus_foam_soya_vainilla_vaso,,ingrediente,Routin Lotus,20
+variacion,Lotus Cold Foam,lotus_foam_soya_vainilla_vaso,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Lotus Cold Foam,lotus_foam_soya_vainilla_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Lotus Cold Foam,lotus_foam_light_lata,,ingrediente,Café Tukafe Tradición,14
+variacion,Lotus Cold Foam,lotus_foam_light_lata,,ingrediente,Crema para Batir,60
+variacion,Lotus Cold Foam,lotus_foam_light_lata,,ingrediente,Galletas Lotus para Frappé,1
+variacion,Lotus Cold Foam,lotus_foam_light_lata,,ingrediente,Routin Lotus,20
+variacion,Lotus Cold Foam,lotus_foam_light_lata,,ingrediente,Leche Bové Barista Light,260
+variacion,Lotus Cold Foam,lotus_foam_light_lata,,insumo,Lata Pet,1
+variacion,Lotus Cold Foam,lotus_foam_deslactosada_lata,,ingrediente,Café Tukafe Tradición,14
+variacion,Lotus Cold Foam,lotus_foam_deslactosada_lata,,ingrediente,Crema para Batir,60
+variacion,Lotus Cold Foam,lotus_foam_deslactosada_lata,,ingrediente,Galletas Lotus para Frappé,1
+variacion,Lotus Cold Foam,lotus_foam_deslactosada_lata,,ingrediente,Routin Lotus,20
+variacion,Lotus Cold Foam,lotus_foam_deslactosada_lata,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Lotus Cold Foam,lotus_foam_deslactosada_lata,,insumo,Lata Pet,1
+variacion,Lotus Cold Foam,lotus_foam_almendra_lata,,ingrediente,Café Tukafe Tradición,14
+variacion,Lotus Cold Foam,lotus_foam_almendra_lata,,ingrediente,Crema para Batir,60
+variacion,Lotus Cold Foam,lotus_foam_almendra_lata,,ingrediente,Galletas Lotus para Frappé,1
+variacion,Lotus Cold Foam,lotus_foam_almendra_lata,,ingrediente,Routin Lotus,20
+variacion,Lotus Cold Foam,lotus_foam_almendra_lata,,ingrediente,GÜD Almendra Barista,260
+variacion,Lotus Cold Foam,lotus_foam_almendra_lata,,insumo,Lata Pet,1
+variacion,Lotus Cold Foam,lotus_foam_avena_lata,,ingrediente,Café Tukafe Tradición,14
+variacion,Lotus Cold Foam,lotus_foam_avena_lata,,ingrediente,Crema para Batir,60
+variacion,Lotus Cold Foam,lotus_foam_avena_lata,,ingrediente,Galletas Lotus para Frappé,1
+variacion,Lotus Cold Foam,lotus_foam_avena_lata,,ingrediente,Routin Lotus,20
+variacion,Lotus Cold Foam,lotus_foam_avena_lata,,ingrediente,GÜD Avena Barista,260
+variacion,Lotus Cold Foam,lotus_foam_avena_lata,,insumo,Lata Pet,1
+variacion,Lotus Cold Foam,lotus_foam_coco_lata,,ingrediente,Café Tukafe Tradición,14
+variacion,Lotus Cold Foam,lotus_foam_coco_lata,,ingrediente,Crema para Batir,60
+variacion,Lotus Cold Foam,lotus_foam_coco_lata,,ingrediente,Galletas Lotus para Frappé,1
+variacion,Lotus Cold Foam,lotus_foam_coco_lata,,ingrediente,Routin Lotus,20
+variacion,Lotus Cold Foam,lotus_foam_coco_lata,,ingrediente,Leche de Coco,260
+variacion,Lotus Cold Foam,lotus_foam_coco_lata,,insumo,Lata Pet,1
+variacion,Lotus Cold Foam,lotus_foam_soya_vainilla_lata,,ingrediente,Café Tukafe Tradición,14
+variacion,Lotus Cold Foam,lotus_foam_soya_vainilla_lata,,ingrediente,Crema para Batir,60
+variacion,Lotus Cold Foam,lotus_foam_soya_vainilla_lata,,ingrediente,Galletas Lotus para Frappé,1
+variacion,Lotus Cold Foam,lotus_foam_soya_vainilla_lata,,ingrediente,Routin Lotus,20
+variacion,Lotus Cold Foam,lotus_foam_soya_vainilla_lata,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Lotus Cold Foam,lotus_foam_soya_vainilla_lata,,insumo,Lata Pet,1
+variacion,Tiramisú Cold Foam,tiramisu_foam_entera_vaso,,ingrediente,Café Tukafe Tradición,15
+variacion,Tiramisú Cold Foam,tiramisu_foam_entera_vaso,,ingrediente,Crema para Batir,60
+variacion,Tiramisú Cold Foam,tiramisu_foam_entera_vaso,,ingrediente,Routin Tiramisú,38
+variacion,Tiramisú Cold Foam,tiramisu_foam_entera_vaso,,ingrediente,Leche Bové Barista Entera,260
+variacion,Tiramisú Cold Foam,tiramisu_foam_entera_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Tiramisú Cold Foam,tiramisu_foam_light_vaso,,ingrediente,Café Tukafe Tradición,15
+variacion,Tiramisú Cold Foam,tiramisu_foam_light_vaso,,ingrediente,Crema para Batir,60
+variacion,Tiramisú Cold Foam,tiramisu_foam_light_vaso,,ingrediente,Routin Tiramisú,38
+variacion,Tiramisú Cold Foam,tiramisu_foam_light_vaso,,ingrediente,Leche Bové Barista Light,260
+variacion,Tiramisú Cold Foam,tiramisu_foam_light_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Tiramisú Cold Foam,tiramisu_foam_deslactosada_vaso,,ingrediente,Café Tukafe Tradición,15
+variacion,Tiramisú Cold Foam,tiramisu_foam_deslactosada_vaso,,ingrediente,Crema para Batir,60
+variacion,Tiramisú Cold Foam,tiramisu_foam_deslactosada_vaso,,ingrediente,Routin Tiramisú,38
+variacion,Tiramisú Cold Foam,tiramisu_foam_deslactosada_vaso,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Tiramisú Cold Foam,tiramisu_foam_deslactosada_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Tiramisú Cold Foam,tiramisu_foam_almendra_vaso,,ingrediente,Café Tukafe Tradición,15
+variacion,Tiramisú Cold Foam,tiramisu_foam_almendra_vaso,,ingrediente,Crema para Batir,60
+variacion,Tiramisú Cold Foam,tiramisu_foam_almendra_vaso,,ingrediente,Routin Tiramisú,38
+variacion,Tiramisú Cold Foam,tiramisu_foam_almendra_vaso,,ingrediente,GÜD Almendra Barista,260
+variacion,Tiramisú Cold Foam,tiramisu_foam_almendra_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Tiramisú Cold Foam,tiramisu_foam_avena_vaso,,ingrediente,Café Tukafe Tradición,15
+variacion,Tiramisú Cold Foam,tiramisu_foam_avena_vaso,,ingrediente,Crema para Batir,60
+variacion,Tiramisú Cold Foam,tiramisu_foam_avena_vaso,,ingrediente,Routin Tiramisú,38
+variacion,Tiramisú Cold Foam,tiramisu_foam_avena_vaso,,ingrediente,GÜD Avena Barista,260
+variacion,Tiramisú Cold Foam,tiramisu_foam_avena_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Tiramisú Cold Foam,tiramisu_foam_coco_vaso,,ingrediente,Café Tukafe Tradición,15
+variacion,Tiramisú Cold Foam,tiramisu_foam_coco_vaso,,ingrediente,Crema para Batir,60
+variacion,Tiramisú Cold Foam,tiramisu_foam_coco_vaso,,ingrediente,Routin Tiramisú,38
+variacion,Tiramisú Cold Foam,tiramisu_foam_coco_vaso,,ingrediente,Leche de Coco,260
+variacion,Tiramisú Cold Foam,tiramisu_foam_coco_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Tiramisú Cold Foam,tiramisu_foam_soya_vainilla_vaso,,ingrediente,Café Tukafe Tradición,15
+variacion,Tiramisú Cold Foam,tiramisu_foam_soya_vainilla_vaso,,ingrediente,Crema para Batir,60
+variacion,Tiramisú Cold Foam,tiramisu_foam_soya_vainilla_vaso,,ingrediente,Routin Tiramisú,38
+variacion,Tiramisú Cold Foam,tiramisu_foam_soya_vainilla_vaso,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Tiramisú Cold Foam,tiramisu_foam_soya_vainilla_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Tiramisú Cold Foam,tiramisu_foam_entera_lata,,ingrediente,Café Tukafe Tradición,15
+variacion,Tiramisú Cold Foam,tiramisu_foam_entera_lata,,ingrediente,Crema para Batir,60
+variacion,Tiramisú Cold Foam,tiramisu_foam_entera_lata,,ingrediente,Routin Tiramisú,38
+variacion,Tiramisú Cold Foam,tiramisu_foam_entera_lata,,ingrediente,Leche Bové Barista Entera,260
+variacion,Tiramisú Cold Foam,tiramisu_foam_entera_lata,,insumo,Lata Pet,1
+variacion,Tiramisú Cold Foam,tiramisu_foam_light_lata,,ingrediente,Café Tukafe Tradición,15
+variacion,Tiramisú Cold Foam,tiramisu_foam_light_lata,,ingrediente,Crema para Batir,60
+variacion,Tiramisú Cold Foam,tiramisu_foam_light_lata,,ingrediente,Routin Tiramisú,38
+variacion,Tiramisú Cold Foam,tiramisu_foam_light_lata,,ingrediente,Leche Bové Barista Light,260
+variacion,Tiramisú Cold Foam,tiramisu_foam_light_lata,,insumo,Lata Pet,1
+variacion,Tiramisú Cold Foam,tiramisu_foam_deslactosada_lata,,ingrediente,Café Tukafe Tradición,15
+variacion,Tiramisú Cold Foam,tiramisu_foam_deslactosada_lata,,ingrediente,Crema para Batir,60
+variacion,Tiramisú Cold Foam,tiramisu_foam_deslactosada_lata,,ingrediente,Routin Tiramisú,38
+variacion,Tiramisú Cold Foam,tiramisu_foam_deslactosada_lata,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Tiramisú Cold Foam,tiramisu_foam_deslactosada_lata,,insumo,Lata Pet,1
+variacion,Tiramisú Cold Foam,tiramisu_foam_almendra_lata,,ingrediente,Café Tukafe Tradición,15
+variacion,Tiramisú Cold Foam,tiramisu_foam_almendra_lata,,ingrediente,Crema para Batir,60
+variacion,Tiramisú Cold Foam,tiramisu_foam_almendra_lata,,ingrediente,Routin Tiramisú,38
+variacion,Tiramisú Cold Foam,tiramisu_foam_almendra_lata,,ingrediente,GÜD Almendra Barista,260
+variacion,Tiramisú Cold Foam,tiramisu_foam_almendra_lata,,insumo,Lata Pet,1
+variacion,Tiramisú Cold Foam,tiramisu_foam_avena_lata,,ingrediente,Café Tukafe Tradición,15
+variacion,Tiramisú Cold Foam,tiramisu_foam_avena_lata,,ingrediente,Crema para Batir,60
+variacion,Tiramisú Cold Foam,tiramisu_foam_avena_lata,,ingrediente,Routin Tiramisú,38
+variacion,Tiramisú Cold Foam,tiramisu_foam_avena_lata,,ingrediente,GÜD Avena Barista,260
+variacion,Tiramisú Cold Foam,tiramisu_foam_avena_lata,,insumo,Lata Pet,1
+variacion,Tiramisú Cold Foam,tiramisu_foam_coco_lata,,ingrediente,Café Tukafe Tradición,15
+variacion,Tiramisú Cold Foam,tiramisu_foam_coco_lata,,ingrediente,Crema para Batir,60
+variacion,Tiramisú Cold Foam,tiramisu_foam_coco_lata,,ingrediente,Routin Tiramisú,38
+variacion,Tiramisú Cold Foam,tiramisu_foam_coco_lata,,ingrediente,Leche de Coco,260
+variacion,Tiramisú Cold Foam,tiramisu_foam_coco_lata,,insumo,Lata Pet,1
+variacion,Tiramisú Cold Foam,tiramisu_foam_soya_vainilla_lata,,ingrediente,Café Tukafe Tradición,15
+variacion,Tiramisú Cold Foam,tiramisu_foam_soya_vainilla_lata,,ingrediente,Crema para Batir,60
+variacion,Tiramisú Cold Foam,tiramisu_foam_soya_vainilla_lata,,ingrediente,Routin Tiramisú,38
+variacion,Tiramisú Cold Foam,tiramisu_foam_soya_vainilla_lata,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Tiramisú Cold Foam,tiramisu_foam_soya_vainilla_lata,,insumo,Lata Pet,1
+variacion,Nutella Latte,nutella_entera,,ingrediente,Café Tukafe Tradición,14
+variacion,Nutella Latte,nutella_entera,,ingrediente,Nutella,40
+variacion,Nutella Latte,nutella_entera,,ingrediente,Leche Bové Barista Entera,260
+variacion,Nutella Latte,nutella_entera,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Nutella Latte,nutella_light,,ingrediente,Café Tukafe Tradición,14
+variacion,Nutella Latte,nutella_light,,ingrediente,Nutella,40
+variacion,Nutella Latte,nutella_light,,ingrediente,Leche Bové Barista Light,260
+variacion,Nutella Latte,nutella_light,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Nutella Latte,nutella_deslactosada,,ingrediente,Café Tukafe Tradición,14
+variacion,Nutella Latte,nutella_deslactosada,,ingrediente,Nutella,40
+variacion,Nutella Latte,nutella_deslactosada,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Nutella Latte,nutella_deslactosada,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Nutella Latte,nutella_almendra,,ingrediente,Café Tukafe Tradición,14
+variacion,Nutella Latte,nutella_almendra,,ingrediente,Nutella,40
+variacion,Nutella Latte,nutella_almendra,,ingrediente,GÜD Almendra Barista,260
+variacion,Nutella Latte,nutella_almendra,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Nutella Latte,nutella_avena,,ingrediente,Café Tukafe Tradición,14
+variacion,Nutella Latte,nutella_avena,,ingrediente,Nutella,40
+variacion,Nutella Latte,nutella_avena,,ingrediente,GÜD Avena Barista,260
+variacion,Nutella Latte,nutella_avena,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Nutella Latte,nutella_coco,,ingrediente,Café Tukafe Tradición,14
+variacion,Nutella Latte,nutella_coco,,ingrediente,Nutella,40
+variacion,Nutella Latte,nutella_coco,,ingrediente,Leche de Coco,260
+variacion,Nutella Latte,nutella_coco,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Nutella Latte,nutella_soya_vainilla,,ingrediente,Café Tukafe Tradición,14
+variacion,Nutella Latte,nutella_soya_vainilla,,ingrediente,Nutella,40
+variacion,Nutella Latte,nutella_soya_vainilla,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Nutella Latte,nutella_soya_vainilla,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Mint White Mocha Caliente,mint_white_mocha_entera,,ingrediente,Café Tukafe Tradición,14
+variacion,Mint White Mocha Caliente,mint_white_mocha_entera,,ingrediente,Routin Ice Mint,15
+variacion,Mint White Mocha Caliente,mint_white_mocha_entera,,ingrediente,Leche Bové Barista Entera,260
+variacion,Mint White Mocha Caliente,mint_white_mocha_entera,,ingrediente,Routin 1883 Chocolate Blanco,30
+variacion,Mint White Mocha Caliente,mint_white_mocha_entera,,ingrediente,Saborizante Chocolate Blanco,22
+variacion,Mint White Mocha Caliente,mint_white_mocha_entera,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Mint White Mocha Caliente,mint_white_mocha_light,,ingrediente,Café Tukafe Tradición,14
+variacion,Mint White Mocha Caliente,mint_white_mocha_light,,ingrediente,Routin Ice Mint,15
+variacion,Mint White Mocha Caliente,mint_white_mocha_light,,ingrediente,Leche Bové Barista Light,260
+variacion,Mint White Mocha Caliente,mint_white_mocha_light,,ingrediente,Routin 1883 Chocolate Blanco,30
+variacion,Mint White Mocha Caliente,mint_white_mocha_light,,ingrediente,Saborizante Chocolate Blanco,22
+variacion,Mint White Mocha Caliente,mint_white_mocha_light,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Mint White Mocha Caliente,mint_white_mocha_deslactosada,,ingrediente,Café Tukafe Tradición,14
+variacion,Mint White Mocha Caliente,mint_white_mocha_deslactosada,,ingrediente,Routin Ice Mint,15
+variacion,Mint White Mocha Caliente,mint_white_mocha_deslactosada,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Mint White Mocha Caliente,mint_white_mocha_deslactosada,,ingrediente,Routin 1883 Chocolate Blanco,30
+variacion,Mint White Mocha Caliente,mint_white_mocha_deslactosada,,ingrediente,Saborizante Chocolate Blanco,22
+variacion,Mint White Mocha Caliente,mint_white_mocha_deslactosada,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Mint White Mocha Caliente,mint_white_mocha_almendra,,ingrediente,Café Tukafe Tradición,14
+variacion,Mint White Mocha Caliente,mint_white_mocha_almendra,,ingrediente,Routin Ice Mint,15
+variacion,Mint White Mocha Caliente,mint_white_mocha_almendra,,ingrediente,GÜD Almendra Barista,260
+variacion,Mint White Mocha Caliente,mint_white_mocha_almendra,,ingrediente,Routin 1883 Chocolate Blanco,30
+variacion,Mint White Mocha Caliente,mint_white_mocha_almendra,,ingrediente,Saborizante Chocolate Blanco,22
+variacion,Mint White Mocha Caliente,mint_white_mocha_almendra,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Mint White Mocha Caliente,mint_white_mocha_avena,,ingrediente,Café Tukafe Tradición,14
+variacion,Mint White Mocha Caliente,mint_white_mocha_avena,,ingrediente,Routin Ice Mint,15
+variacion,Mint White Mocha Caliente,mint_white_mocha_avena,,ingrediente,GÜD Avena Barista,260
+variacion,Mint White Mocha Caliente,mint_white_mocha_avena,,ingrediente,Routin 1883 Chocolate Blanco,30
+variacion,Mint White Mocha Caliente,mint_white_mocha_avena,,ingrediente,Saborizante Chocolate Blanco,22
+variacion,Mint White Mocha Caliente,mint_white_mocha_avena,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Mint White Mocha Caliente,mint_white_mocha_coco,,ingrediente,Café Tukafe Tradición,14
+variacion,Mint White Mocha Caliente,mint_white_mocha_coco,,ingrediente,Routin Ice Mint,15
+variacion,Mint White Mocha Caliente,mint_white_mocha_coco,,ingrediente,Leche de Coco,260
+variacion,Mint White Mocha Caliente,mint_white_mocha_coco,,ingrediente,Routin 1883 Chocolate Blanco,30
+variacion,Mint White Mocha Caliente,mint_white_mocha_coco,,ingrediente,Saborizante Chocolate Blanco,22
+variacion,Mint White Mocha Caliente,mint_white_mocha_coco,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Mint White Mocha Caliente,mint_white_mocha_soya_vainilla,,ingrediente,Café Tukafe Tradición,14
+variacion,Mint White Mocha Caliente,mint_white_mocha_soya_vainilla,,ingrediente,Routin Ice Mint,15
+variacion,Mint White Mocha Caliente,mint_white_mocha_soya_vainilla,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Mint White Mocha Caliente,mint_white_mocha_soya_vainilla,,ingrediente,Routin 1883 Chocolate Blanco,30
+variacion,Mint White Mocha Caliente,mint_white_mocha_soya_vainilla,,ingrediente,Saborizante Chocolate Blanco,22
+variacion,Mint White Mocha Caliente,mint_white_mocha_soya_vainilla,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Mint White Mocha Frío,mint_white_cold_entera_vaso,,ingrediente,Café Tukafe Tradición,14
+variacion,Mint White Mocha Frío,mint_white_cold_entera_vaso,,ingrediente,Routin Ice Mint,15
+variacion,Mint White Mocha Frío,mint_white_cold_entera_vaso,,ingrediente,Saborizante Chocolate Blanco,22
+variacion,Mint White Mocha Frío,mint_white_cold_entera_vaso,,ingrediente,Routin 1883 Chocolate Blanco,30
+variacion,Mint White Mocha Frío,mint_white_cold_entera_vaso,,ingrediente,Leche Bové Barista Entera,260
+variacion,Mint White Mocha Frío,mint_white_cold_entera_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Mint White Mocha Frío,mint_white_cold_light_vaso,,ingrediente,Café Tukafe Tradición,14
+variacion,Mint White Mocha Frío,mint_white_cold_light_vaso,,ingrediente,Routin Ice Mint,15
+variacion,Mint White Mocha Frío,mint_white_cold_light_vaso,,ingrediente,Saborizante Chocolate Blanco,22
+variacion,Mint White Mocha Frío,mint_white_cold_light_vaso,,ingrediente,Routin 1883 Chocolate Blanco,30
+variacion,Mint White Mocha Frío,mint_white_cold_light_vaso,,ingrediente,Leche Bové Barista Light,260
+variacion,Mint White Mocha Frío,mint_white_cold_light_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Mint White Mocha Frío,mint_white_cold_deslactosada_vaso,,ingrediente,Café Tukafe Tradición,14
+variacion,Mint White Mocha Frío,mint_white_cold_deslactosada_vaso,,ingrediente,Routin Ice Mint,15
+variacion,Mint White Mocha Frío,mint_white_cold_deslactosada_vaso,,ingrediente,Saborizante Chocolate Blanco,22
+variacion,Mint White Mocha Frío,mint_white_cold_deslactosada_vaso,,ingrediente,Routin 1883 Chocolate Blanco,30
+variacion,Mint White Mocha Frío,mint_white_cold_deslactosada_vaso,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Mint White Mocha Frío,mint_white_cold_deslactosada_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Mint White Mocha Frío,mint_white_cold_almendra_vaso,,ingrediente,Café Tukafe Tradición,14
+variacion,Mint White Mocha Frío,mint_white_cold_almendra_vaso,,ingrediente,Routin Ice Mint,15
+variacion,Mint White Mocha Frío,mint_white_cold_almendra_vaso,,ingrediente,Saborizante Chocolate Blanco,22
+variacion,Mint White Mocha Frío,mint_white_cold_almendra_vaso,,ingrediente,Routin 1883 Chocolate Blanco,30
+variacion,Mint White Mocha Frío,mint_white_cold_almendra_vaso,,ingrediente,GÜD Almendra Barista,260
+variacion,Mint White Mocha Frío,mint_white_cold_almendra_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Mint White Mocha Frío,mint_white_cold_avena_vaso,,ingrediente,Café Tukafe Tradición,14
+variacion,Mint White Mocha Frío,mint_white_cold_avena_vaso,,ingrediente,Routin Ice Mint,15
+variacion,Mint White Mocha Frío,mint_white_cold_avena_vaso,,ingrediente,Saborizante Chocolate Blanco,22
+variacion,Mint White Mocha Frío,mint_white_cold_avena_vaso,,ingrediente,Routin 1883 Chocolate Blanco,30
+variacion,Mint White Mocha Frío,mint_white_cold_avena_vaso,,ingrediente,GÜD Avena Barista,260
+variacion,Mint White Mocha Frío,mint_white_cold_avena_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Mint White Mocha Frío,mint_white_cold_coco_vaso,,ingrediente,Café Tukafe Tradición,14
+variacion,Mint White Mocha Frío,mint_white_cold_coco_vaso,,ingrediente,Routin Ice Mint,15
+variacion,Mint White Mocha Frío,mint_white_cold_coco_vaso,,ingrediente,Saborizante Chocolate Blanco,22
+variacion,Mint White Mocha Frío,mint_white_cold_coco_vaso,,ingrediente,Routin 1883 Chocolate Blanco,30
+variacion,Mint White Mocha Frío,mint_white_cold_coco_vaso,,ingrediente,Leche de Coco,260
+variacion,Mint White Mocha Frío,mint_white_cold_coco_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Mint White Mocha Frío,mint_white_cold_soya_vainilla_vaso,,ingrediente,Café Tukafe Tradición,14
+variacion,Mint White Mocha Frío,mint_white_cold_soya_vainilla_vaso,,ingrediente,Routin Ice Mint,15
+variacion,Mint White Mocha Frío,mint_white_cold_soya_vainilla_vaso,,ingrediente,Saborizante Chocolate Blanco,22
+variacion,Mint White Mocha Frío,mint_white_cold_soya_vainilla_vaso,,ingrediente,Routin 1883 Chocolate Blanco,30
+variacion,Mint White Mocha Frío,mint_white_cold_soya_vainilla_vaso,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Mint White Mocha Frío,mint_white_cold_soya_vainilla_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Mint White Mocha Frío,mint_white_cold_entera_lata,,ingrediente,Café Tukafe Tradición,14
+variacion,Mint White Mocha Frío,mint_white_cold_entera_lata,,ingrediente,Routin Ice Mint,15
+variacion,Mint White Mocha Frío,mint_white_cold_entera_lata,,ingrediente,Saborizante Chocolate Blanco,22
+variacion,Mint White Mocha Frío,mint_white_cold_entera_lata,,ingrediente,Routin 1883 Chocolate Blanco,30
+variacion,Mint White Mocha Frío,mint_white_cold_entera_lata,,ingrediente,Leche Bové Barista Entera,260
+variacion,Mint White Mocha Frío,mint_white_cold_entera_lata,,insumo,Lata Pet,1
+variacion,Mint White Mocha Frío,mint_white_cold_light_lata,,ingrediente,Café Tukafe Tradición,14
+variacion,Mint White Mocha Frío,mint_white_cold_light_lata,,ingrediente,Routin Ice Mint,15
+variacion,Mint White Mocha Frío,mint_white_cold_light_lata,,ingrediente,Saborizante Chocolate Blanco,22
+variacion,Mint White Mocha Frío,mint_white_cold_light_lata,,ingrediente,Routin 1883 Chocolate Blanco,30
+variacion,Mint White Mocha Frío,mint_white_cold_light_lata,,ingrediente,Leche Bové Barista Light,260
+variacion,Mint White Mocha Frío,mint_white_cold_light_lata,,insumo,Lata Pet,1
+variacion,Mint White Mocha Frío,mint_white_cold_deslactosada_lata,,ingrediente,Café Tukafe Tradición,14
+variacion,Mint White Mocha Frío,mint_white_cold_deslactosada_lata,,ingrediente,Routin Ice Mint,15
+variacion,Mint White Mocha Frío,mint_white_cold_deslactosada_lata,,ingrediente,Saborizante Chocolate Blanco,22
+variacion,Mint White Mocha Frío,mint_white_cold_deslactosada_lata,,ingrediente,Routin 1883 Chocolate Blanco,30
+variacion,Mint White Mocha Frío,mint_white_cold_deslactosada_lata,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Mint White Mocha Frío,mint_white_cold_deslactosada_lata,,insumo,Lata Pet,1
+variacion,Mint White Mocha Frío,mint_white_cold_almendra_lata,,ingrediente,Café Tukafe Tradición,14
+variacion,Mint White Mocha Frío,mint_white_cold_almendra_lata,,ingrediente,Routin Ice Mint,15
+variacion,Mint White Mocha Frío,mint_white_cold_almendra_lata,,ingrediente,Saborizante Chocolate Blanco,22
+variacion,Mint White Mocha Frío,mint_white_cold_almendra_lata,,ingrediente,Routin 1883 Chocolate Blanco,30
+variacion,Mint White Mocha Frío,mint_white_cold_almendra_lata,,ingrediente,GÜD Almendra Barista,260
+variacion,Mint White Mocha Frío,mint_white_cold_almendra_lata,,insumo,Lata Pet,1
+variacion,Mint White Mocha Frío,mint_white_cold_avena_lata,,ingrediente,Café Tukafe Tradición,14
+variacion,Mint White Mocha Frío,mint_white_cold_avena_lata,,ingrediente,Routin Ice Mint,15
+variacion,Mint White Mocha Frío,mint_white_cold_avena_lata,,ingrediente,Saborizante Chocolate Blanco,22
+variacion,Mint White Mocha Frío,mint_white_cold_avena_lata,,ingrediente,Routin 1883 Chocolate Blanco,30
+variacion,Mint White Mocha Frío,mint_white_cold_avena_lata,,ingrediente,GÜD Avena Barista,260
+variacion,Mint White Mocha Frío,mint_white_cold_avena_lata,,insumo,Lata Pet,1
+variacion,Mint White Mocha Frío,mint_white_cold_coco_lata,,ingrediente,Café Tukafe Tradición,14
+variacion,Mint White Mocha Frío,mint_white_cold_coco_lata,,ingrediente,Routin Ice Mint,15
+variacion,Mint White Mocha Frío,mint_white_cold_coco_lata,,ingrediente,Saborizante Chocolate Blanco,22
+variacion,Mint White Mocha Frío,mint_white_cold_coco_lata,,ingrediente,Routin 1883 Chocolate Blanco,30
+variacion,Mint White Mocha Frío,mint_white_cold_coco_lata,,ingrediente,Leche de Coco,260
+variacion,Mint White Mocha Frío,mint_white_cold_coco_lata,,insumo,Lata Pet,1
+variacion,Mint White Mocha Frío,mint_white_cold_soya_vainilla_lata,,ingrediente,Café Tukafe Tradición,14
+variacion,Mint White Mocha Frío,mint_white_cold_soya_vainilla_lata,,ingrediente,Routin Ice Mint,15
+variacion,Mint White Mocha Frío,mint_white_cold_soya_vainilla_lata,,ingrediente,Saborizante Chocolate Blanco,22
+variacion,Mint White Mocha Frío,mint_white_cold_soya_vainilla_lata,,ingrediente,Routin 1883 Chocolate Blanco,30
+variacion,Mint White Mocha Frío,mint_white_cold_soya_vainilla_lata,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Mint White Mocha Frío,mint_white_cold_soya_vainilla_lata,,insumo,Lata Pet,1
+variacion,Mint White Mocha Frappé,mint_white_frappe_entera,,ingrediente,Café Tukafe Tradición,15
+variacion,Mint White Mocha Frappé,mint_white_frappe_entera,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Mint White Mocha Frappé,mint_white_frappe_entera,,ingrediente,Saborizante Chocolate Blanco,20
+variacion,Mint White Mocha Frappé,mint_white_frappe_entera,,ingrediente,Routin Ice Mint,15
+variacion,Mint White Mocha Frappé,mint_white_frappe_entera,,ingrediente,Leche Bové Barista Entera,30
+variacion,Mint White Mocha Frappé,mint_white_frappe_entera,,insumo,Vaso Pet 16oz,1
+variacion,Mint White Mocha Frappé,mint_white_frappe_light,,ingrediente,Café Tukafe Tradición,15
+variacion,Mint White Mocha Frappé,mint_white_frappe_light,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Mint White Mocha Frappé,mint_white_frappe_light,,ingrediente,Saborizante Chocolate Blanco,20
+variacion,Mint White Mocha Frappé,mint_white_frappe_light,,ingrediente,Routin Ice Mint,15
+variacion,Mint White Mocha Frappé,mint_white_frappe_light,,ingrediente,Leche Bové Barista Light,30
+variacion,Mint White Mocha Frappé,mint_white_frappe_light,,insumo,Vaso Pet 16oz,1
+variacion,Mint White Mocha Frappé,mint_white_frappe_deslactosada,,ingrediente,Café Tukafe Tradición,15
+variacion,Mint White Mocha Frappé,mint_white_frappe_deslactosada,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Mint White Mocha Frappé,mint_white_frappe_deslactosada,,ingrediente,Saborizante Chocolate Blanco,20
+variacion,Mint White Mocha Frappé,mint_white_frappe_deslactosada,,ingrediente,Routin Ice Mint,15
+variacion,Mint White Mocha Frappé,mint_white_frappe_deslactosada,,ingrediente,Leche Bové Barista Deslactosada,30
+variacion,Mint White Mocha Frappé,mint_white_frappe_deslactosada,,insumo,Vaso Pet 16oz,1
+variacion,Mint White Mocha Frappé,mint_white_frappe_almendra,,ingrediente,Café Tukafe Tradición,15
+variacion,Mint White Mocha Frappé,mint_white_frappe_almendra,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Mint White Mocha Frappé,mint_white_frappe_almendra,,ingrediente,Saborizante Chocolate Blanco,20
+variacion,Mint White Mocha Frappé,mint_white_frappe_almendra,,ingrediente,Routin Ice Mint,15
+variacion,Mint White Mocha Frappé,mint_white_frappe_almendra,,ingrediente,GÜD Almendra Barista,30
+variacion,Mint White Mocha Frappé,mint_white_frappe_almendra,,insumo,Vaso Pet 16oz,1
+variacion,Mint White Mocha Frappé,mint_white_frappe_avena,,ingrediente,Café Tukafe Tradición,15
+variacion,Mint White Mocha Frappé,mint_white_frappe_avena,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Mint White Mocha Frappé,mint_white_frappe_avena,,ingrediente,Saborizante Chocolate Blanco,20
+variacion,Mint White Mocha Frappé,mint_white_frappe_avena,,ingrediente,Routin Ice Mint,15
+variacion,Mint White Mocha Frappé,mint_white_frappe_avena,,ingrediente,GÜD Avena Barista,30
+variacion,Mint White Mocha Frappé,mint_white_frappe_avena,,insumo,Vaso Pet 16oz,1
+variacion,Mint White Mocha Frappé,mint_white_frappe_coco,,ingrediente,Café Tukafe Tradición,15
+variacion,Mint White Mocha Frappé,mint_white_frappe_coco,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Mint White Mocha Frappé,mint_white_frappe_coco,,ingrediente,Saborizante Chocolate Blanco,20
+variacion,Mint White Mocha Frappé,mint_white_frappe_coco,,ingrediente,Routin Ice Mint,15
+variacion,Mint White Mocha Frappé,mint_white_frappe_coco,,ingrediente,Leche de Coco,30
+variacion,Mint White Mocha Frappé,mint_white_frappe_coco,,insumo,Vaso Pet 16oz,1
+variacion,Mint White Mocha Frappé,mint_white_frappe_soya_vainilla,,ingrediente,Café Tukafe Tradición,15
+variacion,Mint White Mocha Frappé,mint_white_frappe_soya_vainilla,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Mint White Mocha Frappé,mint_white_frappe_soya_vainilla,,ingrediente,Saborizante Chocolate Blanco,20
+variacion,Mint White Mocha Frappé,mint_white_frappe_soya_vainilla,,ingrediente,Routin Ice Mint,15
+variacion,Mint White Mocha Frappé,mint_white_frappe_soya_vainilla,,ingrediente,GÜD Soya Barista Vainilla,30
+variacion,Mint White Mocha Frappé,mint_white_frappe_soya_vainilla,,insumo,Vaso Pet 16oz,1
+variacion,Matcha Latte Caliente,matcha_caliente_entera,,ingrediente,Paladarte Tradicional Matcha,50
+variacion,Matcha Latte Caliente,matcha_caliente_entera,,ingrediente,Leche Bové Barista Entera,260
+variacion,Matcha Latte Caliente,matcha_caliente_entera,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Matcha Latte Caliente,matcha_caliente_light,,ingrediente,Paladarte Tradicional Matcha,50
+variacion,Matcha Latte Caliente,matcha_caliente_light,,ingrediente,Leche Bové Barista Light,260
+variacion,Matcha Latte Caliente,matcha_caliente_light,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Matcha Latte Caliente,matcha_caliente_deslactosada,,ingrediente,Paladarte Tradicional Matcha,50
+variacion,Matcha Latte Caliente,matcha_caliente_deslactosada,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Matcha Latte Caliente,matcha_caliente_deslactosada,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Matcha Latte Caliente,matcha_caliente_almendra,,ingrediente,Paladarte Tradicional Matcha,50
+variacion,Matcha Latte Caliente,matcha_caliente_almendra,,ingrediente,GÜD Almendra Barista,260
+variacion,Matcha Latte Caliente,matcha_caliente_almendra,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Matcha Latte Caliente,matcha_caliente_avena,,ingrediente,Paladarte Tradicional Matcha,50
+variacion,Matcha Latte Caliente,matcha_caliente_avena,,ingrediente,GÜD Avena Barista,260
+variacion,Matcha Latte Caliente,matcha_caliente_avena,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Matcha Latte Caliente,matcha_caliente_coco,,ingrediente,Paladarte Tradicional Matcha,50
+variacion,Matcha Latte Caliente,matcha_caliente_coco,,ingrediente,Leche de Coco,260
+variacion,Matcha Latte Caliente,matcha_caliente_coco,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Matcha Latte Caliente,matcha_caliente_soya_vainilla,,ingrediente,Paladarte Tradicional Matcha,50
+variacion,Matcha Latte Caliente,matcha_caliente_soya_vainilla,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Matcha Latte Caliente,matcha_caliente_soya_vainilla,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Matcha Latte Frío,matcha_frio_entera_vaso,,ingrediente,Paladarte Tradicional Matcha,50
+variacion,Matcha Latte Frío,matcha_frio_entera_vaso,,ingrediente,Leche Bové Barista Entera,260
+variacion,Matcha Latte Frío,matcha_frio_entera_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Matcha Latte Frío,matcha_frio_light_vaso,,ingrediente,Paladarte Tradicional Matcha,50
+variacion,Matcha Latte Frío,matcha_frio_light_vaso,,ingrediente,Leche Bové Barista Light,260
+variacion,Matcha Latte Frío,matcha_frio_light_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Matcha Latte Frío,matcha_frio_deslactosada_vaso,,ingrediente,Paladarte Tradicional Matcha,50
+variacion,Matcha Latte Frío,matcha_frio_deslactosada_vaso,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Matcha Latte Frío,matcha_frio_deslactosada_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Matcha Latte Frío,matcha_frio_almendra_vaso,,ingrediente,Paladarte Tradicional Matcha,50
+variacion,Matcha Latte Frío,matcha_frio_almendra_vaso,,ingrediente,GÜD Almendra Barista,260
+variacion,Matcha Latte Frío,matcha_frio_almendra_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Matcha Latte Frío,matcha_frio_avena_vaso,,ingrediente,Paladarte Tradicional Matcha,50
+variacion,Matcha Latte Frío,matcha_frio_avena_vaso,,ingrediente,GÜD Avena Barista,260
+variacion,Matcha Latte Frío,matcha_frio_avena_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Matcha Latte Frío,matcha_frio_coco_vaso,,ingrediente,Paladarte Tradicional Matcha,50
+variacion,Matcha Latte Frío,matcha_frio_coco_vaso,,ingrediente,Leche de Coco,260
+variacion,Matcha Latte Frío,matcha_frio_coco_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Matcha Latte Frío,matcha_frio_soya_vainilla_vaso,,ingrediente,Paladarte Tradicional Matcha,50
+variacion,Matcha Latte Frío,matcha_frio_soya_vainilla_vaso,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Matcha Latte Frío,matcha_frio_soya_vainilla_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Matcha Latte Frío,matcha_frio_entera_lata,,ingrediente,Paladarte Tradicional Matcha,50
+variacion,Matcha Latte Frío,matcha_frio_entera_lata,,ingrediente,Leche Bové Barista Entera,260
+variacion,Matcha Latte Frío,matcha_frio_entera_lata,,insumo,Lata Pet,1
+variacion,Matcha Latte Frío,matcha_frio_light_lata,,ingrediente,Paladarte Tradicional Matcha,50
+variacion,Matcha Latte Frío,matcha_frio_light_lata,,ingrediente,Leche Bové Barista Light,260
+variacion,Matcha Latte Frío,matcha_frio_light_lata,,insumo,Lata Pet,1
+variacion,Matcha Latte Frío,matcha_frio_deslactosada_lata,,ingrediente,Paladarte Tradicional Matcha,50
+variacion,Matcha Latte Frío,matcha_frio_deslactosada_lata,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Matcha Latte Frío,matcha_frio_deslactosada_lata,,insumo,Lata Pet,1
+variacion,Matcha Latte Frío,matcha_frio_almendra_lata,,ingrediente,Paladarte Tradicional Matcha,50
+variacion,Matcha Latte Frío,matcha_frio_almendra_lata,,ingrediente,GÜD Almendra Barista,260
+variacion,Matcha Latte Frío,matcha_frio_almendra_lata,,insumo,Lata Pet,1
+variacion,Matcha Latte Frío,matcha_frio_avena_lata,,ingrediente,Paladarte Tradicional Matcha,50
+variacion,Matcha Latte Frío,matcha_frio_avena_lata,,ingrediente,GÜD Avena Barista,260
+variacion,Matcha Latte Frío,matcha_frio_avena_lata,,insumo,Lata Pet,1
+variacion,Matcha Latte Frío,matcha_frio_coco_lata,,ingrediente,Paladarte Tradicional Matcha,50
+variacion,Matcha Latte Frío,matcha_frio_coco_lata,,ingrediente,Leche de Coco,260
+variacion,Matcha Latte Frío,matcha_frio_coco_lata,,insumo,Lata Pet,1
+variacion,Matcha Latte Frío,matcha_frio_soya_vainilla_lata,,ingrediente,Paladarte Tradicional Matcha,50
+variacion,Matcha Latte Frío,matcha_frio_soya_vainilla_lata,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Matcha Latte Frío,matcha_frio_soya_vainilla_lata,,insumo,Lata Pet,1
+variacion,Matcha Latte Frappé,matcha_frappe_entera,,ingrediente,Paladarte Tradicional Matcha,40
+variacion,Matcha Latte Frappé,matcha_frappe_entera,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Matcha Latte Frappé,matcha_frappe_entera,,ingrediente,Leche Bové Barista Entera,45
+variacion,Matcha Latte Frappé,matcha_frappe_entera,,insumo,Vaso Pet 16oz,1
+variacion,Matcha Latte Frappé,matcha_frappe_light,,ingrediente,Paladarte Tradicional Matcha,40
+variacion,Matcha Latte Frappé,matcha_frappe_light,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Matcha Latte Frappé,matcha_frappe_light,,ingrediente,Leche Bové Barista Light,45
+variacion,Matcha Latte Frappé,matcha_frappe_light,,insumo,Vaso Pet 16oz,1
+variacion,Matcha Latte Frappé,matcha_frappe_deslactosada,,ingrediente,Paladarte Tradicional Matcha,40
+variacion,Matcha Latte Frappé,matcha_frappe_deslactosada,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Matcha Latte Frappé,matcha_frappe_deslactosada,,ingrediente,Leche Bové Barista Deslactosada,45
+variacion,Matcha Latte Frappé,matcha_frappe_deslactosada,,insumo,Vaso Pet 16oz,1
+variacion,Matcha Latte Frappé,matcha_frappe_almendra,,ingrediente,Paladarte Tradicional Matcha,40
+variacion,Matcha Latte Frappé,matcha_frappe_almendra,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Matcha Latte Frappé,matcha_frappe_almendra,,ingrediente,GÜD Almendra Barista,45
+variacion,Matcha Latte Frappé,matcha_frappe_almendra,,insumo,Vaso Pet 16oz,1
+variacion,Matcha Latte Frappé,matcha_frappe_avena,,ingrediente,Paladarte Tradicional Matcha,40
+variacion,Matcha Latte Frappé,matcha_frappe_avena,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Matcha Latte Frappé,matcha_frappe_avena,,ingrediente,GÜD Avena Barista,45
+variacion,Matcha Latte Frappé,matcha_frappe_avena,,insumo,Vaso Pet 16oz,1
+variacion,Matcha Latte Frappé,matcha_frappe_coco,,ingrediente,Paladarte Tradicional Matcha,40
+variacion,Matcha Latte Frappé,matcha_frappe_coco,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Matcha Latte Frappé,matcha_frappe_coco,,ingrediente,Leche de Coco,45
+variacion,Matcha Latte Frappé,matcha_frappe_coco,,insumo,Vaso Pet 16oz,1
+variacion,Matcha Latte Frappé,matcha_frappe_soya_vainilla,,ingrediente,Paladarte Tradicional Matcha,40
+variacion,Matcha Latte Frappé,matcha_frappe_soya_vainilla,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Matcha Latte Frappé,matcha_frappe_soya_vainilla,,ingrediente,GÜD Soya Barista Vainilla,45
+variacion,Matcha Latte Frappé,matcha_frappe_soya_vainilla,,insumo,Vaso Pet 16oz,1
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_entera_vaso,,ingrediente,Matcha Ceremonial,3
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_entera_vaso,,ingrediente,Leche Bové Barista Entera,260
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_entera_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_light_vaso,,ingrediente,Matcha Ceremonial,3
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_light_vaso,,ingrediente,Leche Bové Barista Light,260
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_light_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_deslactosada_vaso,,ingrediente,Matcha Ceremonial,3
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_deslactosada_vaso,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_deslactosada_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_almendra_vaso,,ingrediente,Matcha Ceremonial,3
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_almendra_vaso,,ingrediente,GÜD Almendra Barista,260
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_almendra_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_avena_vaso,,ingrediente,Matcha Ceremonial,3
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_avena_vaso,,ingrediente,GÜD Avena Barista,260
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_avena_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_coco_vaso,,ingrediente,Matcha Ceremonial,3
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_coco_vaso,,ingrediente,Leche de Coco,260
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_coco_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_soya_vainilla_vaso,,ingrediente,Matcha Ceremonial,3
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_soya_vainilla_vaso,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_soya_vainilla_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_entera_lata,,ingrediente,Matcha Ceremonial,3
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_entera_lata,,ingrediente,Leche Bové Barista Entera,260
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_entera_lata,,insumo,Lata Pet,1
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_light_lata,,ingrediente,Matcha Ceremonial,3
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_light_lata,,ingrediente,Leche Bové Barista Light,260
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_light_lata,,insumo,Lata Pet,1
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_deslactosada_lata,,ingrediente,Matcha Ceremonial,3
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_deslactosada_lata,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_deslactosada_lata,,insumo,Lata Pet,1
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_almendra_lata,,ingrediente,Matcha Ceremonial,3
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_almendra_lata,,ingrediente,GÜD Almendra Barista,260
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_almendra_lata,,insumo,Lata Pet,1
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_avena_lata,,ingrediente,Matcha Ceremonial,3
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_avena_lata,,ingrediente,GÜD Avena Barista,260
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_avena_lata,,insumo,Lata Pet,1
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_coco_lata,,ingrediente,Matcha Ceremonial,3
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_coco_lata,,ingrediente,Leche de Coco,260
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_coco_lata,,insumo,Lata Pet,1
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_soya_vainilla_lata,,ingrediente,Matcha Ceremonial,3
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_soya_vainilla_lata,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Matcha Ceremonial Frío,matcha_ceremonial_frio_soya_vainilla_lata,,insumo,Lata Pet,1
+variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_entera,,ingrediente,Matcha Ceremonial,3
+variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_entera,,ingrediente,Leche Bové Barista Entera,260
+variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_entera,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_light,,ingrediente,Matcha Ceremonial,3
+variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_light,,ingrediente,Leche Bové Barista Light,260
+variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_light,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_deslactosada,,ingrediente,Matcha Ceremonial,3
+variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_deslactosada,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_deslactosada,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_almendra,,ingrediente,Matcha Ceremonial,3
+variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_almendra,,ingrediente,GÜD Almendra Barista,260
+variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_almendra,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_avena,,ingrediente,Matcha Ceremonial,3
+variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_avena,,ingrediente,GÜD Avena Barista,260
+variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_avena,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_coco,,ingrediente,Matcha Ceremonial,3
+variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_coco,,ingrediente,Leche de Coco,260
+variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_coco,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_soya_vainilla,,ingrediente,Matcha Ceremonial,3
+variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_soya_vainilla,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Matcha Ceremonial Caliente,matcha_ceremonial_caliente_soya_vainilla,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Coco Matcha,coco_matcha_vaso,,ingrediente,Matcha Ceremonial,3
+variacion,Coco Matcha,coco_matcha_vaso,,ingrediente,Miel de Agave,20
+variacion,Coco Matcha,coco_matcha_vaso,,ingrediente,GÜD Agua de Coco,300
+variacion,Coco Matcha,coco_matcha_vaso,,ingrediente,Crema para Batir,40
+variacion,Coco Matcha,coco_matcha_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Coco Matcha,coco_matcha_lata,,ingrediente,Matcha Ceremonial,3
+variacion,Coco Matcha,coco_matcha_lata,,ingrediente,Miel de Agave,20
+variacion,Coco Matcha,coco_matcha_lata,,ingrediente,GÜD Agua de Coco,300
+variacion,Coco Matcha,coco_matcha_lata,,ingrediente,Crema para Batir,40
+variacion,Coco Matcha,coco_matcha_lata,,insumo,Lata Pet,1
+variacion,Matcha Matcha Matcha,matcha_matcha_entera_vaso,,ingrediente,Matcha Ceremonial,7
+variacion,Matcha Matcha Matcha,matcha_matcha_entera_vaso,,ingrediente,Crema para Batir,50
+variacion,Matcha Matcha Matcha,matcha_matcha_entera_vaso,,ingrediente,Leche Bové Barista Entera,260
+variacion,Matcha Matcha Matcha,matcha_matcha_entera_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Matcha Matcha Matcha,matcha_matcha_light_vaso,,ingrediente,Matcha Ceremonial,7
+variacion,Matcha Matcha Matcha,matcha_matcha_light_vaso,,ingrediente,Crema para Batir,50
+variacion,Matcha Matcha Matcha,matcha_matcha_light_vaso,,ingrediente,Leche Bové Barista Light,260
+variacion,Matcha Matcha Matcha,matcha_matcha_light_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Matcha Matcha Matcha,matcha_matcha_deslactosada_vaso,,ingrediente,Matcha Ceremonial,7
+variacion,Matcha Matcha Matcha,matcha_matcha_deslactosada_vaso,,ingrediente,Crema para Batir,50
+variacion,Matcha Matcha Matcha,matcha_matcha_deslactosada_vaso,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Matcha Matcha Matcha,matcha_matcha_deslactosada_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Matcha Matcha Matcha,matcha_matcha_almendra_vaso,,ingrediente,Matcha Ceremonial,7
+variacion,Matcha Matcha Matcha,matcha_matcha_almendra_vaso,,ingrediente,Crema para Batir,50
+variacion,Matcha Matcha Matcha,matcha_matcha_almendra_vaso,,ingrediente,GÜD Almendra Barista,260
+variacion,Matcha Matcha Matcha,matcha_matcha_almendra_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Matcha Matcha Matcha,matcha_matcha_avena_vaso,,ingrediente,Matcha Ceremonial,7
+variacion,Matcha Matcha Matcha,matcha_matcha_avena_vaso,,ingrediente,Crema para Batir,50
+variacion,Matcha Matcha Matcha,matcha_matcha_avena_vaso,,ingrediente,GÜD Avena Barista,260
+variacion,Matcha Matcha Matcha,matcha_matcha_avena_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Matcha Matcha Matcha,matcha_matcha_coco_vaso,,ingrediente,Matcha Ceremonial,7
+variacion,Matcha Matcha Matcha,matcha_matcha_coco_vaso,,ingrediente,Crema para Batir,50
+variacion,Matcha Matcha Matcha,matcha_matcha_coco_vaso,,ingrediente,Leche de Coco,260
+variacion,Matcha Matcha Matcha,matcha_matcha_coco_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Matcha Matcha Matcha,matcha_matcha_soya_vainilla_vaso,,ingrediente,Matcha Ceremonial,7
+variacion,Matcha Matcha Matcha,matcha_matcha_soya_vainilla_vaso,,ingrediente,Crema para Batir,50
+variacion,Matcha Matcha Matcha,matcha_matcha_soya_vainilla_vaso,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Matcha Matcha Matcha,matcha_matcha_soya_vainilla_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Matcha Matcha Matcha,matcha_matcha_entera_lata,,ingrediente,Matcha Ceremonial,7
+variacion,Matcha Matcha Matcha,matcha_matcha_entera_lata,,ingrediente,Crema para Batir,50
+variacion,Matcha Matcha Matcha,matcha_matcha_entera_lata,,ingrediente,Leche Bové Barista Entera,260
+variacion,Matcha Matcha Matcha,matcha_matcha_entera_lata,,insumo,Lata Pet,1
+variacion,Matcha Matcha Matcha,matcha_matcha_light_lata,,ingrediente,Matcha Ceremonial,7
+variacion,Matcha Matcha Matcha,matcha_matcha_light_lata,,ingrediente,Crema para Batir,50
+variacion,Matcha Matcha Matcha,matcha_matcha_light_lata,,ingrediente,Leche Bové Barista Light,260
+variacion,Matcha Matcha Matcha,matcha_matcha_light_lata,,insumo,Lata Pet,1
+variacion,Matcha Matcha Matcha,matcha_matcha_deslactosada_lata,,ingrediente,Matcha Ceremonial,7
+variacion,Matcha Matcha Matcha,matcha_matcha_deslactosada_lata,,ingrediente,Crema para Batir,50
+variacion,Matcha Matcha Matcha,matcha_matcha_deslactosada_lata,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Matcha Matcha Matcha,matcha_matcha_deslactosada_lata,,insumo,Lata Pet,1
+variacion,Matcha Matcha Matcha,matcha_matcha_almendra_lata,,ingrediente,Matcha Ceremonial,7
+variacion,Matcha Matcha Matcha,matcha_matcha_almendra_lata,,ingrediente,Crema para Batir,50
+variacion,Matcha Matcha Matcha,matcha_matcha_almendra_lata,,ingrediente,GÜD Almendra Barista,260
+variacion,Matcha Matcha Matcha,matcha_matcha_almendra_lata,,insumo,Lata Pet,1
+variacion,Matcha Matcha Matcha,matcha_matcha_avena_lata,,ingrediente,Matcha Ceremonial,7
+variacion,Matcha Matcha Matcha,matcha_matcha_avena_lata,,ingrediente,Crema para Batir,50
+variacion,Matcha Matcha Matcha,matcha_matcha_avena_lata,,ingrediente,GÜD Avena Barista,260
+variacion,Matcha Matcha Matcha,matcha_matcha_avena_lata,,insumo,Lata Pet,1
+variacion,Matcha Matcha Matcha,matcha_matcha_coco_lata,,ingrediente,Matcha Ceremonial,7
+variacion,Matcha Matcha Matcha,matcha_matcha_coco_lata,,ingrediente,Crema para Batir,50
+variacion,Matcha Matcha Matcha,matcha_matcha_coco_lata,,ingrediente,Leche de Coco,260
+variacion,Matcha Matcha Matcha,matcha_matcha_coco_lata,,insumo,Lata Pet,1
+variacion,Matcha Matcha Matcha,matcha_matcha_soya_vainilla_lata,,ingrediente,Matcha Ceremonial,7
+variacion,Matcha Matcha Matcha,matcha_matcha_soya_vainilla_lata,,ingrediente,Crema para Batir,50
+variacion,Matcha Matcha Matcha,matcha_matcha_soya_vainilla_lata,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Matcha Matcha Matcha,matcha_matcha_soya_vainilla_lata,,insumo,Lata Pet,1
+variacion,Spiced Chai Caliente,chai_entera,,ingrediente,Spiced Chai Sugar Free David Río,50
+variacion,Spiced Chai Caliente,chai_entera,,ingrediente,Leche Bové Barista Entera,260
+variacion,Spiced Chai Caliente,chai_entera,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Spiced Chai Caliente,chai_light,,ingrediente,Spiced Chai Sugar Free David Río,50
+variacion,Spiced Chai Caliente,chai_light,,ingrediente,Leche Bové Barista Light,260
+variacion,Spiced Chai Caliente,chai_light,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Spiced Chai Caliente,chai_deslactosada,,ingrediente,Spiced Chai Sugar Free David Río,50
+variacion,Spiced Chai Caliente,chai_deslactosada,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Spiced Chai Caliente,chai_deslactosada,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Spiced Chai Caliente,chai_almendra,,ingrediente,Spiced Chai Sugar Free David Río,50
+variacion,Spiced Chai Caliente,chai_almendra,,ingrediente,GÜD Almendra Barista,260
+variacion,Spiced Chai Caliente,chai_almendra,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Spiced Chai Caliente,chai_avena,,ingrediente,Spiced Chai Sugar Free David Río,50
+variacion,Spiced Chai Caliente,chai_avena,,ingrediente,GÜD Avena Barista,260
+variacion,Spiced Chai Caliente,chai_avena,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Spiced Chai Caliente,chai_coco,,ingrediente,Spiced Chai Sugar Free David Río,50
+variacion,Spiced Chai Caliente,chai_coco,,ingrediente,Leche de Coco,260
+variacion,Spiced Chai Caliente,chai_coco,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Spiced Chai Caliente,chai_soya_vainilla,,ingrediente,Spiced Chai Sugar Free David Río,50
+variacion,Spiced Chai Caliente,chai_soya_vainilla,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Spiced Chai Caliente,chai_soya_vainilla,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Spiced Chai Frío,chai_frio_entera_vaso,,ingrediente,Spiced Chai Sugar Free David Río,50
+variacion,Spiced Chai Frío,chai_frio_entera_vaso,,ingrediente,Leche Bové Barista Entera,260
+variacion,Spiced Chai Frío,chai_frio_entera_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Spiced Chai Frío,chai_frio_light_vaso,,ingrediente,Spiced Chai Sugar Free David Río,50
+variacion,Spiced Chai Frío,chai_frio_light_vaso,,ingrediente,Leche Bové Barista Light,260
+variacion,Spiced Chai Frío,chai_frio_light_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Spiced Chai Frío,chai_frio_deslactosada_vaso,,ingrediente,Spiced Chai Sugar Free David Río,50
+variacion,Spiced Chai Frío,chai_frio_deslactosada_vaso,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Spiced Chai Frío,chai_frio_deslactosada_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Spiced Chai Frío,chai_frio_almendra_vaso,,ingrediente,Spiced Chai Sugar Free David Río,50
+variacion,Spiced Chai Frío,chai_frio_almendra_vaso,,ingrediente,GÜD Almendra Barista,260
+variacion,Spiced Chai Frío,chai_frio_almendra_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Spiced Chai Frío,chai_frio_avena_vaso,,ingrediente,Spiced Chai Sugar Free David Río,50
+variacion,Spiced Chai Frío,chai_frio_avena_vaso,,ingrediente,GÜD Avena Barista,260
+variacion,Spiced Chai Frío,chai_frio_avena_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Spiced Chai Frío,chai_frio_coco_vaso,,ingrediente,Spiced Chai Sugar Free David Río,50
+variacion,Spiced Chai Frío,chai_frio_coco_vaso,,ingrediente,Leche de Coco,260
+variacion,Spiced Chai Frío,chai_frio_coco_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Spiced Chai Frío,chai_frio_soya_vainilla_vaso,,ingrediente,Spiced Chai Sugar Free David Río,50
+variacion,Spiced Chai Frío,chai_frio_soya_vainilla_vaso,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Spiced Chai Frío,chai_frio_soya_vainilla_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Spiced Chai Frío,chai_frio_entera_lata,,ingrediente,Spiced Chai Sugar Free David Río,50
+variacion,Spiced Chai Frío,chai_frio_entera_lata,,ingrediente,Leche Bové Barista Entera,260
+variacion,Spiced Chai Frío,chai_frio_entera_lata,,insumo,Lata Pet,1
+variacion,Spiced Chai Frío,chai_frio_light_lata,,ingrediente,Spiced Chai Sugar Free David Río,50
+variacion,Spiced Chai Frío,chai_frio_light_lata,,ingrediente,Leche Bové Barista Light,260
+variacion,Spiced Chai Frío,chai_frio_light_lata,,insumo,Lata Pet,1
+variacion,Spiced Chai Frío,chai_frio_deslactosada_lata,,ingrediente,Spiced Chai Sugar Free David Río,50
+variacion,Spiced Chai Frío,chai_frio_deslactosada_lata,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Spiced Chai Frío,chai_frio_deslactosada_lata,,insumo,Lata Pet,1
+variacion,Spiced Chai Frío,chai_frio_almendra_lata,,ingrediente,Spiced Chai Sugar Free David Río,50
+variacion,Spiced Chai Frío,chai_frio_almendra_lata,,ingrediente,GÜD Almendra Barista,260
+variacion,Spiced Chai Frío,chai_frio_almendra_lata,,insumo,Lata Pet,1
+variacion,Spiced Chai Frío,chai_frio_avena_lata,,ingrediente,Spiced Chai Sugar Free David Río,50
+variacion,Spiced Chai Frío,chai_frio_avena_lata,,ingrediente,GÜD Avena Barista,260
+variacion,Spiced Chai Frío,chai_frio_avena_lata,,insumo,Lata Pet,1
+variacion,Spiced Chai Frío,chai_frio_coco_lata,,ingrediente,Spiced Chai Sugar Free David Río,50
+variacion,Spiced Chai Frío,chai_frio_coco_lata,,ingrediente,Leche de Coco,260
+variacion,Spiced Chai Frío,chai_frio_coco_lata,,insumo,Lata Pet,1
+variacion,Spiced Chai Frío,chai_frio_soya_vainilla_lata,,ingrediente,Spiced Chai Sugar Free David Río,50
+variacion,Spiced Chai Frío,chai_frio_soya_vainilla_lata,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Spiced Chai Frío,chai_frio_soya_vainilla_lata,,insumo,Lata Pet,1
+variacion,Spiced Chai Frappé,chai_frappe_entera,,ingrediente,Spiced Chai Sugar Free David Río,40
+variacion,Spiced Chai Frappé,chai_frappe_entera,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Spiced Chai Frappé,chai_frappe_entera,,ingrediente,Leche Bové Barista Entera,30
+variacion,Spiced Chai Frappé,chai_frappe_entera,,insumo,Vaso Pet 16oz,1
+variacion,Spiced Chai Frappé,chai_frappe_light,,ingrediente,Spiced Chai Sugar Free David Río,40
+variacion,Spiced Chai Frappé,chai_frappe_light,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Spiced Chai Frappé,chai_frappe_light,,ingrediente,Leche Bové Barista Light,30
+variacion,Spiced Chai Frappé,chai_frappe_light,,insumo,Vaso Pet 16oz,1
+variacion,Spiced Chai Frappé,chai_frappe_deslactosada,,ingrediente,Spiced Chai Sugar Free David Río,40
+variacion,Spiced Chai Frappé,chai_frappe_deslactosada,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Spiced Chai Frappé,chai_frappe_deslactosada,,ingrediente,Leche Bové Barista Deslactosada,30
+variacion,Spiced Chai Frappé,chai_frappe_deslactosada,,insumo,Vaso Pet 16oz,1
+variacion,Spiced Chai Frappé,chai_frappe_almendra,,ingrediente,Spiced Chai Sugar Free David Río,40
+variacion,Spiced Chai Frappé,chai_frappe_almendra,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Spiced Chai Frappé,chai_frappe_almendra,,ingrediente,GÜD Almendra Barista,30
+variacion,Spiced Chai Frappé,chai_frappe_almendra,,insumo,Vaso Pet 16oz,1
+variacion,Spiced Chai Frappé,chai_frappe_avena,,ingrediente,Spiced Chai Sugar Free David Río,40
+variacion,Spiced Chai Frappé,chai_frappe_avena,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Spiced Chai Frappé,chai_frappe_avena,,ingrediente,GÜD Avena Barista,30
+variacion,Spiced Chai Frappé,chai_frappe_avena,,insumo,Vaso Pet 16oz,1
+variacion,Spiced Chai Frappé,chai_frappe_coco,,ingrediente,Spiced Chai Sugar Free David Río,40
+variacion,Spiced Chai Frappé,chai_frappe_coco,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Spiced Chai Frappé,chai_frappe_coco,,ingrediente,Leche de Coco,30
+variacion,Spiced Chai Frappé,chai_frappe_coco,,insumo,Vaso Pet 16oz,1
+variacion,Spiced Chai Frappé,chai_frappe_soya_vainilla,,ingrediente,Spiced Chai Sugar Free David Río,40
+variacion,Spiced Chai Frappé,chai_frappe_soya_vainilla,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Spiced Chai Frappé,chai_frappe_soya_vainilla,,ingrediente,GÜD Soya Barista Vainilla,30
+variacion,Spiced Chai Frappé,chai_frappe_soya_vainilla,,insumo,Vaso Pet 16oz,1
+variacion,Chai Vainilla Sugar Free Caliente,chai_vainilla_sugar_free_entera,,ingrediente,Routin Vainilla Sugar Free,22
+variacion,Chai Vainilla Sugar Free Caliente,chai_vainilla_sugar_free_entera,,ingrediente,Chai Flamingo Vainilla David Río,50
+variacion,Chai Vainilla Sugar Free Caliente,chai_vainilla_sugar_free_entera,,ingrediente,Leche Bové Barista Entera,260
+variacion,Chai Vainilla Sugar Free Caliente,chai_vainilla_sugar_free_entera,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Chai Vainilla Sugar Free Caliente,chai_vainilla_sugar_free_light,,ingrediente,Routin Vainilla Sugar Free,22
+variacion,Chai Vainilla Sugar Free Caliente,chai_vainilla_sugar_free_light,,ingrediente,Chai Flamingo Vainilla David Río,50
+variacion,Chai Vainilla Sugar Free Caliente,chai_vainilla_sugar_free_light,,ingrediente,Leche Bové Barista Light,260
+variacion,Chai Vainilla Sugar Free Caliente,chai_vainilla_sugar_free_light,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Chai Vainilla Sugar Free Caliente,chai_vainilla_sugar_free_deslactosada,,ingrediente,Routin Vainilla Sugar Free,22
+variacion,Chai Vainilla Sugar Free Caliente,chai_vainilla_sugar_free_deslactosada,,ingrediente,Chai Flamingo Vainilla David Río,50
+variacion,Chai Vainilla Sugar Free Caliente,chai_vainilla_sugar_free_deslactosada,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Chai Vainilla Sugar Free Caliente,chai_vainilla_sugar_free_deslactosada,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Chai Vainilla Sugar Free Caliente,chai_vainilla_sugar_free_almendra,,ingrediente,Routin Vainilla Sugar Free,22
+variacion,Chai Vainilla Sugar Free Caliente,chai_vainilla_sugar_free_almendra,,ingrediente,Chai Flamingo Vainilla David Río,50
+variacion,Chai Vainilla Sugar Free Caliente,chai_vainilla_sugar_free_almendra,,ingrediente,GÜD Almendra Barista,260
+variacion,Chai Vainilla Sugar Free Caliente,chai_vainilla_sugar_free_almendra,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Chai Vainilla Sugar Free Caliente,chai_vainilla_sugar_free_avena,,ingrediente,Routin Vainilla Sugar Free,22
+variacion,Chai Vainilla Sugar Free Caliente,chai_vainilla_sugar_free_avena,,ingrediente,Chai Flamingo Vainilla David Río,50
+variacion,Chai Vainilla Sugar Free Caliente,chai_vainilla_sugar_free_avena,,ingrediente,GÜD Avena Barista,260
+variacion,Chai Vainilla Sugar Free Caliente,chai_vainilla_sugar_free_avena,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Chai Vainilla Sugar Free Caliente,chai_vainilla_sugar_free_coco,,ingrediente,Routin Vainilla Sugar Free,22
+variacion,Chai Vainilla Sugar Free Caliente,chai_vainilla_sugar_free_coco,,ingrediente,Chai Flamingo Vainilla David Río,50
+variacion,Chai Vainilla Sugar Free Caliente,chai_vainilla_sugar_free_coco,,ingrediente,Leche de Coco,260
+variacion,Chai Vainilla Sugar Free Caliente,chai_vainilla_sugar_free_coco,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Chai Vainilla Sugar Free Caliente,chai_vainilla_sugar_free_soya_vainilla,,ingrediente,Routin Vainilla Sugar Free,22
+variacion,Chai Vainilla Sugar Free Caliente,chai_vainilla_sugar_free_soya_vainilla,,ingrediente,Chai Flamingo Vainilla David Río,50
+variacion,Chai Vainilla Sugar Free Caliente,chai_vainilla_sugar_free_soya_vainilla,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Chai Vainilla Sugar Free Caliente,chai_vainilla_sugar_free_soya_vainilla,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_entera_vaso,,ingrediente,Routin Vainilla Sugar Free,22
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_entera_vaso,,ingrediente,Chai Flamingo Vainilla David Río,50
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_entera_vaso,,ingrediente,Leche Bové Barista Entera,260
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_entera_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_light_vaso,,ingrediente,Routin Vainilla Sugar Free,22
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_light_vaso,,ingrediente,Chai Flamingo Vainilla David Río,50
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_light_vaso,,ingrediente,Leche Bové Barista Light,260
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_light_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_deslactosada_vaso,,ingrediente,Routin Vainilla Sugar Free,22
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_deslactosada_vaso,,ingrediente,Chai Flamingo Vainilla David Río,50
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_deslactosada_vaso,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_deslactosada_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_almendra_vaso,,ingrediente,Routin Vainilla Sugar Free,22
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_almendra_vaso,,ingrediente,Chai Flamingo Vainilla David Río,50
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_almendra_vaso,,ingrediente,GÜD Almendra Barista,260
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_almendra_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_avena_vaso,,ingrediente,Routin Vainilla Sugar Free,22
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_avena_vaso,,ingrediente,Chai Flamingo Vainilla David Río,50
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_avena_vaso,,ingrediente,GÜD Avena Barista,260
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_avena_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_coco_vaso,,ingrediente,Routin Vainilla Sugar Free,22
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_coco_vaso,,ingrediente,Chai Flamingo Vainilla David Río,50
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_coco_vaso,,ingrediente,Leche de Coco,260
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_coco_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_soya_vainilla_vaso,,ingrediente,Routin Vainilla Sugar Free,22
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_soya_vainilla_vaso,,ingrediente,Chai Flamingo Vainilla David Río,50
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_soya_vainilla_vaso,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_soya_vainilla_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_entera_lata,,ingrediente,Routin Vainilla Sugar Free,22
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_entera_lata,,ingrediente,Chai Flamingo Vainilla David Río,50
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_entera_lata,,ingrediente,Leche Bové Barista Entera,260
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_entera_lata,,insumo,Lata Pet,1
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_light_lata,,ingrediente,Routin Vainilla Sugar Free,22
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_light_lata,,ingrediente,Chai Flamingo Vainilla David Río,50
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_light_lata,,ingrediente,Leche Bové Barista Light,260
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_light_lata,,insumo,Lata Pet,1
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_deslactosada_lata,,ingrediente,Routin Vainilla Sugar Free,22
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_deslactosada_lata,,ingrediente,Chai Flamingo Vainilla David Río,50
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_deslactosada_lata,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_deslactosada_lata,,insumo,Lata Pet,1
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_almendra_lata,,ingrediente,Routin Vainilla Sugar Free,22
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_almendra_lata,,ingrediente,Chai Flamingo Vainilla David Río,50
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_almendra_lata,,ingrediente,GÜD Almendra Barista,260
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_almendra_lata,,insumo,Lata Pet,1
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_avena_lata,,ingrediente,Routin Vainilla Sugar Free,22
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_avena_lata,,ingrediente,Chai Flamingo Vainilla David Río,50
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_avena_lata,,ingrediente,GÜD Avena Barista,260
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_avena_lata,,insumo,Lata Pet,1
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_coco_lata,,ingrediente,Routin Vainilla Sugar Free,22
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_coco_lata,,ingrediente,Chai Flamingo Vainilla David Río,50
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_coco_lata,,ingrediente,Leche de Coco,260
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_coco_lata,,insumo,Lata Pet,1
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_soya_vainilla_lata,,ingrediente,Routin Vainilla Sugar Free,22
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_soya_vainilla_lata,,ingrediente,Chai Flamingo Vainilla David Río,50
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_soya_vainilla_lata,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Chai Vainilla Sugar Free Frío,chai_vainilla_sugar_free_frio_soya_vainilla_lata,,insumo,Lata Pet,1
+variacion,Chai Vainilla Sugar Free Frappé,chai_vainilla_sugar_free_frappe_entera,,ingrediente,Routin Vainilla Sugar Free,30
+variacion,Chai Vainilla Sugar Free Frappé,chai_vainilla_sugar_free_frappe_entera,,ingrediente,Chai Flamingo Vainilla David Río,40
+variacion,Chai Vainilla Sugar Free Frappé,chai_vainilla_sugar_free_frappe_entera,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Chai Vainilla Sugar Free Frappé,chai_vainilla_sugar_free_frappe_entera,,ingrediente,Leche Bové Barista Entera,260
+variacion,Chai Vainilla Sugar Free Frappé,chai_vainilla_sugar_free_frappe_entera,,insumo,Vaso Pet 16oz,1
+variacion,Chai Vainilla Sugar Free Frappé,chai_vainilla_sugar_free_frappe_light,,ingrediente,Routin Vainilla Sugar Free,30
+variacion,Chai Vainilla Sugar Free Frappé,chai_vainilla_sugar_free_frappe_light,,ingrediente,Chai Flamingo Vainilla David Río,40
+variacion,Chai Vainilla Sugar Free Frappé,chai_vainilla_sugar_free_frappe_light,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Chai Vainilla Sugar Free Frappé,chai_vainilla_sugar_free_frappe_light,,ingrediente,Leche Bové Barista Light,260
+variacion,Chai Vainilla Sugar Free Frappé,chai_vainilla_sugar_free_frappe_light,,insumo,Vaso Pet 16oz,1
+variacion,Chai Vainilla Sugar Free Frappé,chai_vainilla_sugar_free_frappe_deslactosada,,ingrediente,Routin Vainilla Sugar Free,30
+variacion,Chai Vainilla Sugar Free Frappé,chai_vainilla_sugar_free_frappe_deslactosada,,ingrediente,Chai Flamingo Vainilla David Río,40
+variacion,Chai Vainilla Sugar Free Frappé,chai_vainilla_sugar_free_frappe_deslactosada,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Chai Vainilla Sugar Free Frappé,chai_vainilla_sugar_free_frappe_deslactosada,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Chai Vainilla Sugar Free Frappé,chai_vainilla_sugar_free_frappe_deslactosada,,insumo,Vaso Pet 16oz,1
+variacion,Chai Vainilla Sugar Free Frappé,chai_vainilla_sugar_free_frappe_almendra,,ingrediente,Routin Vainilla Sugar Free,30
+variacion,Chai Vainilla Sugar Free Frappé,chai_vainilla_sugar_free_frappe_almendra,,ingrediente,Chai Flamingo Vainilla David Río,40
+variacion,Chai Vainilla Sugar Free Frappé,chai_vainilla_sugar_free_frappe_almendra,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Chai Vainilla Sugar Free Frappé,chai_vainilla_sugar_free_frappe_almendra,,ingrediente,GÜD Almendra Barista,260
+variacion,Chai Vainilla Sugar Free Frappé,chai_vainilla_sugar_free_frappe_almendra,,insumo,Vaso Pet 16oz,1
+variacion,Chai Vainilla Sugar Free Frappé,chai_vainilla_sugar_free_frappe_avena,,ingrediente,Routin Vainilla Sugar Free,30
+variacion,Chai Vainilla Sugar Free Frappé,chai_vainilla_sugar_free_frappe_avena,,ingrediente,Chai Flamingo Vainilla David Río,40
+variacion,Chai Vainilla Sugar Free Frappé,chai_vainilla_sugar_free_frappe_avena,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Chai Vainilla Sugar Free Frappé,chai_vainilla_sugar_free_frappe_avena,,ingrediente,GÜD Avena Barista,260
+variacion,Chai Vainilla Sugar Free Frappé,chai_vainilla_sugar_free_frappe_avena,,insumo,Vaso Pet 16oz,1
+variacion,Chai Vainilla Sugar Free Frappé,chai_vainilla_sugar_free_frappe_coco,,ingrediente,Routin Vainilla Sugar Free,30
+variacion,Chai Vainilla Sugar Free Frappé,chai_vainilla_sugar_free_frappe_coco,,ingrediente,Chai Flamingo Vainilla David Río,40
+variacion,Chai Vainilla Sugar Free Frappé,chai_vainilla_sugar_free_frappe_coco,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Chai Vainilla Sugar Free Frappé,chai_vainilla_sugar_free_frappe_coco,,ingrediente,Leche de Coco,260
+variacion,Chai Vainilla Sugar Free Frappé,chai_vainilla_sugar_free_frappe_coco,,insumo,Vaso Pet 16oz,1
+variacion,Chai Vainilla Sugar Free Frappé,chai_vainilla_sugar_free_frappe_soya_vainilla,,ingrediente,Routin Vainilla Sugar Free,30
+variacion,Chai Vainilla Sugar Free Frappé,chai_vainilla_sugar_free_frappe_soya_vainilla,,ingrediente,Chai Flamingo Vainilla David Río,40
+variacion,Chai Vainilla Sugar Free Frappé,chai_vainilla_sugar_free_frappe_soya_vainilla,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Chai Vainilla Sugar Free Frappé,chai_vainilla_sugar_free_frappe_soya_vainilla,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Chai Vainilla Sugar Free Frappé,chai_vainilla_sugar_free_frappe_soya_vainilla,,insumo,Vaso Pet 16oz,1
+variacion,Spiced Chai Lavanda Caliente,chai_lavanda_caliente_entera,,ingrediente,Routin Lavanda,22
+variacion,Spiced Chai Lavanda Caliente,chai_lavanda_caliente_entera,,ingrediente,Spiced Chai Sugar Free David Río,40
+variacion,Spiced Chai Lavanda Caliente,chai_lavanda_caliente_entera,,ingrediente,Leche Bové Barista Entera,260
+variacion,Spiced Chai Lavanda Caliente,chai_lavanda_caliente_entera,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Spiced Chai Lavanda Caliente,chai_lavanda_caliente_light,,ingrediente,Routin Lavanda,22
+variacion,Spiced Chai Lavanda Caliente,chai_lavanda_caliente_light,,ingrediente,Spiced Chai Sugar Free David Río,40
+variacion,Spiced Chai Lavanda Caliente,chai_lavanda_caliente_light,,ingrediente,Leche Bové Barista Light,260
+variacion,Spiced Chai Lavanda Caliente,chai_lavanda_caliente_light,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Spiced Chai Lavanda Caliente,chai_lavanda_caliente_deslactosada,,ingrediente,Routin Lavanda,22
+variacion,Spiced Chai Lavanda Caliente,chai_lavanda_caliente_deslactosada,,ingrediente,Spiced Chai Sugar Free David Río,40
+variacion,Spiced Chai Lavanda Caliente,chai_lavanda_caliente_deslactosada,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Spiced Chai Lavanda Caliente,chai_lavanda_caliente_deslactosada,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Spiced Chai Lavanda Caliente,chai_lavanda_caliente_almendra,,ingrediente,Routin Lavanda,22
+variacion,Spiced Chai Lavanda Caliente,chai_lavanda_caliente_almendra,,ingrediente,Spiced Chai Sugar Free David Río,40
+variacion,Spiced Chai Lavanda Caliente,chai_lavanda_caliente_almendra,,ingrediente,GÜD Almendra Barista,260
+variacion,Spiced Chai Lavanda Caliente,chai_lavanda_caliente_almendra,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Spiced Chai Lavanda Caliente,chai_lavanda_caliente_avena,,ingrediente,Routin Lavanda,22
+variacion,Spiced Chai Lavanda Caliente,chai_lavanda_caliente_avena,,ingrediente,Spiced Chai Sugar Free David Río,40
+variacion,Spiced Chai Lavanda Caliente,chai_lavanda_caliente_avena,,ingrediente,GÜD Avena Barista,260
+variacion,Spiced Chai Lavanda Caliente,chai_lavanda_caliente_avena,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Spiced Chai Lavanda Caliente,chai_lavanda_caliente_coco,,ingrediente,Routin Lavanda,22
+variacion,Spiced Chai Lavanda Caliente,chai_lavanda_caliente_coco,,ingrediente,Spiced Chai Sugar Free David Río,40
+variacion,Spiced Chai Lavanda Caliente,chai_lavanda_caliente_coco,,ingrediente,Leche de Coco,260
+variacion,Spiced Chai Lavanda Caliente,chai_lavanda_caliente_coco,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Spiced Chai Lavanda Caliente,chai_lavanda_caliente_soya_vainilla,,ingrediente,Routin Lavanda,22
+variacion,Spiced Chai Lavanda Caliente,chai_lavanda_caliente_soya_vainilla,,ingrediente,Spiced Chai Sugar Free David Río,40
+variacion,Spiced Chai Lavanda Caliente,chai_lavanda_caliente_soya_vainilla,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Spiced Chai Lavanda Caliente,chai_lavanda_caliente_soya_vainilla,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_entera_vaso,,ingrediente,Routin Lavanda,22
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_entera_vaso,,ingrediente,Spiced Chai Sugar Free David Río,40
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_entera_vaso,,ingrediente,Leche Bové Barista Entera,260
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_entera_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_light_vaso,,ingrediente,Routin Lavanda,22
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_light_vaso,,ingrediente,Spiced Chai Sugar Free David Río,40
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_light_vaso,,ingrediente,Leche Bové Barista Light,260
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_light_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_deslactosada_vaso,,ingrediente,Routin Lavanda,22
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_deslactosada_vaso,,ingrediente,Spiced Chai Sugar Free David Río,40
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_deslactosada_vaso,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_deslactosada_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_almendra_vaso,,ingrediente,Routin Lavanda,22
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_almendra_vaso,,ingrediente,Spiced Chai Sugar Free David Río,40
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_almendra_vaso,,ingrediente,GÜD Almendra Barista,260
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_almendra_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_avena_vaso,,ingrediente,Routin Lavanda,22
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_avena_vaso,,ingrediente,Spiced Chai Sugar Free David Río,40
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_avena_vaso,,ingrediente,GÜD Avena Barista,260
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_avena_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_coco_vaso,,ingrediente,Routin Lavanda,22
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_coco_vaso,,ingrediente,Spiced Chai Sugar Free David Río,40
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_coco_vaso,,ingrediente,Leche de Coco,260
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_coco_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_soya_vainilla_vaso,,ingrediente,Routin Lavanda,22
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_soya_vainilla_vaso,,ingrediente,Spiced Chai Sugar Free David Río,40
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_soya_vainilla_vaso,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_soya_vainilla_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_entera_lata,,ingrediente,Routin Lavanda,22
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_entera_lata,,ingrediente,Spiced Chai Sugar Free David Río,40
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_entera_lata,,ingrediente,Leche Bové Barista Entera,260
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_entera_lata,,insumo,Lata Pet,1
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_light_lata,,ingrediente,Routin Lavanda,22
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_light_lata,,ingrediente,Spiced Chai Sugar Free David Río,40
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_light_lata,,ingrediente,Leche Bové Barista Light,260
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_light_lata,,insumo,Lata Pet,1
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_deslactosada_lata,,ingrediente,Routin Lavanda,22
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_deslactosada_lata,,ingrediente,Spiced Chai Sugar Free David Río,40
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_deslactosada_lata,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_deslactosada_lata,,insumo,Lata Pet,1
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_almendra_lata,,ingrediente,Routin Lavanda,22
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_almendra_lata,,ingrediente,Spiced Chai Sugar Free David Río,40
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_almendra_lata,,ingrediente,GÜD Almendra Barista,260
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_almendra_lata,,insumo,Lata Pet,1
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_avena_lata,,ingrediente,Routin Lavanda,22
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_avena_lata,,ingrediente,Spiced Chai Sugar Free David Río,40
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_avena_lata,,ingrediente,GÜD Avena Barista,260
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_avena_lata,,insumo,Lata Pet,1
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_coco_lata,,ingrediente,Routin Lavanda,22
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_coco_lata,,ingrediente,Spiced Chai Sugar Free David Río,40
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_coco_lata,,ingrediente,Leche de Coco,260
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_coco_lata,,insumo,Lata Pet,1
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_soya_vainilla_lata,,ingrediente,Routin Lavanda,22
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_soya_vainilla_lata,,ingrediente,Spiced Chai Sugar Free David Río,40
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_soya_vainilla_lata,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Spiced Chai Lavanda Frío,chai_lavanda_frio_soya_vainilla_lata,,insumo,Lata Pet,1
+variacion,Dirty Chai Caliente,dirty_chai_caliente_entera,,ingrediente,Café Tukafe Tradición,14
+variacion,Dirty Chai Caliente,dirty_chai_caliente_entera,,ingrediente,Spiced Chai Sugar Free David Río,30
+variacion,Dirty Chai Caliente,dirty_chai_caliente_entera,,ingrediente,Leche Bové Barista Entera,260
+variacion,Dirty Chai Caliente,dirty_chai_caliente_entera,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Dirty Chai Caliente,dirty_chai_caliente_light,,ingrediente,Café Tukafe Tradición,14
+variacion,Dirty Chai Caliente,dirty_chai_caliente_light,,ingrediente,Spiced Chai Sugar Free David Río,30
+variacion,Dirty Chai Caliente,dirty_chai_caliente_light,,ingrediente,Leche Bové Barista Light,260
+variacion,Dirty Chai Caliente,dirty_chai_caliente_light,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Dirty Chai Caliente,dirty_chai_caliente_deslactosada,,ingrediente,Café Tukafe Tradición,14
+variacion,Dirty Chai Caliente,dirty_chai_caliente_deslactosada,,ingrediente,Spiced Chai Sugar Free David Río,30
+variacion,Dirty Chai Caliente,dirty_chai_caliente_deslactosada,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Dirty Chai Caliente,dirty_chai_caliente_deslactosada,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Dirty Chai Caliente,dirty_chai_caliente_almendra,,ingrediente,Café Tukafe Tradición,14
+variacion,Dirty Chai Caliente,dirty_chai_caliente_almendra,,ingrediente,Spiced Chai Sugar Free David Río,30
+variacion,Dirty Chai Caliente,dirty_chai_caliente_almendra,,ingrediente,GÜD Almendra Barista,260
+variacion,Dirty Chai Caliente,dirty_chai_caliente_almendra,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Dirty Chai Caliente,dirty_chai_caliente_avena,,ingrediente,Café Tukafe Tradición,14
+variacion,Dirty Chai Caliente,dirty_chai_caliente_avena,,ingrediente,Spiced Chai Sugar Free David Río,30
+variacion,Dirty Chai Caliente,dirty_chai_caliente_avena,,ingrediente,GÜD Avena Barista,260
+variacion,Dirty Chai Caliente,dirty_chai_caliente_avena,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Dirty Chai Caliente,dirty_chai_caliente_coco,,ingrediente,Café Tukafe Tradición,14
+variacion,Dirty Chai Caliente,dirty_chai_caliente_coco,,ingrediente,Spiced Chai Sugar Free David Río,30
+variacion,Dirty Chai Caliente,dirty_chai_caliente_coco,,ingrediente,Leche de Coco,260
+variacion,Dirty Chai Caliente,dirty_chai_caliente_coco,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Dirty Chai Caliente,dirty_chai_caliente_soya_vainilla,,ingrediente,Café Tukafe Tradición,14
+variacion,Dirty Chai Caliente,dirty_chai_caliente_soya_vainilla,,ingrediente,Spiced Chai Sugar Free David Río,30
+variacion,Dirty Chai Caliente,dirty_chai_caliente_soya_vainilla,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Dirty Chai Caliente,dirty_chai_caliente_soya_vainilla,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Dirty Chai Frío,dirty_chai_frio_entera_vaso,,ingrediente,Café Tukafe Tradición,14
+variacion,Dirty Chai Frío,dirty_chai_frio_entera_vaso,,ingrediente,Spiced Chai Sugar Free David Río,30
+variacion,Dirty Chai Frío,dirty_chai_frio_entera_vaso,,ingrediente,Leche Bové Barista Entera,260
+variacion,Dirty Chai Frío,dirty_chai_frio_entera_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Dirty Chai Frío,dirty_chai_frio_light_vaso,,ingrediente,Café Tukafe Tradición,14
+variacion,Dirty Chai Frío,dirty_chai_frio_light_vaso,,ingrediente,Spiced Chai Sugar Free David Río,30
+variacion,Dirty Chai Frío,dirty_chai_frio_light_vaso,,ingrediente,Leche Bové Barista Light,260
+variacion,Dirty Chai Frío,dirty_chai_frio_light_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Dirty Chai Frío,dirty_chai_frio_deslactosada_vaso,,ingrediente,Café Tukafe Tradición,14
+variacion,Dirty Chai Frío,dirty_chai_frio_deslactosada_vaso,,ingrediente,Spiced Chai Sugar Free David Río,30
+variacion,Dirty Chai Frío,dirty_chai_frio_deslactosada_vaso,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Dirty Chai Frío,dirty_chai_frio_deslactosada_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Dirty Chai Frío,dirty_chai_frio_almendra_vaso,,ingrediente,Café Tukafe Tradición,14
+variacion,Dirty Chai Frío,dirty_chai_frio_almendra_vaso,,ingrediente,Spiced Chai Sugar Free David Río,30
+variacion,Dirty Chai Frío,dirty_chai_frio_almendra_vaso,,ingrediente,GÜD Almendra Barista,260
+variacion,Dirty Chai Frío,dirty_chai_frio_almendra_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Dirty Chai Frío,dirty_chai_frio_avena_vaso,,ingrediente,Café Tukafe Tradición,14
+variacion,Dirty Chai Frío,dirty_chai_frio_avena_vaso,,ingrediente,Spiced Chai Sugar Free David Río,30
+variacion,Dirty Chai Frío,dirty_chai_frio_avena_vaso,,ingrediente,GÜD Avena Barista,260
+variacion,Dirty Chai Frío,dirty_chai_frio_avena_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Dirty Chai Frío,dirty_chai_frio_coco_vaso,,ingrediente,Café Tukafe Tradición,14
+variacion,Dirty Chai Frío,dirty_chai_frio_coco_vaso,,ingrediente,Spiced Chai Sugar Free David Río,30
+variacion,Dirty Chai Frío,dirty_chai_frio_coco_vaso,,ingrediente,Leche de Coco,260
+variacion,Dirty Chai Frío,dirty_chai_frio_coco_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Dirty Chai Frío,dirty_chai_frio_soya_vainilla_vaso,,ingrediente,Café Tukafe Tradición,14
+variacion,Dirty Chai Frío,dirty_chai_frio_soya_vainilla_vaso,,ingrediente,Spiced Chai Sugar Free David Río,30
+variacion,Dirty Chai Frío,dirty_chai_frio_soya_vainilla_vaso,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Dirty Chai Frío,dirty_chai_frio_soya_vainilla_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Dirty Chai Frío,dirty_chai_frio_entera_lata,,ingrediente,Café Tukafe Tradición,14
+variacion,Dirty Chai Frío,dirty_chai_frio_entera_lata,,ingrediente,Spiced Chai Sugar Free David Río,30
+variacion,Dirty Chai Frío,dirty_chai_frio_entera_lata,,ingrediente,Leche Bové Barista Entera,260
+variacion,Dirty Chai Frío,dirty_chai_frio_entera_lata,,insumo,Lata Pet,1
+variacion,Dirty Chai Frío,dirty_chai_frio_light_lata,,ingrediente,Café Tukafe Tradición,14
+variacion,Dirty Chai Frío,dirty_chai_frio_light_lata,,ingrediente,Spiced Chai Sugar Free David Río,30
+variacion,Dirty Chai Frío,dirty_chai_frio_light_lata,,ingrediente,Leche Bové Barista Light,260
+variacion,Dirty Chai Frío,dirty_chai_frio_light_lata,,insumo,Lata Pet,1
+variacion,Dirty Chai Frío,dirty_chai_frio_deslactosada_lata,,ingrediente,Café Tukafe Tradición,14
+variacion,Dirty Chai Frío,dirty_chai_frio_deslactosada_lata,,ingrediente,Spiced Chai Sugar Free David Río,30
+variacion,Dirty Chai Frío,dirty_chai_frio_deslactosada_lata,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Dirty Chai Frío,dirty_chai_frio_deslactosada_lata,,insumo,Lata Pet,1
+variacion,Dirty Chai Frío,dirty_chai_frio_almendra_lata,,ingrediente,Café Tukafe Tradición,14
+variacion,Dirty Chai Frío,dirty_chai_frio_almendra_lata,,ingrediente,Spiced Chai Sugar Free David Río,30
+variacion,Dirty Chai Frío,dirty_chai_frio_almendra_lata,,ingrediente,GÜD Almendra Barista,260
+variacion,Dirty Chai Frío,dirty_chai_frio_almendra_lata,,insumo,Lata Pet,1
+variacion,Dirty Chai Frío,dirty_chai_frio_avena_lata,,ingrediente,Café Tukafe Tradición,14
+variacion,Dirty Chai Frío,dirty_chai_frio_avena_lata,,ingrediente,Spiced Chai Sugar Free David Río,30
+variacion,Dirty Chai Frío,dirty_chai_frio_avena_lata,,ingrediente,GÜD Avena Barista,260
+variacion,Dirty Chai Frío,dirty_chai_frio_avena_lata,,insumo,Lata Pet,1
+variacion,Dirty Chai Frío,dirty_chai_frio_coco_lata,,ingrediente,Café Tukafe Tradición,14
+variacion,Dirty Chai Frío,dirty_chai_frio_coco_lata,,ingrediente,Spiced Chai Sugar Free David Río,30
+variacion,Dirty Chai Frío,dirty_chai_frio_coco_lata,,ingrediente,Leche de Coco,260
+variacion,Dirty Chai Frío,dirty_chai_frio_coco_lata,,insumo,Lata Pet,1
+variacion,Dirty Chai Frío,dirty_chai_frio_soya_vainilla_lata,,ingrediente,Café Tukafe Tradición,14
+variacion,Dirty Chai Frío,dirty_chai_frio_soya_vainilla_lata,,ingrediente,Spiced Chai Sugar Free David Río,30
+variacion,Dirty Chai Frío,dirty_chai_frio_soya_vainilla_lata,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Dirty Chai Frío,dirty_chai_frio_soya_vainilla_lata,,insumo,Lata Pet,1
+variacion,Dirty Chai Frappé,dirty_chai_frappe_entera,,ingrediente,Café Tukafe Tradición,15
+variacion,Dirty Chai Frappé,dirty_chai_frappe_entera,,ingrediente,Spiced Chai Sugar Free David Río,40
+variacion,Dirty Chai Frappé,dirty_chai_frappe_entera,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Dirty Chai Frappé,dirty_chai_frappe_entera,,ingrediente,Leche Bové Barista Entera,30
+variacion,Dirty Chai Frappé,dirty_chai_frappe_entera,,insumo,Vaso Pet 16oz,1
+variacion,Dirty Chai Frappé,dirty_chai_frappe_light,,ingrediente,Café Tukafe Tradición,15
+variacion,Dirty Chai Frappé,dirty_chai_frappe_light,,ingrediente,Spiced Chai Sugar Free David Río,40
+variacion,Dirty Chai Frappé,dirty_chai_frappe_light,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Dirty Chai Frappé,dirty_chai_frappe_light,,ingrediente,Leche Bové Barista Light,30
+variacion,Dirty Chai Frappé,dirty_chai_frappe_light,,insumo,Vaso Pet 16oz,1
+variacion,Dirty Chai Frappé,dirty_chai_frappe_deslactosada,,ingrediente,Café Tukafe Tradición,15
+variacion,Dirty Chai Frappé,dirty_chai_frappe_deslactosada,,ingrediente,Spiced Chai Sugar Free David Río,40
+variacion,Dirty Chai Frappé,dirty_chai_frappe_deslactosada,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Dirty Chai Frappé,dirty_chai_frappe_deslactosada,,ingrediente,Leche Bové Barista Deslactosada,30
+variacion,Dirty Chai Frappé,dirty_chai_frappe_deslactosada,,insumo,Vaso Pet 16oz,1
+variacion,Dirty Chai Frappé,dirty_chai_frappe_almendra,,ingrediente,Café Tukafe Tradición,15
+variacion,Dirty Chai Frappé,dirty_chai_frappe_almendra,,ingrediente,Spiced Chai Sugar Free David Río,40
+variacion,Dirty Chai Frappé,dirty_chai_frappe_almendra,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Dirty Chai Frappé,dirty_chai_frappe_almendra,,ingrediente,GÜD Almendra Barista,30
+variacion,Dirty Chai Frappé,dirty_chai_frappe_almendra,,insumo,Vaso Pet 16oz,1
+variacion,Dirty Chai Frappé,dirty_chai_frappe_avena,,ingrediente,Café Tukafe Tradición,15
+variacion,Dirty Chai Frappé,dirty_chai_frappe_avena,,ingrediente,Spiced Chai Sugar Free David Río,40
+variacion,Dirty Chai Frappé,dirty_chai_frappe_avena,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Dirty Chai Frappé,dirty_chai_frappe_avena,,ingrediente,GÜD Avena Barista,30
+variacion,Dirty Chai Frappé,dirty_chai_frappe_avena,,insumo,Vaso Pet 16oz,1
+variacion,Dirty Chai Frappé,dirty_chai_frappe_coco,,ingrediente,Café Tukafe Tradición,15
+variacion,Dirty Chai Frappé,dirty_chai_frappe_coco,,ingrediente,Spiced Chai Sugar Free David Río,40
+variacion,Dirty Chai Frappé,dirty_chai_frappe_coco,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Dirty Chai Frappé,dirty_chai_frappe_coco,,ingrediente,Leche de Coco,30
+variacion,Dirty Chai Frappé,dirty_chai_frappe_coco,,insumo,Vaso Pet 16oz,1
+variacion,Dirty Chai Frappé,dirty_chai_frappe_soya_vainilla,,ingrediente,Café Tukafe Tradición,15
+variacion,Dirty Chai Frappé,dirty_chai_frappe_soya_vainilla,,ingrediente,Spiced Chai Sugar Free David Río,40
+variacion,Dirty Chai Frappé,dirty_chai_frappe_soya_vainilla,,ingrediente,Paladarte Mexicano Base Neutra,40
+variacion,Dirty Chai Frappé,dirty_chai_frappe_soya_vainilla,,ingrediente,GÜD Soya Barista Vainilla,30
+variacion,Dirty Chai Frappé,dirty_chai_frappe_soya_vainilla,,insumo,Vaso Pet 16oz,1
+variacion,Dragon Bloom,dragon_bloom_vaso,,ingrediente,Sanpellegrino Mineral 250ml,1
+variacion,Dragon Bloom,dragon_bloom_vaso,,ingrediente,Pitahaya Liofilizada,5
+variacion,Dragon Bloom,dragon_bloom_vaso,,ingrediente,Routin Lychee,22
+variacion,Dragon Bloom,dragon_bloom_vaso,,ingrediente,Routin Limón Verde,22
+variacion,Dragon Bloom,dragon_bloom_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Mojito,mojito_vaso,,ingrediente,Sanpellegrino Mineral 250ml,1
+variacion,Mojito,mojito_vaso,,ingrediente,Routin Menta Verde,5
+variacion,Mojito,mojito_vaso,,ingrediente,Routin Limón Verde,22
+variacion,Mojito,mojito_vaso,,ingrediente,Routin Basiliscus,22
+variacion,Mojito,mojito_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Lima Limón,lima_limon_vaso,,ingrediente,Sanpellegrino Mineral 250ml,1
+variacion,Lima Limón,lima_limon_vaso,,ingrediente,Routin Limón Amarillo,22
+variacion,Lima Limón,lima_limon_vaso,,ingrediente,Routin Limón Verde,22
+variacion,Lima Limón,lima_limon_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Fresa,fresa_vaso,,ingrediente,Sanpellegrino Mineral 250ml,1
+variacion,Fresa,fresa_vaso,,ingrediente,Routin Fresa,22
+variacion,Fresa,fresa_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Lychee,lychee_vaso,,ingrediente,Sanpellegrino Mineral 250ml,1
+variacion,Lychee,lychee_vaso,,ingrediente,Routin Lychee,22
+variacion,Lychee,lychee_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Fresa Limón,fresa_limon_vaso,,ingrediente,Sanpellegrino Mineral 250ml,1
+variacion,Fresa Limón,fresa_limon_vaso,,ingrediente,Routin Fresa,22
+variacion,Fresa Limón,fresa_limon_vaso,,ingrediente,Routin Limón Verde,22
+variacion,Fresa Limón,fresa_limon_vaso,,ingrediente,Routin Ice Mint,8
+variacion,Fresa Limón,fresa_limon_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Moras Lavanda,moras_lavanda_vaso,,ingrediente,Sanpellegrino Mineral 250ml,1
+variacion,Moras Lavanda,moras_lavanda_vaso,,ingrediente,Routin Lavanda,22
+variacion,Moras Lavanda,moras_lavanda_vaso,,ingrediente,Routin Moras,22
+variacion,Moras Lavanda,moras_lavanda_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Spicy Mango,spicy_mango_vaso,,ingrediente,Sanpellegrino Mineral 250ml,1
+variacion,Spicy Mango,spicy_mango_vaso,,ingrediente,Routin Spicy Mango,22
+variacion,Spicy Mango,spicy_mango_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Dragon Bloom,dragon_bloom_lata,,ingrediente,Sanpellegrino Mineral 250ml,1
+variacion,Dragon Bloom,dragon_bloom_lata,,ingrediente,Pitahaya Liofilizada,5
+variacion,Dragon Bloom,dragon_bloom_lata,,ingrediente,Routin Lychee,22
+variacion,Dragon Bloom,dragon_bloom_lata,,ingrediente,Routin Limón Verde,22
+variacion,Dragon Bloom,dragon_bloom_lata,,insumo,Lata Pet,1
+variacion,Mojito,mojito_lata,,ingrediente,Sanpellegrino Mineral 250ml,1
+variacion,Mojito,mojito_lata,,ingrediente,Routin Menta Verde,5
+variacion,Mojito,mojito_lata,,ingrediente,Routin Limón Verde,22
+variacion,Mojito,mojito_lata,,ingrediente,Routin Basiliscus,22
+variacion,Mojito,mojito_lata,,insumo,Lata Pet,1
+variacion,Lima Limón,lima_limon_lata,,ingrediente,Sanpellegrino Mineral 250ml,1
+variacion,Lima Limón,lima_limon_lata,,ingrediente,Routin Limón Amarillo,22
+variacion,Lima Limón,lima_limon_lata,,ingrediente,Routin Limón Verde,22
+variacion,Lima Limón,lima_limon_lata,,insumo,Lata Pet,1
+variacion,Fresa,fresa_lata,,ingrediente,Sanpellegrino Mineral 250ml,1
+variacion,Fresa,fresa_lata,,ingrediente,Routin Fresa,22
+variacion,Fresa,fresa_lata,,insumo,Lata Pet,1
+variacion,Lychee,lychee_lata,,ingrediente,Sanpellegrino Mineral 250ml,1
+variacion,Lychee,lychee_lata,,ingrediente,Routin Lychee,22
+variacion,Lychee,lychee_lata,,insumo,Lata Pet,1
+variacion,Fresa Limón,fresa_limon_lata,,ingrediente,Sanpellegrino Mineral 250ml,1
+variacion,Fresa Limón,fresa_limon_lata,,ingrediente,Routin Fresa,22
+variacion,Fresa Limón,fresa_limon_lata,,ingrediente,Routin Limón Verde,22
+variacion,Fresa Limón,fresa_limon_lata,,ingrediente,Routin Ice Mint,8
+variacion,Fresa Limón,fresa_limon_lata,,insumo,Lata Pet,1
+variacion,Moras Lavanda,moras_lavanda_lata,,ingrediente,Sanpellegrino Mineral 250ml,1
+variacion,Moras Lavanda,moras_lavanda_lata,,ingrediente,Routin Lavanda,22
+variacion,Moras Lavanda,moras_lavanda_lata,,ingrediente,Routin Moras,22
+variacion,Moras Lavanda,moras_lavanda_lata,,insumo,Lata Pet,1
+variacion,Spicy Mango,spicy_mango_lata,,ingrediente,Sanpellegrino Mineral 250ml,1
+variacion,Spicy Mango,spicy_mango_lata,,ingrediente,Routin Spicy Mango,22
+variacion,Spicy Mango,spicy_mango_lata,,insumo,Lata Pet,1
+producto,Lima Limón Frappé,lima_limon_frappe,,ingrediente,Routin Frappé Mix,30
+producto,Lima Limón Frappé,lima_limon_frappe,,ingrediente,Routin Limón Amarillo,30
+producto,Lima Limón Frappé,lima_limon_frappe,,ingrediente,Routin Limón Verde,30
+producto,Lima Limón Frappé,lima_limon_frappe,,insumo,Vaso Pet 16oz,1
+producto,Fresa Frappé,fresa_frappe,,ingrediente,Routin Frappé Mix,30
+producto,Fresa Frappé,fresa_frappe,,ingrediente,Routin Fresa,30
+producto,Fresa Frappé,fresa_frappe,,insumo,Vaso Pet 16oz,1
+producto,Moras Lavanda Frappé,moras_lavanda_frappe,,ingrediente,Routin Frappé Mix,30
+producto,Moras Lavanda Frappé,moras_lavanda_frappe,,ingrediente,Routin Lavanda,30
+producto,Moras Lavanda Frappé,moras_lavanda_frappe,,ingrediente,Routin Moras,30
+producto,Moras Lavanda Frappé,moras_lavanda_frappe,,insumo,Vaso Pet 16oz,1
+producto,Spicy Mango Frappé,spicy_mango_frappe,,ingrediente,Routin Frappé Mix,30
+producto,Spicy Mango Frappé,spicy_mango_frappe,,ingrediente,Routin Spicy Mango,30
+producto,Spicy Mango Frappé,spicy_mango_frappe,,insumo,Vaso Pet 16oz,1
+producto,Frutos Rojos Frappé,frutos_rojos_frappe,,ingrediente,Routin Frappé Mix,30
+producto,Frutos Rojos Frappé,frutos_rojos_frappe,,ingrediente,Routin Moras,30
+producto,Frutos Rojos Frappé,frutos_rojos_frappe,,ingrediente,Routin Fresa,30
+producto,Frutos Rojos Frappé,frutos_rojos_frappe,,ingrediente,Tisana Frutos Rojos,30
+producto,Frutos Rojos Frappé,frutos_rojos_frappe,,insumo,Vaso Pet 16oz,1
+variacion,Nutella Caliente,nutella_caliente_entera,,ingrediente,Leche Bové Barista Entera,260
+variacion,Nutella Caliente,nutella_caliente_entera,,ingrediente,Nutella,40
+variacion,Nutella Caliente,nutella_caliente_entera,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Nutella Caliente,nutella_caliente_light,,ingrediente,Leche Bové Barista Light,260
+variacion,Nutella Caliente,nutella_caliente_light,,ingrediente,Nutella,40
+variacion,Nutella Caliente,nutella_caliente_light,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Nutella Caliente,nutella_caliente_deslactosada,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Nutella Caliente,nutella_caliente_deslactosada,,ingrediente,Nutella,40
+variacion,Nutella Caliente,nutella_caliente_deslactosada,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Nutella Caliente,nutella_caliente_almendra,,ingrediente,GÜD Almendra Barista,260
+variacion,Nutella Caliente,nutella_caliente_almendra,,ingrediente,Nutella,40
+variacion,Nutella Caliente,nutella_caliente_almendra,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Nutella Caliente,nutella_caliente_avena,,ingrediente,GÜD Avena Barista,260
+variacion,Nutella Caliente,nutella_caliente_avena,,ingrediente,Nutella,40
+variacion,Nutella Caliente,nutella_caliente_avena,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Nutella Caliente,nutella_caliente_coco,,ingrediente,Leche de Coco,260
+variacion,Nutella Caliente,nutella_caliente_coco,,ingrediente,Nutella,40
+variacion,Nutella Caliente,nutella_caliente_coco,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Nutella Caliente,nutella_caliente_soya_vainilla,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Nutella Caliente,nutella_caliente_soya_vainilla,,ingrediente,Nutella,40
+variacion,Nutella Caliente,nutella_caliente_soya_vainilla,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Nutella Frío,nutella_frio_entera_vaso,,ingrediente,Leche Bové Barista Entera,260
+variacion,Nutella Frío,nutella_frio_entera_vaso,,ingrediente,Nutella,40
+variacion,Nutella Frío,nutella_frio_entera_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Nutella Frío,nutella_frio_light_vaso,,ingrediente,Leche Bové Barista Light,260
+variacion,Nutella Frío,nutella_frio_light_vaso,,ingrediente,Nutella,40
+variacion,Nutella Frío,nutella_frio_light_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Nutella Frío,nutella_frio_deslactosada_vaso,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Nutella Frío,nutella_frio_deslactosada_vaso,,ingrediente,Nutella,40
+variacion,Nutella Frío,nutella_frio_deslactosada_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Nutella Frío,nutella_frio_almendra_vaso,,ingrediente,GÜD Almendra Barista,260
+variacion,Nutella Frío,nutella_frio_almendra_vaso,,ingrediente,Nutella,40
+variacion,Nutella Frío,nutella_frio_almendra_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Nutella Frío,nutella_frio_avena_vaso,,ingrediente,GÜD Avena Barista,260
+variacion,Nutella Frío,nutella_frio_avena_vaso,,ingrediente,Nutella,40
+variacion,Nutella Frío,nutella_frio_avena_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Nutella Frío,nutella_frio_coco_vaso,,ingrediente,Leche de Coco,260
+variacion,Nutella Frío,nutella_frio_coco_vaso,,ingrediente,Nutella,40
+variacion,Nutella Frío,nutella_frio_coco_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Nutella Frío,nutella_frio_soya_vainilla_vaso,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Nutella Frío,nutella_frio_soya_vainilla_vaso,,ingrediente,Nutella,40
+variacion,Nutella Frío,nutella_frio_soya_vainilla_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Nutella Frío,nutella_frio_entera_lata,,ingrediente,Leche Bové Barista Entera,260
+variacion,Nutella Frío,nutella_frio_entera_lata,,ingrediente,Nutella,40
+variacion,Nutella Frío,nutella_frio_entera_lata,,insumo,Lata Pet,1
+variacion,Nutella Frío,nutella_frio_light_lata,,ingrediente,Leche Bové Barista Light,260
+variacion,Nutella Frío,nutella_frio_light_lata,,ingrediente,Nutella,40
+variacion,Nutella Frío,nutella_frio_light_lata,,insumo,Lata Pet,1
+variacion,Nutella Frío,nutella_frio_deslactosada_lata,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Nutella Frío,nutella_frio_deslactosada_lata,,ingrediente,Nutella,40
+variacion,Nutella Frío,nutella_frio_deslactosada_lata,,insumo,Lata Pet,1
+variacion,Nutella Frío,nutella_frio_almendra_lata,,ingrediente,GÜD Almendra Barista,260
+variacion,Nutella Frío,nutella_frio_almendra_lata,,ingrediente,Nutella,40
+variacion,Nutella Frío,nutella_frio_almendra_lata,,insumo,Lata Pet,1
+variacion,Nutella Frío,nutella_frio_avena_lata,,ingrediente,GÜD Avena Barista,260
+variacion,Nutella Frío,nutella_frio_avena_lata,,ingrediente,Nutella,40
+variacion,Nutella Frío,nutella_frio_avena_lata,,insumo,Lata Pet,1
+variacion,Nutella Frío,nutella_frio_coco_lata,,ingrediente,Leche de Coco,260
+variacion,Nutella Frío,nutella_frio_coco_lata,,ingrediente,Nutella,40
+variacion,Nutella Frío,nutella_frio_coco_lata,,insumo,Lata Pet,1
+variacion,Nutella Frío,nutella_frio_soya_vainilla_lata,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Nutella Frío,nutella_frio_soya_vainilla_lata,,ingrediente,Nutella,40
+variacion,Nutella Frío,nutella_frio_soya_vainilla_lata,,insumo,Lata Pet,1
+variacion,Dulce de Leche Caliente,dulce_leche_caliente_entera,,ingrediente,Leche Bové Barista Entera,260
+variacion,Dulce de Leche Caliente,dulce_leche_caliente_entera,,ingrediente,Routin Dulce de Leche,20
+variacion,Dulce de Leche Caliente,dulce_leche_caliente_entera,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Dulce de Leche Caliente,dulce_leche_caliente_light,,ingrediente,Leche Bové Barista Light,260
+variacion,Dulce de Leche Caliente,dulce_leche_caliente_light,,ingrediente,Routin Dulce de Leche,20
+variacion,Dulce de Leche Caliente,dulce_leche_caliente_light,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Dulce de Leche Caliente,dulce_leche_caliente_deslactosada,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Dulce de Leche Caliente,dulce_leche_caliente_deslactosada,,ingrediente,Routin Dulce de Leche,20
+variacion,Dulce de Leche Caliente,dulce_leche_caliente_deslactosada,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Dulce de Leche Caliente,dulce_leche_caliente_almendra,,ingrediente,GÜD Almendra Barista,260
+variacion,Dulce de Leche Caliente,dulce_leche_caliente_almendra,,ingrediente,Routin Dulce de Leche,20
+variacion,Dulce de Leche Caliente,dulce_leche_caliente_almendra,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Dulce de Leche Caliente,dulce_leche_caliente_avena,,ingrediente,GÜD Avena Barista,260
+variacion,Dulce de Leche Caliente,dulce_leche_caliente_avena,,ingrediente,Routin Dulce de Leche,20
+variacion,Dulce de Leche Caliente,dulce_leche_caliente_avena,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Dulce de Leche Caliente,dulce_leche_caliente_coco,,ingrediente,Leche de Coco,260
+variacion,Dulce de Leche Caliente,dulce_leche_caliente_coco,,ingrediente,Routin Dulce de Leche,20
+variacion,Dulce de Leche Caliente,dulce_leche_caliente_coco,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Dulce de Leche Caliente,dulce_leche_caliente_soya_vainilla,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Dulce de Leche Caliente,dulce_leche_caliente_soya_vainilla,,ingrediente,Routin Dulce de Leche,20
+variacion,Dulce de Leche Caliente,dulce_leche_caliente_soya_vainilla,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Dulce de Leche Frío,dulce_leche_frio_entera_vaso,,ingrediente,Leche Bové Barista Entera,260
+variacion,Dulce de Leche Frío,dulce_leche_frio_entera_vaso,,ingrediente,Routin Dulce de Leche,20
+variacion,Dulce de Leche Frío,dulce_leche_frio_entera_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Dulce de Leche Frío,dulce_leche_frio_light_vaso,,ingrediente,Leche Bové Barista Light,260
+variacion,Dulce de Leche Frío,dulce_leche_frio_light_vaso,,ingrediente,Routin Dulce de Leche,20
+variacion,Dulce de Leche Frío,dulce_leche_frio_light_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Dulce de Leche Frío,dulce_leche_frio_deslactosada_vaso,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Dulce de Leche Frío,dulce_leche_frio_deslactosada_vaso,,ingrediente,Routin Dulce de Leche,20
+variacion,Dulce de Leche Frío,dulce_leche_frio_deslactosada_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Dulce de Leche Frío,dulce_leche_frio_almendra_vaso,,ingrediente,GÜD Almendra Barista,260
+variacion,Dulce de Leche Frío,dulce_leche_frio_almendra_vaso,,ingrediente,Routin Dulce de Leche,20
+variacion,Dulce de Leche Frío,dulce_leche_frio_almendra_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Dulce de Leche Frío,dulce_leche_frio_avena_vaso,,ingrediente,GÜD Avena Barista,260
+variacion,Dulce de Leche Frío,dulce_leche_frio_avena_vaso,,ingrediente,Routin Dulce de Leche,20
+variacion,Dulce de Leche Frío,dulce_leche_frio_avena_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Dulce de Leche Frío,dulce_leche_frio_coco_vaso,,ingrediente,Leche de Coco,260
+variacion,Dulce de Leche Frío,dulce_leche_frio_coco_vaso,,ingrediente,Routin Dulce de Leche,20
+variacion,Dulce de Leche Frío,dulce_leche_frio_coco_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Dulce de Leche Frío,dulce_leche_frio_soya_vainilla_vaso,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Dulce de Leche Frío,dulce_leche_frio_soya_vainilla_vaso,,ingrediente,Routin Dulce de Leche,20
+variacion,Dulce de Leche Frío,dulce_leche_frio_soya_vainilla_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Dulce de Leche Frío,dulce_leche_frio_entera_lata,,ingrediente,Leche Bové Barista Entera,260
+variacion,Dulce de Leche Frío,dulce_leche_frio_entera_lata,,ingrediente,Routin Dulce de Leche,20
+variacion,Dulce de Leche Frío,dulce_leche_frio_entera_lata,,insumo,Lata Pet,1
+variacion,Dulce de Leche Frío,dulce_leche_frio_light_lata,,ingrediente,Leche Bové Barista Light,260
+variacion,Dulce de Leche Frío,dulce_leche_frio_light_lata,,ingrediente,Routin Dulce de Leche,20
+variacion,Dulce de Leche Frío,dulce_leche_frio_light_lata,,insumo,Lata Pet,1
+variacion,Dulce de Leche Frío,dulce_leche_frio_deslactosada_lata,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Dulce de Leche Frío,dulce_leche_frio_deslactosada_lata,,ingrediente,Routin Dulce de Leche,20
+variacion,Dulce de Leche Frío,dulce_leche_frio_deslactosada_lata,,insumo,Lata Pet,1
+variacion,Dulce de Leche Frío,dulce_leche_frio_almendra_lata,,ingrediente,GÜD Almendra Barista,260
+variacion,Dulce de Leche Frío,dulce_leche_frio_almendra_lata,,ingrediente,Routin Dulce de Leche,20
+variacion,Dulce de Leche Frío,dulce_leche_frio_almendra_lata,,insumo,Lata Pet,1
+variacion,Dulce de Leche Frío,dulce_leche_frio_avena_lata,,ingrediente,GÜD Avena Barista,260
+variacion,Dulce de Leche Frío,dulce_leche_frio_avena_lata,,ingrediente,Routin Dulce de Leche,20
+variacion,Dulce de Leche Frío,dulce_leche_frio_avena_lata,,insumo,Lata Pet,1
+variacion,Dulce de Leche Frío,dulce_leche_frio_coco_lata,,ingrediente,Leche de Coco,260
+variacion,Dulce de Leche Frío,dulce_leche_frio_coco_lata,,ingrediente,Routin Dulce de Leche,20
+variacion,Dulce de Leche Frío,dulce_leche_frio_coco_lata,,insumo,Lata Pet,1
+variacion,Dulce de Leche Frío,dulce_leche_frio_soya_vainilla_lata,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Dulce de Leche Frío,dulce_leche_frio_soya_vainilla_lata,,ingrediente,Routin Dulce de Leche,20
+variacion,Dulce de Leche Frío,dulce_leche_frio_soya_vainilla_lata,,insumo,Lata Pet,1
+variacion,Lotus Caliente,lotus_caliente_entera,,ingrediente,Leche Bové Barista Entera,260
+variacion,Lotus Caliente,lotus_caliente_entera,,ingrediente,Routin Lotus,20
+variacion,Lotus Caliente,lotus_caliente_entera,,ingrediente,Galletas Lotus para Frappé,1
+variacion,Lotus Caliente,lotus_caliente_entera,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Lotus Caliente,lotus_caliente_light,,ingrediente,Leche Bové Barista Light,260
+variacion,Lotus Caliente,lotus_caliente_light,,ingrediente,Routin Lotus,20
+variacion,Lotus Caliente,lotus_caliente_light,,ingrediente,Galletas Lotus para Frappé,1
+variacion,Lotus Caliente,lotus_caliente_light,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Lotus Caliente,lotus_caliente_deslactosada,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Lotus Caliente,lotus_caliente_deslactosada,,ingrediente,Routin Lotus,20
+variacion,Lotus Caliente,lotus_caliente_deslactosada,,ingrediente,Galletas Lotus para Frappé,1
+variacion,Lotus Caliente,lotus_caliente_deslactosada,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Lotus Caliente,lotus_caliente_almendra,,ingrediente,GÜD Almendra Barista,260
+variacion,Lotus Caliente,lotus_caliente_almendra,,ingrediente,Routin Lotus,20
+variacion,Lotus Caliente,lotus_caliente_almendra,,ingrediente,Galletas Lotus para Frappé,1
+variacion,Lotus Caliente,lotus_caliente_almendra,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Lotus Caliente,lotus_caliente_avena,,ingrediente,GÜD Avena Barista,260
+variacion,Lotus Caliente,lotus_caliente_avena,,ingrediente,Routin Lotus,20
+variacion,Lotus Caliente,lotus_caliente_avena,,ingrediente,Galletas Lotus para Frappé,1
+variacion,Lotus Caliente,lotus_caliente_avena,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Lotus Caliente,lotus_caliente_coco,,ingrediente,Leche de Coco,260
+variacion,Lotus Caliente,lotus_caliente_coco,,ingrediente,Routin Lotus,20
+variacion,Lotus Caliente,lotus_caliente_coco,,ingrediente,Galletas Lotus para Frappé,1
+variacion,Lotus Caliente,lotus_caliente_coco,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Lotus Caliente,lotus_caliente_soya_vainilla,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Lotus Caliente,lotus_caliente_soya_vainilla,,ingrediente,Routin Lotus,20
+variacion,Lotus Caliente,lotus_caliente_soya_vainilla,,ingrediente,Galletas Lotus para Frappé,1
+variacion,Lotus Caliente,lotus_caliente_soya_vainilla,,insumo,Vaso de Doble Pared 12oz,1
+variacion,Lotus Frío,lotus_frio_entera_vaso,,ingrediente,Leche Bové Barista Entera,260
+variacion,Lotus Frío,lotus_frio_entera_vaso,,ingrediente,Routin Lotus,20
+variacion,Lotus Frío,lotus_frio_entera_vaso,,ingrediente,Galletas Lotus para Frappé,1
+variacion,Lotus Frío,lotus_frio_entera_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Lotus Frío,lotus_frio_light_vaso,,ingrediente,Leche Bové Barista Light,260
+variacion,Lotus Frío,lotus_frio_light_vaso,,ingrediente,Routin Lotus,20
+variacion,Lotus Frío,lotus_frio_light_vaso,,ingrediente,Galletas Lotus para Frappé,1
+variacion,Lotus Frío,lotus_frio_light_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Lotus Frío,lotus_frio_deslactosada_vaso,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Lotus Frío,lotus_frio_deslactosada_vaso,,ingrediente,Routin Lotus,20
+variacion,Lotus Frío,lotus_frio_deslactosada_vaso,,ingrediente,Galletas Lotus para Frappé,1
+variacion,Lotus Frío,lotus_frio_deslactosada_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Lotus Frío,lotus_frio_almendra_vaso,,ingrediente,GÜD Almendra Barista,260
+variacion,Lotus Frío,lotus_frio_almendra_vaso,,ingrediente,Routin Lotus,20
+variacion,Lotus Frío,lotus_frio_almendra_vaso,,ingrediente,Galletas Lotus para Frappé,1
+variacion,Lotus Frío,lotus_frio_almendra_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Lotus Frío,lotus_frio_avena_vaso,,ingrediente,GÜD Avena Barista,260
+variacion,Lotus Frío,lotus_frio_avena_vaso,,ingrediente,Routin Lotus,20
+variacion,Lotus Frío,lotus_frio_avena_vaso,,ingrediente,Galletas Lotus para Frappé,1
+variacion,Lotus Frío,lotus_frio_avena_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Lotus Frío,lotus_frio_coco_vaso,,ingrediente,Leche de Coco,260
+variacion,Lotus Frío,lotus_frio_coco_vaso,,ingrediente,Routin Lotus,20
+variacion,Lotus Frío,lotus_frio_coco_vaso,,ingrediente,Galletas Lotus para Frappé,1
+variacion,Lotus Frío,lotus_frio_coco_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Lotus Frío,lotus_frio_soya_vainilla_vaso,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Lotus Frío,lotus_frio_soya_vainilla_vaso,,ingrediente,Routin Lotus,20
+variacion,Lotus Frío,lotus_frio_soya_vainilla_vaso,,ingrediente,Galletas Lotus para Frappé,1
+variacion,Lotus Frío,lotus_frio_soya_vainilla_vaso,,insumo,Vaso Pet 16oz,1
+variacion,Lotus Frío,lotus_frio_entera_lata,,ingrediente,Leche Bové Barista Entera,260
+variacion,Lotus Frío,lotus_frio_entera_lata,,ingrediente,Routin Lotus,20
+variacion,Lotus Frío,lotus_frio_entera_lata,,ingrediente,Galletas Lotus para Frappé,1
+variacion,Lotus Frío,lotus_frio_entera_lata,,insumo,Lata Pet,1
+variacion,Lotus Frío,lotus_frio_light_lata,,ingrediente,Leche Bové Barista Light,260
+variacion,Lotus Frío,lotus_frio_light_lata,,ingrediente,Routin Lotus,20
+variacion,Lotus Frío,lotus_frio_light_lata,,ingrediente,Galletas Lotus para Frappé,1
+variacion,Lotus Frío,lotus_frio_light_lata,,insumo,Lata Pet,1
+variacion,Lotus Frío,lotus_frio_deslactosada_lata,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Lotus Frío,lotus_frio_deslactosada_lata,,ingrediente,Routin Lotus,20
+variacion,Lotus Frío,lotus_frio_deslactosada_lata,,ingrediente,Galletas Lotus para Frappé,1
+variacion,Lotus Frío,lotus_frio_deslactosada_lata,,insumo,Lata Pet,1
+variacion,Lotus Frío,lotus_frio_almendra_lata,,ingrediente,GÜD Almendra Barista,260
+variacion,Lotus Frío,lotus_frio_almendra_lata,,ingrediente,Routin Lotus,20
+variacion,Lotus Frío,lotus_frio_almendra_lata,,ingrediente,Galletas Lotus para Frappé,1
+variacion,Lotus Frío,lotus_frio_almendra_lata,,insumo,Lata Pet,1
+variacion,Lotus Frío,lotus_frio_avena_lata,,ingrediente,GÜD Avena Barista,260
+variacion,Lotus Frío,lotus_frio_avena_lata,,ingrediente,Routin Lotus,20
+variacion,Lotus Frío,lotus_frio_avena_lata,,ingrediente,Galletas Lotus para Frappé,1
+variacion,Lotus Frío,lotus_frio_avena_lata,,insumo,Lata Pet,1
+variacion,Lotus Frío,lotus_frio_coco_lata,,ingrediente,Leche de Coco,260
+variacion,Lotus Frío,lotus_frio_coco_lata,,ingrediente,Routin Lotus,20
+variacion,Lotus Frío,lotus_frio_coco_lata,,ingrediente,Galletas Lotus para Frappé,1
+variacion,Lotus Frío,lotus_frio_coco_lata,,insumo,Lata Pet,1
+variacion,Lotus Frío,lotus_frio_soya_vainilla_lata,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Lotus Frío,lotus_frio_soya_vainilla_lata,,ingrediente,Routin Lotus,20
+variacion,Lotus Frío,lotus_frio_soya_vainilla_lata,,ingrediente,Galletas Lotus para Frappé,1
+variacion,Lotus Frío,lotus_frio_soya_vainilla_lata,,insumo,Lata Pet,1
+variacion,Oreo Frappé,ore_frappe_entera,,ingrediente,Leche Bové Barista Entera,45
+variacion,Oreo Frappé,ore_frappe_entera,,ingrediente,Routin Chocolate Oscuro,22
+variacion,Oreo Frappé,ore_frappe_entera,,ingrediente,Capuccine Cookies & Cream,50
+variacion,Oreo Frappé,ore_frappe_entera,,insumo,Vaso Pet 16oz,1
+variacion,Oreo Frappé,ore_frappe_light,,ingrediente,Leche Bové Barista Light,45
+variacion,Oreo Frappé,ore_frappe_light,,ingrediente,Routin Chocolate Oscuro,22
+variacion,Oreo Frappé,ore_frappe_light,,ingrediente,Capuccine Cookies & Cream,50
+variacion,Oreo Frappé,ore_frappe_light,,insumo,Vaso Pet 16oz,1
+variacion,Oreo Frappé,ore_frappe_deslactosada,,ingrediente,Leche Bové Barista Deslactosada,45
+variacion,Oreo Frappé,ore_frappe_deslactosada,,ingrediente,Routin Chocolate Oscuro,22
+variacion,Oreo Frappé,ore_frappe_deslactosada,,ingrediente,Capuccine Cookies & Cream,50
+variacion,Oreo Frappé,ore_frappe_deslactosada,,insumo,Vaso Pet 16oz,1
+variacion,Oreo Frappé,ore_frappe_almendra,,ingrediente,GÜD Almendra Barista,45
+variacion,Oreo Frappé,ore_frappe_almendra,,ingrediente,Routin Chocolate Oscuro,22
+variacion,Oreo Frappé,ore_frappe_almendra,,ingrediente,Capuccine Cookies & Cream,50
+variacion,Oreo Frappé,ore_frappe_almendra,,insumo,Vaso Pet 16oz,1
+variacion,Oreo Frappé,ore_frappe_avena,,ingrediente,GÜD Avena Barista,45
+variacion,Oreo Frappé,ore_frappe_avena,,ingrediente,Routin Chocolate Oscuro,22
+variacion,Oreo Frappé,ore_frappe_avena,,ingrediente,Capuccine Cookies & Cream,50
+variacion,Oreo Frappé,ore_frappe_avena,,insumo,Vaso Pet 16oz,1
+variacion,Oreo Frappé,ore_frappe_coco,,ingrediente,Leche de Coco,45
+variacion,Oreo Frappé,ore_frappe_coco,,ingrediente,Routin Chocolate Oscuro,22
+variacion,Oreo Frappé,ore_frappe_coco,,ingrediente,Capuccine Cookies & Cream,50
+variacion,Oreo Frappé,ore_frappe_coco,,insumo,Vaso Pet 16oz,1
+variacion,Oreo Frappé,ore_frappe_soya_vainilla,,ingrediente,GÜD Soya Barista Vainilla,45
+variacion,Oreo Frappé,ore_frappe_soya_vainilla,,ingrediente,Routin Chocolate Oscuro,22
+variacion,Oreo Frappé,ore_frappe_soya_vainilla,,ingrediente,Capuccine Cookies & Cream,50
+variacion,Oreo Frappé,ore_frappe_soya_vainilla,,insumo,Vaso Pet 16oz,1
+variacion,Croissant de Chocolate,croissant_chocolate_local,,ingrediente,Croissant de Chocolate,1
+variacion,Croissant de Chocolate,croissant_chocolate_local,,insumo,Plato Kraft,1
+variacion,Croissant de Chocolate,croissant_chocolate_llevar,,ingrediente,Croissant de Chocolate,1
+variacion,Croissant de Chocolate,croissant_chocolate_llevar,,insumo,Bolsa para Pan,1
+variacion,Roll de Canela,rol_canela_local,,ingrediente,Roll de Canela,1
+variacion,Roll de Canela,rol_canela_local,,insumo,Plato Kraft,1
+variacion,Roll de Canela,rol_canela_llevar,,ingrediente,Roll de Canela,1
+variacion,Roll de Canela,rol_canela_llevar,,insumo,Bolsa para Pan,1
+variacion,Cruffin de Nutella,cruffin_nutella_local,,ingrediente,Cruffin de Nutella,1
+variacion,Cruffin de Nutella,cruffin_nutella_local,,insumo,Plato Kraft,1
+variacion,Cruffin de Nutella,cruffin_nutella_llevar,,ingrediente,Cruffin de Nutella,1
+variacion,Cruffin de Nutella,cruffin_nutella_llevar,,insumo,Bolsa para Pan,1
+variacion,Kouign Amman,kouign_local,,ingrediente,Kouign Amman,1
+variacion,Kouign Amman,kouign_local,,insumo,Plato Kraft,1
+variacion,Kouign Amman,kouign_llevar,,ingrediente,Kouign Amman,1
+variacion,Kouign Amman,kouign_llevar,,insumo,Bolsa para Pan,1
+variacion,Galleta Clásica (Choco y Nuez),galleta_clasica_local,,ingrediente,Galleta Clásica (Choco y Nuez),1
+variacion,Galleta Clásica (Choco y Nuez),galleta_clasica_local,,insumo,Plato Kraft,1
+variacion,Galleta Clásica (Choco y Nuez),galleta_clasica_llevar,,ingrediente,Galleta Clásica (Choco y Nuez),1
+variacion,Galleta Clásica (Choco y Nuez),galleta_clasica_llevar,,insumo,Bolsa para Pan,1
+variacion,Galleta Doble Chocolate,galleta_chocolate_local,,ingrediente,Galleta Doble Chocolate,1
+variacion,Galleta Doble Chocolate,galleta_chocolate_local,,insumo,Plato Kraft,1
+variacion,Galleta Doble Chocolate,galleta_chocolate_llevar,,ingrediente,Galleta Doble Chocolate,1
+variacion,Galleta Doble Chocolate,galleta_chocolate_llevar,,insumo,Bolsa para Pan,1
+variacion,Galleta de Lotus,galleta_lotus_local,,ingrediente,Galleta de Lotus,1
+variacion,Galleta de Lotus,galleta_lotus_local,,insumo,Plato Kraft,1
+variacion,Galleta de Lotus,galleta_lotus_llevar,,ingrediente,Galleta de Lotus,1
+variacion,Galleta de Lotus,galleta_lotus_llevar,,insumo,Bolsa para Pan,1
+variacion,Brownie Clásico,brownie_local,,ingrediente,Brownie Clásico,1
+variacion,Brownie Clásico,brownie_local,,insumo,Plato Kraft,1
+variacion,Brownie Clásico,brownie_llevar,,ingrediente,Brownie Clásico,1
+variacion,Brownie Clásico,brownie_llevar,,insumo,Bolsa para Pan,1
+variacion,Brownie Nutella,brownie_nutella_local,,ingrediente,Brownie Nutella,1
+variacion,Brownie Nutella,brownie_nutella_local,,insumo,Plato Kraft,1
+variacion,Brownie Nutella,brownie_nutella_llevar,,ingrediente,Brownie Nutella,1
+variacion,Brownie Nutella,brownie_nutella_llevar,,insumo,Bolsa para Pan,1
+variacion,Galleta de Avena y Arándano,galleta_arandano_local,,ingrediente,Galleta de Avena y Arándano,1
+variacion,Galleta de Avena y Arándano,galleta_arandano_local,,insumo,Plato Kraft,1
+variacion,Galleta de Avena y Arándano,galleta_arandano_llevar,,ingrediente,Galleta de Avena y Arándano,1
+variacion,Galleta de Avena y Arándano,galleta_arandano_llevar,,insumo,Bolsa para Pan,1
+variacion,Croissant de Pavo y Queso,croissant_pavo_local,,ingrediente,Pechuga de Pavo San Rafael,40
+variacion,Croissant de Pavo y Queso,croissant_pavo_local,,ingrediente,Queso Manchego Nochebuena,30
+variacion,Croissant de Pavo y Queso,croissant_pavo_local,,ingrediente,Croissant Masa Madre,1
+variacion,Croissant de Pavo y Queso,croissant_pavo_local,,insumo,Plato Kraft,1
+variacion,Croissant de Pavo y Queso,croissant_pavo_llevar,,ingrediente,Pechuga de Pavo San Rafael,40
+variacion,Croissant de Pavo y Queso,croissant_pavo_llevar,,ingrediente,Queso Manchego Nochebuena,30
+variacion,Croissant de Pavo y Queso,croissant_pavo_llevar,,ingrediente,Croissant Masa Madre,1
+variacion,Croissant de Pavo y Queso,croissant_pavo_llevar,,insumo,Contenedor Kraft,1
+variacion,Baguette de Pavo y Queso,baguette_pavo_local,,ingrediente,Pan de Baguette,1
+variacion,Baguette de Pavo y Queso,baguette_pavo_local,,ingrediente,Pechuga de Pavo San Rafael,40
+variacion,Baguette de Pavo y Queso,baguette_pavo_local,,ingrediente,Queso Manchego Nochebuena,30
+variacion,Baguette de Pavo y Queso,baguette_pavo_local,,insumo,Plato Kraft,1
+variacion,Baguette de Pavo y Queso,baguette_pavo_llevar,,ingrediente,Pan de Baguette,1
+variacion,Baguette de Pavo y Queso,baguette_pavo_llevar,,ingrediente,Pechuga de Pavo San Rafael,40
+variacion,Baguette de Pavo y Queso,baguette_pavo_llevar,,ingrediente,Queso Manchego Nochebuena,30
+variacion,Baguette de Pavo y Queso,baguette_pavo_llevar,,insumo,Contenedor Kraft,1
+variacion,Sandwich de Pavo y Queso,sandwich_pavo_local,,ingrediente,Pan Rebanado Masa Madre,2
+variacion,Sandwich de Pavo y Queso,sandwich_pavo_local,,ingrediente,Pechuga de Pavo San Rafael,87
+variacion,Sandwich de Pavo y Queso,sandwich_pavo_local,,ingrediente,Queso Manchego Nochebuena,40
+variacion,Sandwich de Pavo y Queso,sandwich_pavo_local,,insumo,Plato Kraft,1
+variacion,Sandwich de Pavo y Queso,sandwich_pavo_llevar,,ingrediente,Pan Rebanado Masa Madre,2
+variacion,Sandwich de Pavo y Queso,sandwich_pavo_llevar,,ingrediente,Pechuga de Pavo San Rafael,87
+variacion,Sandwich de Pavo y Queso,sandwich_pavo_llevar,,ingrediente,Queso Manchego Nochebuena,40
+variacion,Sandwich de Pavo y Queso,sandwich_pavo_llevar,,insumo,Contenedor Kraft,1
+variacion,Baguette de Serrano y Queso,baguette_serrano_local,,ingrediente,Jamón Serrano,30
+variacion,Baguette de Serrano y Queso,baguette_serrano_local,,ingrediente,Queso Manchego Nochebuena,40
+variacion,Baguette de Serrano y Queso,baguette_serrano_local,,ingrediente,Aderezo Chipotle,15
+variacion,Baguette de Serrano y Queso,baguette_serrano_local,,ingrediente,Pan de Baguette,1
+variacion,Baguette de Serrano y Queso,baguette_serrano_local,,insumo,Plato Kraft,1
+variacion,Baguette de Serrano y Queso,baguette_serrano_llevar,,ingrediente,Jamón Serrano,30
+variacion,Baguette de Serrano y Queso,baguette_serrano_llevar,,ingrediente,Queso Manchego Nochebuena,40
+variacion,Baguette de Serrano y Queso,baguette_serrano_llevar,,ingrediente,Aderezo Chipotle,15
+variacion,Baguette de Serrano y Queso,baguette_serrano_llevar,,ingrediente,Pan de Baguette,1
+variacion,Baguette de Serrano y Queso,baguette_serrano_llevar,,insumo,Contenedor Kraft,1
+variacion,Sandwich de Jamón y Selva Negra,sandwich_selva_local,,ingrediente,Selva NeGramosa,40
+variacion,Sandwich de Jamón y Selva Negra,sandwich_selva_local,,ingrediente,Jamón de Pierna,22
+variacion,Sandwich de Jamón y Selva Negra,sandwich_selva_local,,ingrediente,Queso Manchego Nochebuena,30
+variacion,Sandwich de Jamón y Selva Negra,sandwich_selva_local,,ingrediente,Pan Rebanado Masa Madre,2
+variacion,Sandwich de Jamón y Selva Negra,sandwich_selva_local,,insumo,Plato Kraft,1
+variacion,Sandwich de Jamón y Selva Negra,sandwich_selva_llevar,,ingrediente,Selva NeGramosa,40
+variacion,Sandwich de Jamón y Selva Negra,sandwich_selva_llevar,,ingrediente,Jamón de Pierna,22
+variacion,Sandwich de Jamón y Selva Negra,sandwich_selva_llevar,,ingrediente,Queso Manchego Nochebuena,30
+variacion,Sandwich de Jamón y Selva Negra,sandwich_selva_llevar,,ingrediente,Pan Rebanado Masa Madre,2
+variacion,Sandwich de Jamón y Selva Negra,sandwich_selva_llevar,,insumo,Contenedor Kraft,1
+variacion,Osito Latte,osito_late_entera,,ingrediente,Leche Bové Barista Entera,260
+variacion,Osito Latte,osito_late_entera,,ingrediente,Café Tukafe Tradición,15
+variacion,Osito Latte,osito_late_entera,,insumo,Lata Oso,1
+variacion,Osito Latte,osito_late_light,,ingrediente,Leche Bové Barista Light,260
+variacion,Osito Latte,osito_late_light,,ingrediente,Café Tukafe Tradición,15
+variacion,Osito Latte,osito_late_light,,insumo,Lata Oso,1
+variacion,Osito Latte,osito_late_deslactosada,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Osito Latte,osito_late_deslactosada,,ingrediente,Café Tukafe Tradición,15
+variacion,Osito Latte,osito_late_deslactosada,,insumo,Lata Oso,1
+variacion,Osito Latte,osito_late_almendra,,ingrediente,GÜD Almendra Barista,260
+variacion,Osito Latte,osito_late_almendra,,ingrediente,Café Tukafe Tradición,15
+variacion,Osito Latte,osito_late_almendra,,insumo,Lata Oso,1
+variacion,Osito Latte,osito_late_avena,,ingrediente,GÜD Avena Barista,260
+variacion,Osito Latte,osito_late_avena,,ingrediente,Café Tukafe Tradición,15
+variacion,Osito Latte,osito_late_avena,,insumo,Lata Oso,1
+variacion,Osito Latte,osito_late_coco,,ingrediente,Leche de Coco,260
+variacion,Osito Latte,osito_late_coco,,ingrediente,Café Tukafe Tradición,15
+variacion,Osito Latte,osito_late_coco,,insumo,Lata Oso,1
+variacion,Osito Latte,osito_late_soya_vainilla,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Osito Latte,osito_late_soya_vainilla,,ingrediente,Café Tukafe Tradición,15
+variacion,Osito Latte,osito_late_soya_vainilla,,insumo,Lata Oso,1
+variacion,Osito Chai,osito_chai_entera,,ingrediente,Spiced Chai Sugar Free David Río,30
+variacion,Osito Chai,osito_chai_entera,,ingrediente,Leche Bové Barista Entera,260
+variacion,Osito Chai,osito_chai_entera,,insumo,Lata Oso,1
+variacion,Osito Chai,osito_chai_light,,ingrediente,Spiced Chai Sugar Free David Río,30
+variacion,Osito Chai,osito_chai_light,,ingrediente,Leche Bové Barista Light,260
+variacion,Osito Chai,osito_chai_light,,insumo,Lata Oso,1
+variacion,Osito Chai,osito_chai_deslactosada,,ingrediente,Spiced Chai Sugar Free David Río,30
+variacion,Osito Chai,osito_chai_deslactosada,,ingrediente,Leche Bové Barista Deslactosada,260
+variacion,Osito Chai,osito_chai_deslactosada,,insumo,Lata Oso,1
+variacion,Osito Chai,osito_chai_almendra,,ingrediente,Spiced Chai Sugar Free David Río,30
+variacion,Osito Chai,osito_chai_almendra,,ingrediente,GÜD Almendra Barista,260
+variacion,Osito Chai,osito_chai_almendra,,insumo,Lata Oso,1
+variacion,Osito Chai,osito_chai_avena,,ingrediente,Spiced Chai Sugar Free David Río,30
+variacion,Osito Chai,osito_chai_avena,,ingrediente,GÜD Avena Barista,260
+variacion,Osito Chai,osito_chai_avena,,insumo,Lata Oso,1
+variacion,Osito Chai,osito_chai_coco,,ingrediente,Spiced Chai Sugar Free David Río,30
+variacion,Osito Chai,osito_chai_coco,,ingrediente,Leche de Coco,260
+variacion,Osito Chai,osito_chai_coco,,insumo,Lata Oso,1
+variacion,Osito Chai,osito_chai_soya_vainilla,,ingrediente,Spiced Chai Sugar Free David Río,30
+variacion,Osito Chai,osito_chai_soya_vainilla,,ingrediente,GÜD Soya Barista Vainilla,260
+variacion,Osito Chai,osito_chai_soya_vainilla,,insumo,Lata Oso,1
+variacion,Osito Matcha,osito_matcha_entera,,ingrediente,Matcha Ceremonial,4
+variacion,Osito Matcha,osito_matcha_entera,,ingrediente,Leche Bové Barista Entera,200
+variacion,Osito Matcha,osito_matcha_entera,,insumo,Lata Oso,1
+variacion,Osito Matcha,osito_matcha_light,,ingrediente,Matcha Ceremonial,4
+variacion,Osito Matcha,osito_matcha_light,,ingrediente,Leche Bové Barista Light,200
+variacion,Osito Matcha,osito_matcha_light,,insumo,Lata Oso,1
+variacion,Osito Matcha,osito_matcha_deslactosada,,ingrediente,Matcha Ceremonial,4
+variacion,Osito Matcha,osito_matcha_deslactosada,,ingrediente,Leche Bové Barista Deslactosada,200
+variacion,Osito Matcha,osito_matcha_deslactosada,,insumo,Lata Oso,1
+variacion,Osito Matcha,osito_matcha_almendra,,ingrediente,Matcha Ceremonial,4
+variacion,Osito Matcha,osito_matcha_almendra,,ingrediente,GÜD Almendra Barista,200
+variacion,Osito Matcha,osito_matcha_almendra,,insumo,Lata Oso,1
+variacion,Osito Matcha,osito_matcha_avena,,ingrediente,Matcha Ceremonial,4
+variacion,Osito Matcha,osito_matcha_avena,,ingrediente,GÜD Avena Barista,200
+variacion,Osito Matcha,osito_matcha_avena,,insumo,Lata Oso,1
+variacion,Osito Matcha,osito_matcha_coco,,ingrediente,Matcha Ceremonial,4
+variacion,Osito Matcha,osito_matcha_coco,,ingrediente,Leche de Coco,200
+variacion,Osito Matcha,osito_matcha_coco,,insumo,Lata Oso,1
+variacion,Osito Matcha,osito_matcha_soya_vainilla,,ingrediente,Matcha Ceremonial,4
+variacion,Osito Matcha,osito_matcha_soya_vainilla,,ingrediente,GÜD Soya Barista Vainilla,200
+variacion,Osito Matcha,osito_matcha_soya_vainilla,,insumo,Lata Oso,1

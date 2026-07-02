@@ -1,16 +1,31 @@
 nombre_modificador,nombre_opcion,tipo_componente,nombre_componente,cantidad
-Leche,Leche Entera,ingrediente,Leche Bove Barista Entera,50
-Leche,Leche Light,ingrediente,Leche Bove Barista Light,50
-Leche,Leche Deslactosada,ingrediente,Leche Bove Barista Deslactosada,50
-Leche,Leche de Almendra,ingrediente,Gud Almendra Barista,50
-Leche,Leche de Avena,ingrediente,Gud Avena Barista,50
+Sabor,Vainilla Sugar Free,ingrediente,Routin Vainilla Sugar Free,22
+Sabor,Caramelo Sugar Free,ingrediente,Routin Caramelo Sin Azúcar,22
+Sabor,Vainilla,ingrediente,Routin Vainilla Francesa,22
+Sabor,Avellana Sugar Free,ingrediente,Routin Avellana Sin Azúcar,22
+Sabor,Chocolate Blanco,ingrediente,Saborizante Chocolate Blanco,22
+Sabor,Lavanda,ingrediente,Routin Lavanda,22
+Sabor,Almendra,ingrediente,Routin Almendra,22
+Sabor,Caramelo,ingrediente,Routin Caramelo,22
+Sabor,Dulce de Leche,ingrediente,Routin Dulce de Leche,22
+Sabor,Salted Caramel,ingrediente,Routin Salted Caramel,22
+Shot Extra,Con Shot Extra Distinción,ingrediente,Café Tukafe Distinción,15
+Shot Extra,Con Shot Extra Tradición,ingrediente,Café Tukafe Tradición,15
+Shot Extra Tradición,Con Shot Extra Tradición,ingrediente,Café Tukafe Tradición,15
+Shot Extra Distinción,Con Shot Extra Distinción,ingrediente,Café Tukafe Distinción,15
+Leche,Leche Entera,ingrediente,Leche Bové Barista Entera,50
+Leche,Leche Light,ingrediente,Leche Bové Barista Light,50
+Leche,Leche Deslactosada,ingrediente,Leche Bové Barista Deslactosada,50
+Leche,Leche de Soya Vainilla,ingrediente,GÜD Soya Barista Vainilla,50
+Leche,Leche de Almendra,ingrediente,GÜD Almendra Barista,50
+Leche,Leche de Avena,ingrediente,GÜD Avena Barista,50
 Leche,Leche de Coco,ingrediente,Leche de Coco,50
-Shot Extra,Con Shot Extra,ingrediente,Café Tukafe Distinción,15
-Sabor, Vainilla Sugar Free,ingrediente,Saborizante Routin Vainilla Sugar Free,22
-Sabor,Caramelo Sugar Free,ingrediente,Saborizante Routin Caramelo Sugar Free,22
-Sabor,Vainilla,ingrediente,Saborizante Routin Vainilla Francesa,22
-Sabor,Caramelo,ingrediente,Saborizante Routin Caramelo,22
-Sabor,Lotus,ingrediente,Saborizante Routin Lotus,22
-Cold Foam,Fresa,ingrediente,Saborizante Routin Fresa,30
-Cold Foam,Vainilla,ingrediente,Saborizante Routin Vainilla Francesa,30
-Cold Foam,Vainilla Sugar Free,ingrediente,Saborizante Routin Vainilla Sugar Free,30
+Cold Foam,Cold Foam de Fresa,ingrediente,Leche Bové Barista Entera,60
+Cold Foam,Cold Foam de Fresa,ingrediente,Monin Fresa,22
+Cold Foam,Cold Foam de Moras,ingrediente,Leche Bové Barista Entera,60
+Cold Foam,Cold Foam de Moras,ingrediente,Routin Moras,22
+Cold Foam,Cold Foam de Vainilla,ingrediente,Leche Bové Barista Entera,60
+Cold Foam,Cold Foam de Vainilla,ingrediente,Routin Vainilla Francesa,22
+Cold Foam,Cold Foam de Vainilla Sugar Free,ingrediente,Leche Bové Barista Entera,60
+Cold Foam,Cold Foam de Vainilla Sugar Free,ingrediente,Routin Vainilla Sugar Free,22
+Endulzado,Miel de Agave,ingrediente,Miel de Agave,15

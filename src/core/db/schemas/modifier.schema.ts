@@ -2,6 +2,7 @@ import { relations, sql } from "drizzle-orm";
 import {
   boolean,
   check,
+  foreignKey,
   index,
   integer,
   numeric,
@@ -15,6 +16,7 @@ import { generateTimestamps } from "@core/utils";
 import { ingredientsDB } from "./ingredient.schema";
 import { productsDB } from "./product.schema";
 import { suppliesDB } from "./supply.schema";
+import { productVariationGroupsDB, variationGroupOptionsDB } from "./variation.schema";
 
 const modifiers = pgTable(
   "modifier",
@@ -64,6 +66,7 @@ const modifierOptions = pgTable(
   (table) => [
     uniqueIndex("modifier_option_modifier_name_unique").on(table.modifierId, table.name),
     uniqueIndex("modifier_option_modifier_sort_order_unique").on(table.modifierId, table.sortOrder),
+    uniqueIndex("modifier_option_modifier_id_id_unique").on(table.modifierId, table.id),
     uniqueIndex("modifier_option_single_default_unique")
       .on(table.modifierId)
       .where(sql`${table.isDefault} = true`),
@@ -95,6 +98,71 @@ const productModifiers = pgTable(
     check("product_modifier_sort_order_non_negative_check", sql`${table.sortOrder} >= 0`),
     index("product_modifier_product_id_idx").on(table.productId),
     index("product_modifier_modifier_id_idx").on(table.modifierId),
+  ],
+);
+
+const productModifierOptions = pgTable(
+  "product_modifier_option",
+  {
+    productId: text("product_id").notNull(),
+    modifierId: text("modifier_id").notNull(),
+    modifierOptionId: text("modifier_option_id").notNull(),
+    ...generateTimestamps(),
+  },
+  (table) => [
+    primaryKey({
+      name: "product_modifier_option_pk",
+      columns: [table.productId, table.modifierId, table.modifierOptionId],
+    }),
+    foreignKey({
+      name: "product_modifier_option_product_modifier_fk",
+      columns: [table.productId, table.modifierId],
+      foreignColumns: [productModifiers.productId, productModifiers.modifierId],
+    }).onDelete("cascade"),
+    foreignKey({
+      name: "product_modifier_option_modifier_option_fk",
+      columns: [table.modifierId, table.modifierOptionId],
+      foreignColumns: [modifierOptions.modifierId, modifierOptions.id],
+    }).onDelete("cascade"),
+    index("product_modifier_option_product_modifier_idx").on(table.productId, table.modifierId),
+    index("product_modifier_option_modifier_option_id_idx").on(table.modifierOptionId),
+  ],
+);
+
+const productModifierVisibilityRules = pgTable(
+  "product_modifier_visibility_rule",
+  {
+    productId: text("product_id").notNull(),
+    modifierId: text("modifier_id").notNull(),
+    variationGroupId: text("variation_group_id").notNull(),
+    variationOptionId: text("variation_option_id")
+      .notNull()
+      .references(() => variationGroupOptionsDB.id, { onDelete: "cascade" }),
+    ...generateTimestamps(),
+  },
+  (table) => [
+    primaryKey({
+      name: "product_modifier_visibility_rule_pk",
+      columns: [table.productId, table.modifierId, table.variationGroupId, table.variationOptionId],
+    }),
+    foreignKey({
+      name: "product_modifier_visibility_rule_product_modifier_fk",
+      columns: [table.productId, table.modifierId],
+      foreignColumns: [productModifiers.productId, productModifiers.modifierId],
+    }).onDelete("cascade"),
+    foreignKey({
+      name: "product_modifier_visibility_rule_product_variation_group_fk",
+      columns: [table.productId, table.variationGroupId],
+      foreignColumns: [
+        productVariationGroupsDB.productId,
+        productVariationGroupsDB.variationGroupId,
+      ],
+    }).onDelete("cascade"),
+    index("product_modifier_visibility_rule_product_modifier_idx").on(
+      table.productId,
+      table.modifierId,
+    ),
+    index("product_modifier_visibility_rule_variation_option_idx").on(table.variationOptionId),
   ],
 );
 
@@ -147,6 +215,8 @@ const modifierOptionSupplies = pgTable(
 export const modifiersDB = modifiers;
 export const modifierOptionsDB = modifierOptions;
 export const productModifiersDB = productModifiers;
+export const productModifierOptionsDB = productModifierOptions;
+export const productModifierVisibilityRulesDB = productModifierVisibilityRules;
 export const modifierOptionIngredientsDB = modifierOptionIngredients;
 export const modifierOptionSuppliesDB = modifierOptionSupplies;
 
@@ -160,11 +230,12 @@ export const modifierOptionsRelations = relations(modifierOptionsDB, ({ one, man
     fields: [modifierOptionsDB.modifierId],
     references: [modifiersDB.id],
   }),
+  productLinks: many(productModifierOptionsDB),
   ingredients: many(modifierOptionIngredientsDB),
   supplies: many(modifierOptionSuppliesDB),
 }));
 
-export const productModifiersRelations = relations(productModifiersDB, ({ one }) => ({
+export const productModifiersRelations = relations(productModifiersDB, ({ one, many }) => ({
   product: one(productsDB, {
     fields: [productModifiersDB.productId],
     references: [productsDB.id],
@@ -173,7 +244,44 @@ export const productModifiersRelations = relations(productModifiersDB, ({ one })
     fields: [productModifiersDB.modifierId],
     references: [modifiersDB.id],
   }),
+  allowedOptions: many(productModifierOptionsDB),
+  visibilityRules: many(productModifierVisibilityRulesDB),
 }));
+
+export const productModifierOptionsRelations = relations(productModifierOptionsDB, ({ one }) => ({
+  productModifier: one(productModifiersDB, {
+    fields: [productModifierOptionsDB.productId, productModifierOptionsDB.modifierId],
+    references: [productModifiersDB.productId, productModifiersDB.modifierId],
+  }),
+  option: one(modifierOptionsDB, {
+    fields: [productModifierOptionsDB.modifierId, productModifierOptionsDB.modifierOptionId],
+    references: [modifierOptionsDB.modifierId, modifierOptionsDB.id],
+  }),
+}));
+
+export const productModifierVisibilityRulesRelations = relations(
+  productModifierVisibilityRulesDB,
+  ({ one }) => ({
+    productModifier: one(productModifiersDB, {
+      fields: [
+        productModifierVisibilityRulesDB.productId,
+        productModifierVisibilityRulesDB.modifierId,
+      ],
+      references: [productModifiersDB.productId, productModifiersDB.modifierId],
+    }),
+    productVariationGroup: one(productVariationGroupsDB, {
+      fields: [
+        productModifierVisibilityRulesDB.productId,
+        productModifierVisibilityRulesDB.variationGroupId,
+      ],
+      references: [productVariationGroupsDB.productId, productVariationGroupsDB.variationGroupId],
+    }),
+    variationOption: one(variationGroupOptionsDB, {
+      fields: [productModifierVisibilityRulesDB.variationOptionId],
+      references: [variationGroupOptionsDB.id],
+    }),
+  }),
+);
 
 export const modifierOptionIngredientsRelations = relations(
   modifierOptionIngredientsDB,
@@ -203,5 +311,7 @@ export const modifierOptionSuppliesRelations = relations(modifierOptionSuppliesD
 export type Modifier = typeof modifiersDB.$inferSelect;
 export type ModifierOption = typeof modifierOptionsDB.$inferSelect;
 export type ProductModifier = typeof productModifiersDB.$inferSelect;
+export type ProductModifierOption = typeof productModifierOptionsDB.$inferSelect;
+export type ProductModifierVisibilityRule = typeof productModifierVisibilityRulesDB.$inferSelect;
 export type ModifierOptionIngredient = typeof modifierOptionIngredientsDB.$inferSelect;
 export type ModifierOptionSupply = typeof modifierOptionSuppliesDB.$inferSelect;

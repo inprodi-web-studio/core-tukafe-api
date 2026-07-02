@@ -148,11 +148,35 @@ export const variationResponseSchema = z.object({
   recipe: recipeResponseSchema.nullish(),
 });
 
+const productCategoryResponseSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  icon: z.string(),
+  color: z.string(),
+  sortOrder: z.number().int().nonnegative(),
+  isFourPlusOneEligible: z.boolean(),
+  isCashbackEligible: z.boolean(),
+  image: imageSchema.nullable(),
+  parentId: z.string().nullish(),
+});
+
+const productModifierResponseSchema = modifierResponseSchema.extend({
+  optionScope: z.enum(["all", "subset"]),
+  allowedOptionIds: z.array(z.string()).nullable(),
+  visibleWhen: z.array(
+    z.object({
+      variationGroupId: z.string(),
+      variationOptionId: z.string(),
+    }),
+  ),
+});
+
 export const productResponseSchema = z.object({
   id: z.string(),
   name: z.string(),
   kitchenName: z.string().nullish(),
   priceCents: z.number().nonnegative().nullable(),
+  isFeatured: z.boolean(),
   customerDescription: z.string(),
   kitchenDescription: z.string().nullish(),
   image: imageSchema.nullable(),
@@ -162,16 +186,8 @@ export const productResponseSchema = z.object({
     abbreviation: z.string(),
     precision: z.number().nonnegative(),
   }),
-  category: z
-    .object({
-      id: z.string(),
-      name: z.string(),
-      icon: z.string(),
-      color: z.string(),
-      image: imageSchema.nullable(),
-      parentId: z.string().nullish(),
-    })
-    .nullish(),
+  category: productCategoryResponseSchema.nullish(),
+  categories: z.array(productCategoryResponseSchema),
   taxes: z.array(
     z.object({
       id: z.string(),
@@ -185,10 +201,12 @@ export const productResponseSchema = z.object({
       name: z.string(),
       slug: z.string(),
       address: z.string(),
+      latitude: z.number().nullable(),
+      longitude: z.number().nullable(),
       logo: z.string().nullish(),
     }),
   ),
-  modifiers: z.array(modifierResponseSchema),
+  modifiers: z.array(productModifierResponseSchema),
   productType: z.string(),
   recipe: recipeResponseSchema.nullish(),
   variationGroups: z.array(variationGroupResponseSchema),

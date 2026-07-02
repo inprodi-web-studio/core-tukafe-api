@@ -1,5 +1,17 @@
 import { z } from "zod";
 
+const editableCustomerNameSchema = z.string().trim().min(1).max(120);
+
+export const updateCurrentCustomerBodySchema = z
+  .object({
+    name: editableCustomerNameSchema,
+    middleName: z.string().trim().max(120).nullable().optional(),
+    lastName: editableCustomerNameSchema,
+  })
+  .strict();
+
+export type UpdateCurrentCustomerBody = z.infer<typeof updateCurrentCustomerBodySchema>;
+
 export const currentCustomerResponseSchema = z
   .object({
     token: z.string(),
@@ -22,3 +34,12 @@ export const currentCustomerResponseSchema = z
   .strict();
 
 export type CurrentCustomerResponse = z.infer<typeof currentCustomerResponseSchema>;
+
+export const qrLoginTokenResponseSchema = z
+  .object({
+    payload: z.string(),
+    expiresAt: z.string(),
+  })
+  .strict();
+
+export type QrLoginTokenResponse = z.infer<typeof qrLoginTokenResponseSchema>;

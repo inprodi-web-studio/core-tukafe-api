@@ -65,6 +65,7 @@ export function mapResendError(e: unknown): never {
         notFound("auth.phoneNotRegistered", "Phone number is not registered"),
     },
     codePaths: [["body", "code"]],
+    fallback: () => badRequest("auth.otpSendFailed", "Failed to send verification code"),
   });
 }
 
@@ -92,5 +93,38 @@ export function mapLoginError(e: unknown): never {
         badRequest("auth.phoneNotVerified", "Phone number must be verified before login"),
     },
     codePaths: [["body", "code"]],
+  });
+}
+
+export function mapChangePasswordError(e: unknown): never {
+  throwMappedError(e, {
+    map: {
+      INVALID_PASSWORD: () =>
+        badRequest("auth.currentPasswordInvalid", "Current password is incorrect"),
+      PASSWORD_TOO_SHORT: () =>
+        badRequest("auth.passwordTooShort", "Password must be at least 8 characters"),
+      PASSWORD_TOO_LONG: () => badRequest("auth.passwordTooLong", "Password is too long"),
+      CREDENTIAL_ACCOUNT_NOT_FOUND: () =>
+        badRequest("auth.credentialAccountNotFound", "Credential account was not found"),
+    },
+    codePaths: [["body", "code"]],
+  });
+}
+
+export function mapPasswordResetError(e: unknown): never {
+  throwMappedError(e, {
+    map: {
+      INVALID_OTP: () => badRequest("auth.invalidOTP", "The verification code is incorrect"),
+      OTP_EXPIRED: () => badRequest("auth.otpExpired", "The verification code has expired"),
+      OTP_NOT_FOUND: () =>
+        badRequest("auth.otpNotFound", "No pending verification found for this phone number"),
+      TOO_MANY_ATTEMPTS: () => badRequest("auth.tooManyAttempts", "Too many attempts"),
+      PASSWORD_TOO_SHORT: () =>
+        badRequest("auth.passwordTooShort", "Password must be at least 8 characters"),
+      PASSWORD_TOO_LONG: () => badRequest("auth.passwordTooLong", "Password is too long"),
+      UNEXPECTED_ERROR: () => badRequest("auth.passwordResetFailed", "Password reset failed"),
+    },
+    codePaths: [["body", "code"]],
+    fallback: () => badRequest("auth.otpSendFailed", "Failed to send verification code"),
   });
 }

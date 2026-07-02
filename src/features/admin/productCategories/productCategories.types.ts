@@ -9,7 +9,9 @@ export interface ProductCategoryListItem {
   name: string;
   icon: string;
   color: string;
+  sortOrder: number;
   isFourPlusOneEligible: boolean;
+  isCashbackEligible: boolean;
   image: ProductCategoryImage | null;
   children: ProductCategoryListItem[];
 }
@@ -24,13 +26,30 @@ export interface AdminProductCategoriesService {
     input?: ListProductCategoriesServiceParams,
   ): Promise<PaginatedResult<ProductCategoryListItem>>;
   create(input: CreateProductCategoryServiceParams): Promise<ProductCategoryResponse>;
+  update(
+    id: string,
+    input: UpdateProductCategoryServiceParams,
+  ): Promise<ProductCategoryResponse>;
 }
 
 export interface CreateProductCategoryServiceParams {
   name: string;
   icon: string;
   color: string;
+  sortOrder?: number;
   isFourPlusOneEligible?: boolean;
+  isCashbackEligible?: boolean;
+  imageUploadId?: string | null;
+  parentId?: string | null;
+}
+
+export interface UpdateProductCategoryServiceParams {
+  name?: string;
+  icon?: string;
+  color?: string;
+  sortOrder?: number;
+  isFourPlusOneEligible?: boolean;
+  isCashbackEligible?: boolean;
   imageUploadId?: string | null;
   parentId?: string | null;
 }

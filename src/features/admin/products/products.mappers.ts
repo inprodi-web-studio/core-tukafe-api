@@ -38,6 +38,19 @@ export const mapProductResponse = (product: ProductWithRelations): ProductRespon
   return {
     ...product,
     taxes: product.taxes.map(({ tax }) => tax),
+    categories: [...product.categories]
+      .sort((left, right) => {
+        if (left.category.sortOrder !== right.category.sortOrder) {
+          return left.category.sortOrder - right.category.sortOrder;
+        }
+
+        if (left.category.name !== right.category.name) {
+          return left.category.name.localeCompare(right.category.name);
+        }
+
+        return left.category.id.localeCompare(right.category.id);
+      })
+      .map(({ category }) => category),
     organizations: [...product.organizations]
       .sort((left, right) => {
         if (left.organization.name !== right.organization.name) {
@@ -51,6 +64,8 @@ export const mapProductResponse = (product: ProductWithRelations): ProductRespon
         name: organization.name,
         slug: organization.slug,
         address: organization.address,
+        latitude: organization.latitude,
+        longitude: organization.longitude,
         logo: organization.logo,
       })),
     modifiers: [...product.modifiers]
@@ -65,7 +80,37 @@ export const mapProductResponse = (product: ProductWithRelations): ProductRespon
 
         return left.modifier.id.localeCompare(right.modifier.id);
       })
-      .map(({ modifier }) => mapModifierResponse(modifier)),
+      .map(({ allowedOptions, modifier, visibilityRules }) => {
+        const allowedOptionIds = allowedOptions.map((option) => option.modifierOptionId);
+        const allowedOptionIdsSet = new Set(allowedOptionIds);
+        const hasOptionScope = allowedOptionIds.length > 0;
+        const scopedModifier = mapModifierResponse({
+          ...modifier,
+          options: hasOptionScope
+            ? modifier.options.filter((option) => allowedOptionIdsSet.has(option.id))
+            : modifier.options,
+        });
+
+        return {
+          ...scopedModifier,
+          optionScope: hasOptionScope ? ("subset" as const) : ("all" as const),
+          allowedOptionIds: hasOptionScope
+            ? scopedModifier.options.map((option) => option.id)
+            : null,
+          visibleWhen: [...visibilityRules]
+            .sort((left, right) => {
+              if (left.variationGroupId !== right.variationGroupId) {
+                return left.variationGroupId.localeCompare(right.variationGroupId);
+              }
+
+              return left.variationOptionId.localeCompare(right.variationOptionId);
+            })
+            .map(({ variationGroupId, variationOptionId }) => ({
+              variationGroupId,
+              variationOptionId,
+            })),
+        };
+      }),
     recipe: product.recipe ? mapRecipeResponse(product.recipe) : null,
     variationGroups: [...product.variationGroups]
       .sort((left, right) => {

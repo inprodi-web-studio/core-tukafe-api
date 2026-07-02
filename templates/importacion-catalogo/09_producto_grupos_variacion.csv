@@ -1,10 +1,92 @@
 nombre_producto,nombre_grupo_variacion,orden_en_producto
-Capuccino,Tipo de Leche,1
-Latte Caliente,Tipo de Leche,1
-Latte Frío,Tipo de Leche,1
-Mocha Blanco Caliente,Tipo de Leche,1
-Mocha Blanco Frío,Tipo de Leche,1
+Espresso,Tipo de Café,1
+Espresso,Tamaño Espresso,2
+Americano Caliente,Tipo de Café,1
+Americano Frío,Tipo de Café,1
+Americano Frío,Envase,2
+Capuccino,Tipo de Café,1
+Capuccino,Tipo de Leche,2
+Latte Caliente,Tipo de Café,1
+Latte Caliente,Tipo de Leche,2
+Latte Frío,Tipo de Café,1
+Latte Frío,Tipo de Leche,2
+Latte Frío,Envase,3
+Latte Frappé,Tipo de Café,1
+Latte Frappé,Tipo de Leche,2
 Mocha Caliente,Tipo de Leche,1
 Mocha Frío,Tipo de Leche,1
+Mocha Frío,Envase,3
+Mocha Frappé,Tipo de Leche,1
+Coco Coffee Foam,Base de Bebida,1
+Coco Coffee Foam,Envase,2
+Lotus Cold Foam,Tipo de Leche,1
+Lotus Cold Foam,Envase,2
+Tiramisú Cold Foam,Tipo de Leche,1
+Tiramisú Cold Foam,Envase,2
+Nutella Latte,Tipo de Leche,1
+Mint White Mocha Caliente,Tipo de Leche,1
+Mint White Mocha Frío,Tipo de Leche,1
+Mint White Mocha Frío,Envase,2
+Mint White Mocha Frappé,Tipo de Leche,1
+Matcha Latte Caliente,Tipo de Leche,1
+Matcha Latte Frío,Tipo de Leche,1
+Matcha Latte Frío,Envase,2
+Matcha Latte Frappé,Tipo de Leche,1
 Matcha Ceremonial Caliente,Tipo de Leche,1
-Matcha Ceremonial Frío,Tipo de Leche,1
+Matcha Ceremonial Frío,Cold Foam,1
+Matcha Ceremonial Frío,Tipo de Leche,2
+Matcha Ceremonial Frío,Envase,3
+Coco Matcha,Envase,1
+Matcha Matcha Matcha,Tipo de Leche,1
+Matcha Matcha Matcha,Envase,2
+Spiced Chai Caliente,Tipo de Leche,1
+Spiced Chai Frío,Tipo de Leche,1
+Spiced Chai Frappé,Tipo de Leche,1
+Chai Vainilla Sugar Free Caliente,Tipo de Leche,1
+Chai Vainilla Sugar Free Frío,Tipo de Leche,1
+Chai Vainilla Sugar Free Frappé,Tipo de Leche,1
+Spiced Chai Lavanda Caliente,Tipo de Leche,1
+Spiced Chai Lavanda Frío,Tipo de Leche,1
+Dirty Chai Caliente,Tipo de Leche,1
+Dirty Chai Frío,Tipo de Leche,1
+Dirty Chai Frappé,Tipo de Leche,1
+Spiced Chai Frío,Envase,2
+Chai Vainilla Sugar Free Frío,Envase,2
+Spiced Chai Lavanda Frío,Envase,2
+Dirty Chai Frío,Envase,2
+Dragon Bloom,Envase,1
+Mojito,Envase,1
+Lima Limón,Envase,1
+Fresa,Envase,1
+Lychee,Envase,1
+Fresa Limón,Envase,1
+Moras Lavanda,Envase,1
+Spicy Mango,Envase,1
+Nutella Caliente,Tipo de Leche,1
+Nutella Frío,Tipo de Leche,1
+Nutella Frío,Envase,2
+Dulce de Leche Caliente,Tipo de Leche,1
+Dulce de Leche Frío,Tipo de Leche,1
+Dulce de Leche Frío,Envase,2
+Lotus Caliente,Tipo de Leche,1
+Lotus Frío,Tipo de Leche,1
+Lotus Frío,Envase,2
+Oreo Frappé,Tipo de Leche,1
+Croissant de Chocolate,Estancia,1
+Roll de Canela,Estancia,1
+Cruffin de Nutella,Estancia,1
+Kouign Amman,Estancia,1
+Galleta Clásica (Choco y Nuez),Estancia,1
+Galleta Doble Chocolate,Estancia,1
+Galleta de Lotus,Estancia,1
+Brownie Clásico,Estancia,1
+Brownie Nutella,Estancia,1
+Galleta de Avena y Arándano,Estancia,1
+Croissant de Pavo y Queso,Estancia,1
+Baguette de Pavo y Queso,Estancia,1
+Sandwich de Pavo y Queso,Estancia,1
+Baguette de Serrano y Queso,Estancia,1
+Sandwich de Jamón y Selva Negra,Estancia,1
+Osito Latte,Tipo de Leche,1
+Osito Chai,Tipo de Leche,1
+Osito Matcha,Tipo de Leche,1

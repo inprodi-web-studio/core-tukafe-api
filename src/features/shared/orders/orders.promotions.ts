@@ -415,6 +415,10 @@ export function buildPromotionlessPreview(
     | "subtotalCents"
     | "taxesCents"
     | "grandTotalCents"
+    | "amountDueCents"
+    | "cashbackRedemptionCents"
+    | "cashbackEarnedCents"
+    | "cashbackEligiblePaidCents"
     | "promotionDiscountCents"
     | "couponDiscountCents"
     | "items"
@@ -422,6 +426,7 @@ export function buildPromotionlessPreview(
 ): OrderPreviewResponse {
   return {
     ...result,
+    cashbackBalanceCents: null,
     promotion: null,
     coupon: null,
   };

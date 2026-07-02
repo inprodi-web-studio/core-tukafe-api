@@ -11,9 +11,11 @@ export interface AdminAuthService {
 export interface LoginWithEmailServiceParams {
   email: string;
   password: string;
+  organizationId?: string | null;
 }
 
 export interface LoginWithEmailServiceResponse {
   user: Pick<User, "id" | "email" | "name" | "middleName" | "lastName">;
   cookie: string | null;
+  organizationId: string | null;
 }

@@ -1,18 +1,52 @@
-nombre_producto,nombre_modificador,orden_en_producto
-Americano Caliente,Leche,1
-Americano Caliente,Shot Extra,2
-Americano Caliente,Sabor,3
-Americano Frío,Leche,1
-Americano Frío,Shot Extra,2
-Americano Frío,Sabor,3
-Capuccino,Shot Extra,1
-Capuccino,Sabor,1
-Latte Caliente,Shot Extra,1
-Latte Caliente,Sabor,2
-Latte Frío,Shot Extra,1
-Latte Frío,Sabor,2
-Mocha Blanco Caliente,Shot Extra,1
-Mocha Blanco Frío,Shot Extra,1
-Mocha Caliente,Shot Extra,1
-Mocha Frío,Shot Extra,1
-Matcha Ceremonial,Cold Foam,1
+nombre_producto,nombre_modificador,orden_en_producto,opciones_permitidas
+Espresso,Leche,1,
+Espresso,Shot Extra Tradición,2,
+Espresso,Shot Extra Distinción,3,
+Espresso,Sabor,4,
+Americano Caliente,Leche,1,
+Americano Caliente,Shot Extra Tradición,2,
+Americano Caliente,Shot Extra Distinción,3,
+Americano Caliente,Sabor,4,
+Americano Frío,Leche,1,
+Americano Frío,Shot Extra Tradición,2,
+Americano Frío,Shot Extra Distinción,3,
+Americano Frío,Sabor,4,
+Capuccino,Shot Extra Tradición,1,
+Capuccino,Shot Extra Distinción,2,
+Capuccino,Sabor,3,
+Latte Caliente,Shot Extra Tradición,1,
+Latte Caliente,Shot Extra Distinción,2,
+Latte Caliente,Sabor,3,
+Latte Frío,Shot Extra Tradición,1,
+Latte Frío,Shot Extra Distinción,2,
+Latte Frío,Sabor,3,
+Latte Frappé,Shot Extra Tradición,1,
+Latte Frappé,Shot Extra Distinción,2,
+Latte Frappé,Sabor,3,
+Mocha Caliente,Shot Extra,1,Con Shot Extra Tradición
+Mocha Frío,Shot Extra,1,Con Shot Extra Tradición
+Mocha Frappé,Shot Extra,1,Con Shot Extra Tradición
+Lotus Cold Foam,Shot Extra,1,Con Shot Extra Tradición
+Tiramisú Cold Foam,Shot Extra,1,Con Shot Extra Tradición
+Nutella Latte,Shot Extra,1,Con Shot Extra Tradición
+Mint White Mocha Caliente,Shot Extra,1,Con Shot Extra Tradición
+Mint White Mocha Frío,Shot Extra,1,Con Shot Extra Tradición
+Mint White Mocha Frappé,Shot Extra,1,Con Shot Extra Tradición
+Matcha Ceremonial Caliente,Cold Foam,1,
+Matcha Ceremonial Caliente,Endulzado,2,Miel de Agave
+Matcha Ceremonial Frío,Cold Foam,1,
+Matcha Ceremonial Frío,Endulzado,2,Miel de Agave
+Matcha Matcha Matcha,Endulzado,1,
+Spiced Chai Caliente,Sabor,1,Dulce de Leche|Lavanda|Vainilla Sugar Free|Vainilla
+Spiced Chai Frío,Sabor,1,Dulce de Leche|Lavanda|Vainilla Sugar Free|Vainilla
+Spiced Chai Frappé,Sabor,1,Dulce de Leche|Lavanda|Vainilla Sugar Free|Vainilla
+Dirty Chai Caliente,Shot Extra,1,Con Shot Extra Tradición
+Dirty Chai Caliente,Sabor,2,Dulce de Leche|Lavanda|Vainilla Sugar Free|Vainilla
+Dirty Chai Frío,Shot Extra,1,Con Shot Extra Tradición
+Dirty Chai Frío,Sabor,2,Dulce de Leche|Lavanda|Vainilla Sugar Free|Vainilla
+Dirty Chai Frappé,Shot Extra,1,Con Shot Extra Tradición
+Dirty Chai Frappé,Sabor,2,Dulce de Leche|Lavanda|Vainilla Sugar Free|Vainilla
+Osito Latte,Sabor,1,
+Osito Chai,Sabor,1,Dulce de Leche|Lavanda|Vainilla Sugar Free|Vainilla
+Osito Matcha,Cold Foam,1,
+Osito Matcha,Endulzado,2,

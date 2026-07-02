@@ -11,7 +11,9 @@ interface ProductCategoryTreeSource {
   name: string;
   icon: string;
   color: string;
+  sortOrder: number;
   isFourPlusOneEligible: boolean;
+  isCashbackEligible: boolean;
   image: GuestProductCategoryListItem["image"];
   parentId: string | null;
 }
@@ -28,7 +30,9 @@ function buildProductCategoryTree(
       name: category.name,
       icon: category.icon,
       color: category.color,
+      sortOrder: category.sortOrder,
       isFourPlusOneEligible: category.isFourPlusOneEligible,
+      isCashbackEligible: category.isCashbackEligible,
       image: category.image,
       children: [],
     });
@@ -70,7 +74,9 @@ export function guestProductCategoriesService(
           name: true,
           icon: true,
           color: true,
+          sortOrder: true,
           isFourPlusOneEligible: true,
+          isCashbackEligible: true,
           parentId: true,
         },
         with: {
@@ -84,7 +90,11 @@ export function guestProductCategoriesService(
             },
           },
         },
-        orderBy: [asc(productCategoriesDB.name), asc(productCategoriesDB.id)],
+        orderBy: [
+          asc(productCategoriesDB.sortOrder),
+          asc(productCategoriesDB.name),
+          asc(productCategoriesDB.id),
+        ],
       });
 
       return buildProductCategoryTree(categories);

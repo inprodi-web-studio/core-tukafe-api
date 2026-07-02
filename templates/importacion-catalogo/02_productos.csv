@@ -1,12 +1,89 @@
-nombre_producto,precio_mxn,tipo_producto,ruta_categoria_producto,unidad_venta,nombre_en_cocina,descripcion_cliente,descripcion_cocina,archivo_imagen
-Americano Caliente,70,assembled,Café,Pieza,Americano Caliente,,,hot_americano
-Americano Frío,70,assembled,Café,Pieza,Americano Frío,,,cold_americano
-Capuccino,86,assembled,Café,Pieza,Capuccino,,,capuccino
-Latte Caliente,66,assembled,Café,Pieza,Latte Caliente,,,hot_latte
-Latte Frío,66,assembled,Café,Pieza,Latte Frío,,,cold_latte
-Mocha Blanco Caliente,78,assembled,Café,Pieza,Mocha Blanco Caliente,,,hot_mocha
-Mocha Blanco Frío,78,assembled,Café,Pieza,Mocha Blanco Frío,,,cold_mocha
-Mocha Caliente,78,assembled,Café,Pieza,Mocha Caliente,,,hot_mocha
-Mocha Frío,78,assembled,Café,Pieza,Mocha Frío,,,cold_mocha
-Matcha Ceremonial Caliente,99,assembled,Matcha,Pieza,Matcha Ceremonial Caliente,,,hot_matcha
-Matcha Ceremonial Frío,99,assembled,Matcha,Pieza,Matcha Ceremonial Frío,,,cold_matcha
+nombre_producto,precio_mxn,tipo_producto,ruta_categoria_producto,unidad_venta,nombre_en_cocina,descripcion_cliente,descripcion_cocina,archivo_imagen,destacado
+Espresso,,assembled,Café,Pieza,Espresso,"Un shot intenso, aromático y directo al punto. Preparado con café de altura de Chiapas, 100% mexicano.",,espresso,NO
+Americano Caliente,,assembled,Café,Pieza,Americano Caliente,"Café de altura chiapaneco, suave pero con carácter. Ideal para quienes disfrutan el café sin rodeos.",,hot_americano,NO
+Americano Frío,,assembled,Café,Pieza,Americano Frío,"Refrescante, ligero y con todo el sabor de nuestro café chiapaneco de altura. Para despertar con estilo.",,cold_americano,NO
+Capuccino,,assembled,Café,Pieza,Capuccino,"Espresso, leche vaporizada y espuma cremosa en perfecto equilibrio. Un clásico que nunca falla.",,capuccino,NO
+Latte Caliente,,assembled,Café,Pieza,Latte Caliente,"Nuestro latte es suave, cremoso y preparado con café de altura de Chiapas. Probablemente el mejor latte que vas a probar.",,hot_latte,SI
+Latte Frío,,assembled,Café,Pieza,Latte Frío,"Cremoso, fresco y con ese saborcito perfecto de café mexicano. El latte que se te va a antojar diario.",,cold_latte,SI
+Latte Frappé,,assembled,"Café, Frappé",Pieza,Latte Frappé,"El mejor latte que vas a probar, ahora en versión frappé. Cremoso, frío y peligrosamente adictivo.",,latte_frappe,NO
+Mocha Caliente,,assembled,Café,Pieza,Mocha Caliente,"Café chiapaneco con chocolate en una mezcla cremosa y apapachadora. Como un abrazo, pero con cafeína.",,hot_mocha,NO
+Mocha Frío,,assembled,Café,Pieza,Mocha Frío,"Chocolate y café de altura servidos bien fríos. Dulce, fresco y con toda la actitud.",,cold_mocha,NO
+Mocha Frappé,,assembled,"Café, Frappé",Pieza,Mocha Frappé,Un frappé cremoso con café y chocolate. Perfecto para consentirte sin pensarlo demasiado.,,frappe_mocha,NO
+Coco Coffee Foam,,assembled,Café,Pieza,Coco Coffee Foam,Café frío con un toque tropical de coco y una espuma cremosa que lo hace irresistible.,,coco_coffee_foam,SI
+Lotus Cold Foam,,assembled,"Café, Especialidades",Pieza,Lotus Cold Foam,"Una de nuestras bebidas insignia. Café frío, cremosa espuma y el sabor único de Lotus. No te la puedes perder.",,lotus_foam,SI
+Tiramisú Cold Foam,,assembled,"Café, Especialidades",Pieza,Tiramisú Cold Foam,"Especialidad de la casa. Cremosa, dulce y con sabor a tiramisú; es como tomarte el postre en vaso.",,tiramisu_foam,SI
+Nutella Latte,,assembled,Café,Pieza,Nutella Latte,No es un simple chocolate caliente con café. Es un latte cremoso con el delicioso sabor de Nutella que todos amamos.,,nutella_latte,NO
+Mint White Mocha Caliente,,assembled,Café,Pieza,Mint White Mocha,"Chocolate blanco, menta y café en una mezcla fresca, dulce y muy especial. Diferente, pero de la mejor manera.",,mint_mocha,NO
+Mint White Mocha Frío,,assembled,Café,Pieza,Mint White Mocha Frío,"Chocolate blanco, menta y café en una mezcla fresca, dulce y muy especial. Diferente, pero de la mejor manera.",,mint_cold,SI
+Mint White Mocha Frappé,,assembled,"Café, Frappé",Pieza,Mint White Mocha Frappé,"Chocolate blanco, menta y café en una mezcla fresca, dulce y muy especial. Diferente, pero de la mejor manera.",,latte_frappe,NO
+Matcha Latte Caliente,,assembled,Matcha,Pieza,Matcha Latte Caliente,"Matcha suave y cremoso con leche, perfecto para quienes buscan algo reconfortante sin café.",,hot_matcha,NO
+Matcha Latte Frío,,assembled,Matcha,Pieza,Matcha Latte Frío,"Refrescante, cremoso y con ese sabor herbal tan especial del matcha. Ideal para cualquier momento del día.",,cold_matcha,NO
+Matcha Latte Frappé,,assembled,"Matcha, Frappé",Pieza,Matcha Latte Frappé,"Matcha en versión frappé: frío, cremoso y súper antojable. Para amantes del matcha con mood dulce.",,frappe_matcha,NO
+Matcha Ceremonial Caliente,,assembled,Matcha,Pieza,Matcha Ceremonial Caliente,"Matcha ceremonial proveniente de Uji, una de las regiones más reconocidas por su calidad. Puro, elegante y delicioso.",,hot_matcha,SI
+Matcha Ceremonial Frío,,assembled,Matcha,Pieza,Matcha Ceremonial Frío,Matcha ceremonial de Uji servido frío para disfrutar su sabor auténtico de forma fresca y ligera.,,ceremonial_matcha_cold,SI
+Coco Matcha,,assembled,Matcha,Pieza,Coco Matcha,"Matcha cremoso con un toque de coco. Tropical, suave y perfecto para salir de lo de siempre.",,coco_matcha,SI
+Matcha Matcha Matcha,,assembled,Matcha,Pieza,Matcha Matcha Matcha,"Para verdaderos amantes del matcha: latte con matcha Uji, foam de matcha y matcha espolvoreado. Matcha x3, porque uno no era suficiente.",,matcha_matcha_matcha,NO
+Spiced Chai Caliente,,assembled,Chai,Pieza,Spiced Chai Caliente,"Chai especiado, aromático y cremoso. Calientito sabe a pausa bonita en medio del día.",,hot_chai,NO
+Spiced Chai Frío,,assembled,Chai,Pieza,Spiced Chai Frío,"El chai que tanto te gusta, pero en versión fresca. Especiado, dulce y muy fácil de amar.",,cold_chai,NO
+Spiced Chai Frappé,,assembled,"Chai, Frappé",Pieza,Spiced Chai Frappé,"Chai cremoso en versión frappé. Frío, especiado y con vibra de postre.",,frappe_chai,NO
+Chai Vainilla Sugar Free Caliente,,assembled,Chai,Pieza,Chai Vainilla Sugar Free Caliente,"Chai con vainilla, cremoso y sugar free. Dulcecito, pero sin culpa.",,hot_chai,NO
+Chai Vainilla Sugar Free Frío,,assembled,Chai,Pieza,Chai Vainilla Sugar Free Frío,"Refrescante, aromático y con toque de vainilla sugar free. Una opción ligera y deliciosa.",,cold_chai,NO
+Chai Vainilla Sugar Free Frappé,,assembled,"Chai, Frappé",Pieza,Chai Vainilla Sugar Free Frappé,"Todo el sabor del chai vainilla en versión frappé y sugar free. Cremoso, frío y muy disfrutable.",,frappe_chai,NO
+Spiced Chai Lavanda Caliente,,assembled,Chai,Pieza,Spiced Chai Lavanda Caliente,"Chai especiado con un toque floral de lavanda. Suave, aromático y perfecto para consentirte.",,hot_chai,NO
+Spiced Chai Lavanda Frío,,assembled,Chai,Pieza,Spiced Chai Lavanda Frío,"Una mezcla fresca, especiada y floral. Para cuando quieres algo diferente, bonito y rico.",,cold_chai,NO
+Dirty Chai Caliente,,assembled,Chai,Pieza,Dirty Chai Caliente,"El chai que tanto te gusta combinado con la mejor calidad de nuestro café chiapaneco. Especiado, cremoso y con boost extra.",,hot_chai,NO
+Dirty Chai Frío,,assembled,Chai,Pieza,Dirty Chai Frío,"Chai frío con espresso de café de altura de Chiapas. Refrescante, especiado y con energía de sobra.",,cold_dirty_chai,NO
+Dirty Chai Frappé,,assembled,"Chai, Frappé",Pieza,Dirty Chai Frappé,"Chai frappé con café chiapaneco. Cremoso, especiado y perfecto para quienes quieren lo mejor de dos mundos.",,dirty_matcha,NO
+Dragon Bloom,,assembled,Fresh Soda,Pieza,Dragon Bloom,"Burbujeante, fresca y con un sabor frutal que se siente tan bonito como suena.",,dragon_bloom,NO
+Mojito,,assembled,Fresh Soda,Pieza,Mojito,"Refrescante, cítrica y con ese toque herbal que te hace decir: “sí necesitaba esto”.",,mojito,NO
+Lima Limón,,assembled,Fresh Soda,Pieza,Lima Limón,"Clásica, fresca y burbujeante. La opción perfecta para algo ligero y muy refrescante.",,lemon_soda,NO
+Fresa,,assembled,Fresh Soda,Pieza,Fresa,"Dulce, fresca y burbujeante. Como una soda feliz con sabor a fresa.",,soda_fresa,NO
+Lychee,,assembled,Fresh Soda,Pieza,Lychee,"Ligera y refrescante. Una soda diferente, elegante y muy fácil de disfrutar.",,litchee_soda,NO
+Fresa Limón,,assembled,Fresh Soda,Pieza,Fresa Limón,"Fresa dulce con un toque cítrico de limón. Fresca, divertida y muy antojable.",,soda_fresa_limon,NO
+Moras Lavanda,,assembled,Fresh Soda,Pieza,Moras Lavanda,"Frutos rojos con un toque floral de lavanda. Refrescante, bonita y con mucho estilo.",,soda_moras,NO
+Spicy Mango,,assembled,Fresh Soda,Pieza,Spicy Mango,"Mango dulce con un toque spicy. Fresca, atrevida y con tantita emoción en cada trago.",,soda_mango,NO
+Lima Limón Frappé,85,assembled,Frappé,Pieza,Lima Limón Frappé,"Cítrico, frío y súper refrescante. Perfecto para días de calor o antojos frescos.",,frappe_lemon,NO
+Fresa Frappé,85,assembled,Frappé,Pieza,Fresa Frappé,"Dulce, cremoso y con sabor a fresa. Un clásico que siempre cae bien.",,frappe_fresa,NO
+Moras Lavanda Frappé,85,assembled,Frappé,Pieza,Moras Lavanda Frappé,"Frutos rojos y lavanda en versión frappé. Cremoso, floral y diferente.",,frappe_moras,NO
+Spicy Mango Frappé,85,assembled,Frappé,Pieza,Spicy Mango Frappé,Mango dulce con un toque picosito en versión frappé. Refrescante y con personalidad.,,frappe_mango,NO
+Frutos Rojos Frappé,85,assembled,Frappé,Pieza,Frutos Rojos Frappé,"Frío, frutal y cremoso. Una mezcla intensa de frutos rojos para consentirte.",,frappe_frutos,NO
+Nutella Caliente,,assembled,Not Coffee,Pieza,Nutella Caliente,"Chocolate cremoso con el delicioso sabor de Nutella. No es cualquier chocolate caliente, es Nutella en mood apapacho.",,nutella_latte,NO
+Nutella Frío,,assembled,Not Coffee,Pieza,Nutella Frío,"El sabor de Nutella en una bebida fría, cremosa y dulce. Perfecta para consentirte.",,cold_nutella,NO
+Dulce de Leche Caliente,,assembled,Not Coffee,Pieza,Dulce de Leche Caliente,"Cremosa, dulce y calientita. Sabe a postre casero en versión bebida.",,dulce_leche_caliente,NO
+Dulce de Leche Frío,,assembled,Not Coffee,Pieza,Dulce de Leche Frío,"Dulce, suave y refrescante. Una bebida cremosa para los amantes del dulce de leche.",,dulce_leche_frio,NO
+Lotus Caliente,,assembled,"Not Coffee, Especialidades",Pieza,Lotus Caliente,"Cremosa y con el sabor único de Lotus. Dulce, especiada y perfecta para consentirte. Nuestra especialidad que no te puedes perder.",,lottus_hot,NO
+Lotus Frío,,assembled,"Not Coffee, Especialidades",Pieza,Lotus Frío,El sabor de Lotus en una bebida fría y cremosa. Una especialidad que se disfruta hasta el último trago.,,lottus_cold,NO
+Oreo Frappé,,assembled,"Not Coffee, Frappé",Pieza,Oreo Frappé,"Galleta Oreo en versión frappé: cremosa, fría y con sabor a postre divertido.",,oreo_frappe,NO
+Croissant de Chocolate,60,assembled,Panadería,Pieza,Croissant de Chocolate,"Hojaldrado, suave y con chocolate. Un clásico que nunca decepciona.",,croissant_chocolate,NO
+Roll de Canela,66,assembled,Panadería,Pieza,Roll de Canela,"Uno de los favoritos de la casa. Suave, aromático y con ese toque de canela que conquista.",,rol_canela,NO
+Cruffin de Nutella,66,assembled,Panadería,Pieza,Cruffin de Nutella,"La mezcla perfecta entre croissant y muffin, relleno con Nutella. Crujiente, suave y muy antojable.",,cruffin_nutella,NO
+Kouign Amman,56,assembled,Panadería,Pieza,Kouign Amman,"Hojaldrado, caramelizado y con textura irresistible. Elegante, crujiente y delicioso.",,kouign,NO
+Galleta Clásica (Choco y Nuez),50,assembled,Panadería,Pieza,Galleta Clásica (Choco y Nuez),"Crujiente por fuera, suave por dentro y con chocolate y nuez. La galleta que siempre se antoja.",,galleta_clasica,NO
+Galleta Doble Chocolate,50,assembled,Panadería,Pieza,Galleta Doble Chocolate,"Para los verdaderos fans del chocolate. Intensa, suave y con doble dosis de felicidad.",,galleta_chocolate,NO
+Galleta de Lotus,50,assembled,Panadería,Pieza,Galleta de Lotus,Galleta suave con el sabor especiado y caramelizado de Lotus. Diferente y deliciosa.,,galleta_lotus,NO
+Brownie Clásico,50,assembled,Panadería,Pieza,Brownie Clásico,"Chocolate intenso, textura suave y ese centro delicioso que todo brownie debe tener.",,brownie,NO
+Brownie Nutella,55,assembled,Panadería,Pieza,Brownie Nutella,Brownie chocolatoso con Nutella. Porque al brownie sí se le podía subir de nivel.,,brownie_nutella,NO
+Galleta de Avena y Arándano,50,assembled,Panadería,Pieza,Galleta de Avena y Arándano,"Una opción suave, dulce y frutal. Perfecta para acompañar tu café sin pensarlo mucho.",,galleta_arandano,NO
+Croissant de Pavo y Queso,75,assembled,Bocadillos,Pieza,Croissant de Pavo y Queso,"Un éxito de la casa. Hojaldrado, calientito y relleno de pavo con queso.",,croissant_pavo,NO
+Baguette de Pavo y Queso,85,assembled,Bocadillos,Pieza,Baguette de Pavo y Queso,"Crujiente por fuera, suave por dentro y con el combo clásico de pavo y queso.",,baguette_pavo,NO
+Sandwich de Pavo y Queso,65,assembled,Bocadillos,Pieza,Sandwich de Pavo y Queso,"Sencillo, rico y cumplidor. Ideal para un desayuno o snack rápido.",,sandwich_pavo,NO
+Baguette de Serrano y Queso,95,assembled,Bocadillos,Pieza,Baguette de Serrano y Queso,"Pan crujiente, jamón serrano y queso en una combinación con mucho sabor.",,baguettte_serrano,NO
+Sandwich de Jamón y Selva Negra,85,assembled,Bocadillos,Pieza,Sandwich de Jamón y Selva Negra,"Un sandwich sabroso y práctico, con jamón de selva negra y queso. Perfecto para acompañar tu bebida favorita.",,sandwich_selva_negra,NO
+Agua Mineral Patrona Mía (lata) ,40,simple,Ready to Go,Pieza,Agua Mineral Patrona Mía (lata) ,"Agua mineral burbujeante y refrescante, lista para llevar.",,patrona_mia_lata,NO
+Agua Mineral Patrona Mía (botella) ,40,simple,Ready to Go,Pieza,Agua Mineral Patrona Mía (botella) ,"Refrescante, ligera y con burbujas. Perfecta para acompañar cualquier antojo.",,patrona_mia_botella,NO
+Agua Natural  Patrona Mía ,35,simple,Ready to Go,Pieza,Agua Natural  Patrona Mía ,"Agua natural fresca y práctica. Básica, sí, pero necesaria.",,patrona_mia_botella,NO
+Kombucha de Jamaica,80,simple,Ready to Go,Pieza,Kombucha de Jamaica,"Refrescante, burbujeante y con el toque floral de la jamaica.",,kombucha_jamaica,NO
+Kombucha de Limón y Jengibre,80,simple,Ready to Go,Pieza,Kombucha de Limón y Jengibre,"Cítrica, fresca y con un toque de jengibre. Ligera y con mucha personalidad.",,kambucha_limon,NO
+Mudbrew Black ,80,simple,Ready to Go,Pieza,Mudbrew Black ,"Cold brew listo para beber, intenso y directo. Café frío sin complicaciones.",,mudbrew_black,NO
+Mudbrew Caramel,80,simple,Ready to Go,Pieza,Mudbrew Caramel,"Cold brew listo para beber con un toque dulce de caramelo. Suave, práctico y delicioso.",,mudbrew_caramel,NO
+Mudbrew Chai,80,simple,Ready to Go,Pieza,Mudbrew Chai,Cold brew con vibra especiada de chai. Una mezcla diferente para llevar.,,mudbrew_chai,NO
+Mudbrew Latte,80,simple,Ready to Go,Pieza,Mudbrew Latte,"Cold brew listo para beber en versión latte. Cremoso, fresco y práctico.",,mudbrew_latte,NO
+Mudbrew Matcha,80,simple,Ready to Go,Pieza,Mudbrew Matcha,"Matcha listo para beber, fresco y fácil de disfrutar donde sea.",,mudbrew_matcha,NO
+Mudbrew Vainilla Latte,80,simple,Ready to Go,Pieza,Mudbrew Vainilla Latte,"Cold brew con vainilla en versión lista para beber. Dulce, cremoso y perfecto para llevar.",,mudbrew_vainilla,NO
+Tukafe Tradición Molido 250gr,220,simple,Tukafe en Casa,Pieza,Tukafe Tradición Molido 250gr,"El café de la casa, el mismo que usamos en nuestras bebidas. Café de altura de Chiapas, 100% mexicano, listo para preparar en casa.",,tukafe_tradición,NO
+Tukafe Tradición Grano 250gr,220,simple,Tukafe en Casa,Pieza,Tukafe Tradición Grano 250gr,"El café de la casa, el mismo que usamos en nuestras bebidas. Café de altura de Chiapas, 100% mexicano. Llévalo en grano y muélelo a tu gusto.",,tukafe_tradición,NO
+Tukafe Distinción Molido 250gr,250,simple,Tukafe en Casa,Pieza,Tukafe Distinción Molido 250gr,Una selección especial de nuestro café de altura de Chiapas. Molido y listo para que disfrutes una gran taza en casa.,,tukafe_distincion,NO
+Tukafe Distinción Grano 250gr,250,simple,Tukafe en Casa,Pieza,Tukafe Distinción Grano 250gr,Una selección especial de nuestro café de altura de Chiapas. Ideal para quienes disfrutan preparar café desde el grano.,,tukafe_distincion,NO
+Osito Latte,,assembled,Osito Tukafe,Pieza,Osito Latte,"Nuestro latte favorito servido en el vaso de osito, el consentido y trend de nuestros clientes. Tierno, cremoso y muy instagrameable.",,osito_cafe,NO
+Osito Chai,,assembled,Osito Tukafe,Pieza,Osito Chai,"Chai cremoso servido en vaso de osito. Especiado, bonito y listo para robar miradas.",,osito_chai,NO
+Osito Matcha,,assembled,Osito Tukafe,Pieza,Osito Matcha,"Matcha cremoso en el vaso favorito de todos. Verde, cute y perfecto para amantes del matcha.",,osito_matcha,NO

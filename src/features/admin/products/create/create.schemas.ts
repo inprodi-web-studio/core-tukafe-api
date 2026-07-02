@@ -1,6 +1,23 @@
 import { z } from "zod";
 import { recipeSchema, variationSchema } from "../product.schemas";
 
+const productModifierConfigSchema = z
+  .object({
+    modifierId: z.nanoid(),
+    optionIds: z.array(z.nanoid()).min(1).nullish(),
+    visibleWhen: z
+      .array(
+        z
+          .object({
+            variationGroupId: z.nanoid(),
+            variationOptionId: z.nanoid(),
+          })
+          .strict(),
+      )
+      .optional(),
+  })
+  .strict();
+
 const createBaseBodySchema = z.object({
   name: z.string().nonempty(),
   kitchenName: z.string().nullish(),
@@ -9,11 +26,14 @@ const createBaseBodySchema = z.object({
   kitchenDescription: z.string().nullish(),
   unitId: z.nanoid(),
   categoryId: z.nanoid().nullish(),
+  categoryIds: z.array(z.nanoid()).min(1).optional(),
   imageUploadId: z.string().nonempty().nullish(),
+  isFeatured: z.boolean().optional(),
   taxIds: z.array(z.string()).nullish(),
   organizationIds: z.array(z.nanoid()).min(1).optional(),
   modifierIds: z.array(z.nanoid()).min(1).optional(),
   modifiers: z.array(z.nanoid()).min(1).optional(),
+  modifierConfigs: z.array(productModifierConfigSchema).min(1).optional(),
   variationGroupIds: z.array(z.nanoid()).min(1).optional(),
   variations: z.array(variationSchema).min(1).optional(),
 });
@@ -36,6 +56,23 @@ export const createBodySchema = z
   .superRefine((body, context) => {
     const variationsCount = body.variations?.length ?? 0;
     const variationGroupsCount = body.variationGroupIds?.length ?? 0;
+    const legacyModifierInputsCount = (body.modifierIds ? 1 : 0) + (body.modifiers ? 1 : 0);
+
+    if (legacyModifierInputsCount > 1) {
+      context.addIssue({
+        code: "custom",
+        message: "Use only one legacy modifier field",
+        path: ["modifierIds"],
+      });
+    }
+
+    if (body.modifierConfigs && legacyModifierInputsCount > 0) {
+      context.addIssue({
+        code: "custom",
+        message: "Use modifierConfigs or modifierIds/modifiers, not both",
+        path: ["modifierConfigs"],
+      });
+    }
 
     if (variationsCount > 0 && variationGroupsCount === 0) {
       context.addIssue({

@@ -1,6 +1,6 @@
+import { apiKey } from "@better-auth/api-key";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { apiKey } from "better-auth/plugins";
 import { bearer } from "better-auth/plugins/bearer";
 import { organization } from "better-auth/plugins/organization";
 import { phoneNumber } from "better-auth/plugins/phone-number";
@@ -18,6 +18,10 @@ import {
   userDB,
   verificationDB,
 } from "@core/db/schemas";
+import {
+  sendCustomerVerificationCodeSms,
+  sendPasswordResetCodeSms,
+} from "@core/services/sms.service";
 import { resolveGeolocation } from "@core/utils";
 import { ORGANIZATION_AC, ORGANIZATION_ROLES } from "./permissions.config";
 
@@ -70,10 +74,16 @@ export const auth = betterAuth({
     phoneNumber({
       requireVerification: true,
       allowedAttempts: 5,
-      sendOTP: ({ phoneNumber, code }, ctx) => {
-        //TODO: Send with twilio
-        console.log(`[OTP] ${phoneNumber}: ${code}`);
-      },
+      sendOTP: ({ phoneNumber, code }) =>
+        sendCustomerVerificationCodeSms({
+          phoneNumber,
+          code,
+        }),
+      sendPasswordResetOTP: ({ phoneNumber, code }) =>
+        sendPasswordResetCodeSms({
+          phoneNumber,
+          code,
+        }),
     }),
     organization({
       allowUserToCreateOrganization: async (user) =>
@@ -94,6 +104,14 @@ export const auth = betterAuth({
             address: {
               type: "string",
               required: true,
+            },
+            latitude: {
+              type: "number",
+              required: false,
+            },
+            longitude: {
+              type: "number",
+              required: false,
             },
           },
         },

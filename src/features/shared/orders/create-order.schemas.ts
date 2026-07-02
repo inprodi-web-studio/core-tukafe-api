@@ -30,6 +30,7 @@ export const orderItemBodySchema = z
 
 export const orderCouponCodeSchema = z.string().trim().min(1).max(64);
 export const orderPaymentAttemptIdSchema = z.nanoid();
+export const orderCashbackRedeemCentsSchema = z.number().int().nonnegative();
 
 export const orderTipBodySchema = z.discriminatedUnion("type", [
   z

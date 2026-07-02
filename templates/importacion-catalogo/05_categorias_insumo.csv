@@ -1,2 +1,6 @@
 nombre_categoria,icono,color_hex
-Vasos,PintGlassIcon,#228be6
+Consumibles,CircleDashedIcon,#fd7e14
+Empaques,CircleDashedIcon,#82c91e
+Envases,CircleDashedIcon,#fab005
+Tapas,CircleDashedIcon,#9775fa
+Vasos,CircleDashedIcon,#15aabf

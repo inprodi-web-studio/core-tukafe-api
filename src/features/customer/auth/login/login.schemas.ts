@@ -10,7 +10,6 @@ export const loginBodySchema = z
   .strict()
   .refine(
     (data) => {
-      console.log(data);
       return Boolean(data.email) !== Boolean(data.phone);
     },
     {

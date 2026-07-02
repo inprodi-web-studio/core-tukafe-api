@@ -1,0 +1,454 @@
+archivo,linea_csv,columna,antes,despues
+01_clientes.csv,2,apellido_paterno,Rodr�guez,Rodríguez
+01_clientes.csv,15,apellido_paterno,Nu�ez,Núñez
+01_clientes.csv,16,apellido_paterno,L�pez,López
+01_clientes.csv,23,apellido_paterno,I�iguez,Iñiguez
+01_clientes.csv,32,apellido_paterno,Nu�ez,Núñez
+01_clientes.csv,34,apellido_paterno,Ch�vez,Chávez
+01_clientes.csv,40,apellido_paterno,Gonz�lez,González
+01_clientes.csv,42,apellido_paterno,Ram�rez,Ramírez
+01_clientes.csv,44,nombres,V�ctor,Víctor
+01_clientes.csv,44,apellido_paterno,G�mez,Gómez
+01_clientes.csv,47,apellido_paterno,S�nchez,Sánchez
+01_clientes.csv,57,apellido_materno,Le�n,León
+01_clientes.csv,66,apellido_paterno,S�nchez,Sánchez
+01_clientes.csv,67,apellido_paterno,L�pez,López
+01_clientes.csv,69,apellido_paterno,Hern�ndez,Hernández
+01_clientes.csv,71,apellido_paterno,Gonz�lez,González
+01_clientes.csv,73,apellido_paterno,Guzm�n,Guzmán
+01_clientes.csv,75,apellido_paterno,L�pez,López
+01_clientes.csv,75,apellido_materno,Hern�ndez,Hernández
+01_clientes.csv,77,nombres,Sof�a,Sofía
+01_clientes.csv,78,nombres,Sof�a,Sofía
+01_clientes.csv,79,nombres,Sof�a,Sofía
+01_clientes.csv,80,nombres,Sof�a,Sofía
+01_clientes.csv,81,nombres,Sof�a,Sofía
+01_clientes.csv,81,apellido_materno,Guzm�n,Guzmán
+01_clientes.csv,82,nombres,Sof�a,Sofía
+01_clientes.csv,82,apellido_paterno,M�ndez,Méndez
+01_clientes.csv,83,nombres,Sof�a,Sofía
+01_clientes.csv,84,nombres,Sof�a,Sofía
+01_clientes.csv,86,nombres,Sof�a,Sofía
+01_clientes.csv,87,apellido_paterno,D�az,Díaz
+01_clientes.csv,94,apellido_paterno,Garc�a,García
+01_clientes.csv,94,apellido_materno,L�pez,López
+01_clientes.csv,96,apellido_paterno,O�farrill,O'Farrill
+01_clientes.csv,98,apellido_materno,L�pez,López
+01_clientes.csv,101,apellido_paterno,Garc�a,García
+01_clientes.csv,103,nombres,Sebasti�n,Sebastián
+01_clientes.csv,104,nombres,Sebasti�n,Sebastián
+01_clientes.csv,105,apellido_paterno,G�mez,Gómez
+01_clientes.csv,107,apellido_paterno,S�nchez,Sánchez
+01_clientes.csv,110,apellido_paterno,P�rez,Pérez
+01_clientes.csv,111,apellido_paterno,Mu�oz,Muñoz
+01_clientes.csv,113,apellido_paterno,Urz�a,Urzúa
+01_clientes.csv,117,apellido_paterno,Mu�oz,Muñoz
+01_clientes.csv,119,apellido_paterno,Gir�n,Girón
+01_clientes.csv,119,apellido_materno,L�pez,López
+01_clientes.csv,120,apellido_paterno,Ya�ez,Yañez
+01_clientes.csv,124,apellido_paterno,Fern�ndez,Fernández
+01_clientes.csv,125,apellido_paterno,P�rez,Pérez
+01_clientes.csv,134,apellido_paterno,Gonz�lez,González
+01_clientes.csv,138,apellido_paterno,P�rez,Pérez
+01_clientes.csv,140,apellido_paterno,Cort�s,Cortés
+01_clientes.csv,141,apellido_materno,Villase�or,Villaseñor
+01_clientes.csv,144,apellido_materno,P�rez,Pérez
+01_clientes.csv,145,apellido_paterno,S�nchez,Sánchez
+01_clientes.csv,147,apellido_materno,Mart�n Del Campo,Martín Del Campo
+01_clientes.csv,153,apellido_paterno,Beltr�n,Beltrán
+01_clientes.csv,155,apellido_paterno,Pe�a,Peña
+01_clientes.csv,156,nombres,Ra�l Sandrini,Raúl Sandrini
+01_clientes.csv,157,nombres,Ra�l,Raúl
+01_clientes.csv,6031,apellido_paterno,Garc�a,García
+01_clientes.csv,6033,apellido_materno,Guzm�n,Guzmán
+01_clientes.csv,6034,apellido_paterno,L�pez,López
+01_clientes.csv,6037,apellido_materno,Ram�rez,Ramírez
+01_clientes.csv,6041,apellido_paterno,Hern�ndez,Hernández
+01_clientes.csv,6047,apellido_paterno,God�nez,Godínez
+01_clientes.csv,6051,apellido_paterno,�Vila,Ávila
+01_clientes.csv,6055,apellido_paterno,P�rez,Pérez
+01_clientes.csv,6063,apellido_paterno,Ca�ongo,Cañongo
+01_clientes.csv,6069,apellido_paterno,Garc�a,García
+01_clientes.csv,6071,nombres,No�,Noé
+01_clientes.csv,6075,apellido_paterno,Ch�vez,Chávez
+01_clientes.csv,6078,apellido_materno,S�nchez,Sánchez
+01_clientes.csv,6081,nombres,Natalie M�a,Natalie Mía
+01_clientes.csv,6084,apellido_paterno,P�rez,Pérez
+01_clientes.csv,6085,apellido_materno,Mart�n,Martín
+01_clientes.csv,6089,apellido_paterno,M�rquez,Márquez
+01_clientes.csv,6096,nombres,M�nica,Mónica
+01_clientes.csv,6097,apellido_paterno,M�rquez,Márquez
+01_clientes.csv,6099,nombres,M�nica Brisa,Mónica Brisa
+01_clientes.csv,6101,nombres,Mois�s,Moisés
+01_clientes.csv,6101,apellido_paterno,God�nez,Godínez
+01_clientes.csv,6103,apellido_paterno,M�rquez,Márquez
+01_clientes.csv,6104,nombres,Miriam Noem�,Miriam Noemí
+01_clientes.csv,6104,apellido_materno,P�rez,Pérez
+01_clientes.csv,6109,nombres,Miguel �Ngel,Miguel Ángel
+01_clientes.csv,6109,apellido_materno,Dur�n,Durán
+01_clientes.csv,6116,apellido_paterno,Esc�rcega,Escárcega
+01_clientes.csv,6116,apellido_materno,Garc�a,García
+01_clientes.csv,6117,apellido_materno,Gonz�lez,González
+01_clientes.csv,6118,apellido_paterno,M�rquez,Márquez
+01_clientes.csv,6119,apellido_paterno,Hern�ndez,Hernández
+01_clientes.csv,6125,apellido_paterno,Garc�a,García
+01_clientes.csv,6127,apellido_paterno,L�pez,López
+01_clientes.csv,6130,nombres,Mart�n Alejandro,Martín Alejandro
+01_clientes.csv,6133,apellido_paterno,Gonz�lez,González
+01_clientes.csv,6137,apellido_paterno,L�pez,López
+01_clientes.csv,6137,apellido_materno,P�rez,Pérez
+01_clientes.csv,6139,apellido_paterno,Hern�ndez,Hernández
+01_clientes.csv,6141,apellido_paterno,Casta�eda,Castañeda
+01_clientes.csv,6148,apellido_paterno,Hern�ndez,Hernández
+01_clientes.csv,6153,nombres,Mar�a Paula,María Paula
+01_clientes.csv,6154,nombres,Mar�a Magdalena,María Magdalena
+01_clientes.csv,6155,nombres,Mar�a,María
+01_clientes.csv,6156,nombres,Mar�a Laura,María Laura
+01_clientes.csv,6156,apellido_paterno,G�mez,Gómez
+01_clientes.csv,6157,nombres,Mar�a Jos�,María José
+01_clientes.csv,6158,nombres,Mar�a Jos�,María José
+01_clientes.csv,6158,apellido_paterno,Gasc�n,Gascón
+01_clientes.csv,6159,nombres,Mar�a Jos�,María José
+01_clientes.csv,6159,apellido_paterno,Garc�a,García
+01_clientes.csv,6159,apellido_materno,P�rez,Pérez
+01_clientes.csv,6160,nombres,Mar�a Jos�,María José
+01_clientes.csv,6161,nombres,Mar�a Isabel,María Isabel
+01_clientes.csv,6161,apellido_paterno,P�rez,Pérez
+01_clientes.csv,6162,nombres,Mar�a Fernanda,María Fernanda
+01_clientes.csv,6164,nombres,Mar�a Fernanda,María Fernanda
+01_clientes.csv,6164,apellido_materno,De Le�n,De León
+01_clientes.csv,6165,nombres,Mar�a Fernanda,María Fernanda
+01_clientes.csv,6165,apellido_paterno,Garc�a,García
+01_clientes.csv,6165,apellido_materno,Guti�rrez,Gutiérrez
+01_clientes.csv,6166,nombres,Mar�a Fernanda,María Fernanda
+01_clientes.csv,6167,nombres,Mar�a Fernanda,María Fernanda
+01_clientes.csv,6170,nombres,Mar�a De Lourdes,María De Lourdes
+01_clientes.csv,6172,apellido_materno,Gonz�lez,González
+01_clientes.csv,6173,apellido_paterno,Gonz�lez,González
+01_clientes.csv,6174,apellido_paterno,P�rez,Pérez
+01_clientes.csv,6175,apellido_paterno,Guti�rrez,Gutiérrez
+01_clientes.csv,6200,apellido_materno,Garc�a,García
+01_clientes.csv,6212,apellido_paterno,Mar�n,Marín
+01_clientes.csv,6215,apellido_paterno,Hern�ndez,Hernández
+01_clientes.csv,6216,apellido_paterno,Casta�eda,Castañeda
+01_clientes.csv,6217,apellido_paterno,Lomel�,Lomelí
+01_clientes.csv,6221,apellido_paterno,V�lez,Vélez
+01_clientes.csv,6223,nombres,L�zaro,Lázaro
+01_clientes.csv,6223,apellido_paterno,Garc�a,García
+01_clientes.csv,6226,apellido_paterno,Jim�nez,Jiménez
+01_clientes.csv,6230,apellido_paterno,Hern�ndez,Hernández
+01_clientes.csv,6231,apellido_paterno,Guti�rrez,Gutiérrez
+01_clientes.csv,6233,apellido_paterno,Hern�ndez,Hernández
+01_clientes.csv,6236,apellido_materno,P�rez,Pérez
+01_clientes.csv,6238,apellido_paterno,Sahag�n,Sahagún
+01_clientes.csv,6239,apellido_paterno,Y��ez,Yáñez
+01_clientes.csv,6243,apellido_paterno,P�rez,Pérez
+01_clientes.csv,6244,apellido_paterno,Ju�rez,Juárez
+01_clientes.csv,6245,apellido_paterno,Hern�ndez,Hernández
+01_clientes.csv,6247,apellido_paterno,Mu�oz,Muñoz
+01_clientes.csv,6256,apellido_paterno,Hern�ndez,Hernández
+01_clientes.csv,6261,apellido_paterno,Jim�nez,Jiménez
+01_clientes.csv,6269,apellido_paterno,Jim�nez,Jiménez
+01_clientes.csv,6270,nombres,Josu�,Josué
+01_clientes.csv,6274,apellido_paterno,Ram�rez,Ramírez
+01_clientes.csv,6276,apellido_paterno,Hern�ndez,Hernández
+01_clientes.csv,6277,nombres,Jos�,José
+01_clientes.csv,6279,nombres,Jos� Luis,José Luis
+01_clientes.csv,6279,apellido_paterno,M�ndez,Méndez
+01_clientes.csv,6279,apellido_materno,G�mez,Gómez
+01_clientes.csv,6280,nombres,Jos�,José
+01_clientes.csv,6281,nombres,Jos� Enrique,José Enrique
+01_clientes.csv,6283,nombres,Jos� Eduardo,José Eduardo
+01_clientes.csv,6283,apellido_paterno,L�pez,López
+01_clientes.csv,6286,nombres,Jos� Alberto,José Alberto
+01_clientes.csv,6286,apellido_paterno,F�lix,Félix
+01_clientes.csv,6286,apellido_materno,Rodr�guez,Rodríguez
+01_clientes.csv,6290,apellido_paterno,N��ez,Núñez
+01_clientes.csv,6296,apellido_materno,P�rez,Pérez
+01_clientes.csv,6297,apellido_paterno,L�pez,López
+01_clientes.csv,6301,nombres,Jes�s,Jesús
+01_clientes.csv,6302,nombres,Jes�s Ernesto,Jesús Ernesto
+01_clientes.csv,6303,nombres,Jes�s Eduardo,Jesús Eduardo
+01_clientes.csv,6303,apellido_paterno,Hern�ndez,Hernández
+01_clientes.csv,6303,apellido_materno,Brise�o,Briseño
+01_clientes.csv,6307,apellido_paterno,G�mez,Gómez
+01_clientes.csv,6311,apellido_paterno,Rodr�guez,Rodríguez
+01_clientes.csv,6311,apellido_materno,Casta�eda,Castañeda
+01_clientes.csv,6319,apellido_paterno,Guti�rrez,Gutiérrez
+01_clientes.csv,6324,apellido_paterno,Rodr�guez,Rodríguez
+01_clientes.csv,6331,apellido_materno,Guti�rrez,Gutiérrez
+01_clientes.csv,6333,apellido_paterno,G�mez,Gómez
+01_clientes.csv,6336,apellido_paterno,Carre�n,Carreón
+01_clientes.csv,6338,nombres,Iv�n,Iván
+01_clientes.csv,6339,apellido_paterno,Mej�a,Mejía
+01_clientes.csv,6341,nombres,Iv�n,Iván
+01_clientes.csv,6341,apellido_paterno,B�ez,Báez
+01_clientes.csv,6345,apellido_paterno,G�mez,Gómez
+01_clientes.csv,6346,apellido_paterno,Ram�rez,Ramírez
+01_clientes.csv,6346,apellido_materno,Ba�uelos,Bañuelos
+01_clientes.csv,6347,apellido_paterno,I�iguez,Iñiguez
+01_clientes.csv,6354,apellido_paterno,Ram�rez,Ramírez
+01_clientes.csv,6355,nombres,Ir�n,Irán
+01_clientes.csv,6357,apellido_paterno,Ram�rez,Ramírez
+01_clientes.csv,6359,apellido_paterno,N�jar,Nájar
+01_clientes.csv,6361,apellido_paterno,�Lvarez,Álvarez
+01_clientes.csv,6364,nombres,H�ctor Hugo,Héctor Hugo
+01_clientes.csv,6364,apellido_paterno,Mor�n,Morán
+01_clientes.csv,6365,nombres,H�ctor,Héctor
+01_clientes.csv,6366,nombres,H�ctor,Héctor
+01_clientes.csv,6367,apellido_paterno,V�zquez,Vázquez
+01_clientes.csv,6370,apellido_paterno,Rodr�guez,Rodríguez
+01_clientes.csv,6371,apellido_paterno,Monta�o,Montaño
+01_clientes.csv,6387,apellido_paterno,Ram�rez,Ramírez
+01_clientes.csv,6392,apellido_materno,Gonz�lez,González
+01_clientes.csv,6397,apellido_paterno,Maga�a,Magaña
+01_clientes.csv,6405,apellido_paterno,Cort�s,Cortés
+01_clientes.csv,6407,apellido_paterno,Ram�rez,Ramírez
+01_clientes.csv,6410,apellido_paterno,G�mez,Gómez
+01_clientes.csv,6412,apellido_paterno,Fern�ndez,Fernández
+01_clientes.csv,6423,nombres,F�tima,Fátima
+01_clientes.csv,6425,apellido_paterno,Gonz�lez,González
+01_clientes.csv,6429,apellido_paterno,Nu�ez,Núñez
+01_clientes.csv,6431,apellido_materno,Gonz�lez,González
+01_clientes.csv,6434,apellido_materno,M�ndez,Méndez
+01_clientes.csv,6437,apellido_paterno,Hern�ndez,Hernández
+01_clientes.csv,6438,apellido_paterno,Jim�nez,Jiménez
+01_clientes.csv,6438,apellido_materno,Rodr�guez,Rodríguez
+01_clientes.csv,6452,apellido_paterno,D�vila,Dávila
+01_clientes.csv,6460,apellido_paterno,Ju�rez,Juárez
+01_clientes.csv,6462,apellido_paterno,C�rdenas,Cárdenas
+01_clientes.csv,6475,apellido_paterno,Guti�rrez,Gutiérrez
+01_clientes.csv,6476,apellido_paterno,Gonz�lez,González
+01_clientes.csv,6477,apellido_paterno,D�az,Díaz
+01_clientes.csv,6481,apellido_paterno,S�nchez,Sánchez
+01_clientes.csv,6484,apellido_paterno,M�rquez,Márquez
+01_clientes.csv,6487,apellido_paterno,Echeverr�a,Echeverría
+01_clientes.csv,6492,apellido_paterno,Hern�ndez,Hernández
+01_clientes.csv,6493,apellido_paterno,Hern�ndez,Hernández
+01_clientes.csv,6501,apellido_paterno,Garc�a,García
+01_clientes.csv,6501,apellido_materno,L�pez,López
+01_clientes.csv,6502,apellido_paterno,Garc�a,García
+01_clientes.csv,6502,apellido_materno,L�pez,López
+01_clientes.csv,6505,apellido_paterno,Ju�rez,Juárez
+01_clientes.csv,6505,apellido_materno,Mor�n,Morán
+01_clientes.csv,6508,apellido_paterno,M�rquez,Márquez
+01_clientes.csv,6510,apellido_paterno,Mu�oz,Muñoz
+01_clientes.csv,6516,apellido_materno,Gonz�lez,González
+01_clientes.csv,6517,apellido_paterno,Casta�eda,Castañeda
+01_clientes.csv,6521,apellido_materno,Hern�ndez,Hernández
+01_clientes.csv,6524,apellido_paterno,P�rez,Pérez
+01_clientes.csv,6527,apellido_paterno,Rodr�guez,Rodríguez
+01_clientes.csv,6529,apellido_paterno,Hern�ndez,Hernández
+01_clientes.csv,6530,nombres,Dami�n,Damián
+01_clientes.csv,6530,apellido_paterno,�Vila,Ávila
+01_clientes.csv,6532,apellido_materno,Mart�nez,Martínez
+01_clientes.csv,6533,apellido_paterno,L�pez,López
+01_clientes.csv,6535,apellido_materno,Rodr�guez,Rodríguez
+01_clientes.csv,6540,apellido_paterno,C�rdenas,Cárdenas
+01_clientes.csv,6546,apellido_paterno,L�pez,López
+01_clientes.csv,6559,nombres,C�sar,César
+01_clientes.csv,6561,nombres,C�sar Arturo,César Arturo
+01_clientes.csv,6562,apellido_paterno,Maga�a,Magaña
+01_clientes.csv,6564,apellido_paterno,Garc�a,García
+01_clientes.csv,6567,apellido_paterno,Mart�nez,Martínez
+01_clientes.csv,6567,apellido_materno,Mart�nez,Martínez
+01_clientes.csv,6570,apellido_paterno,Gonz�lez,González
+01_clientes.csv,6573,apellido_paterno,Hern�ndez,Hernández
+01_clientes.csv,6574,apellido_paterno,Guzm�n,Guzmán
+01_clientes.csv,6577,apellido_paterno,Fabi�n,Fabián
+01_clientes.csv,6581,apellido_paterno,Ju�rez,Juárez
+01_clientes.csv,6587,apellido_paterno,L�pez,López
+01_clientes.csv,6596,nombres,Bel�n,Belén
+01_clientes.csv,6596,apellido_paterno,Garc�a,García
+01_clientes.csv,6597,apellido_paterno,Gonz�lez,González
+01_clientes.csv,6598,apellido_paterno,Hern�ndez,Hernández
+01_clientes.csv,6599,nombres,B�rbara,Bárbara
+01_clientes.csv,6604,nombres,Arleth Rub�,Arleth Rubí
+01_clientes.csv,6604,apellido_materno,Dur�n,Durán
+01_clientes.csv,6609,apellido_materno,Garc�a,García
+01_clientes.csv,6611,apellido_paterno,L�pez,López
+01_clientes.csv,6614,apellido_materno,Guti�rrez,Gutiérrez
+01_clientes.csv,6615,apellido_paterno,Nu�ez,Núñez
+01_clientes.csv,6617,apellido_paterno,S�nchez,Sánchez
+01_clientes.csv,6620,apellido_paterno,Guzm�n,Guzmán
+01_clientes.csv,6620,apellido_materno,Cant�,Cantú
+01_clientes.csv,6622,nombres,Ang�lica,Angélica
+01_clientes.csv,6624,apellido_paterno,Mart�nez,Martínez
+01_clientes.csv,6626,apellido_paterno,Hern�ndez,Hernández
+01_clientes.csv,6638,apellido_paterno,Gonz�lez,González
+01_clientes.csv,6646,apellido_paterno,M�rquez,Márquez
+01_clientes.csv,6647,apellido_paterno,D�az,Díaz
+01_clientes.csv,6647,apellido_materno,�Lvarez,Álvarez
+01_clientes.csv,6648,apellido_materno,Hern�ndez,Hernández
+01_clientes.csv,6650,apellido_materno,Vel�zquez,Velázquez
+01_clientes.csv,6657,apellido_paterno,Garc�a,García
+01_clientes.csv,6657,apellido_materno,Vi�as,Viñas
+01_clientes.csv,6659,nombres,Am�rica,América
+01_clientes.csv,6659,apellido_paterno,L�pez,López
+01_clientes.csv,6662,apellido_paterno,Mu�oz,Muñoz
+01_clientes.csv,6665,apellido_paterno,Ch�vez,Chávez
+01_clientes.csv,6666,apellido_paterno,Rodr�guez,Rodríguez
+01_clientes.csv,6668,apellido_paterno,Mart�nez,Martínez
+01_clientes.csv,6669,apellido_materno,P�rez,Pérez
+01_clientes.csv,6676,apellido_paterno,S�nchez,Sánchez
+01_clientes.csv,6680,apellido_paterno,Dur�n,Durán
+01_clientes.csv,6693,apellido_paterno,Mart�nez,Martínez
+01_clientes.csv,6693,apellido_materno,C�rdova,Córdova
+01_clientes.csv,6698,apellido_paterno,C�rdenas,Cárdenas
+01_clientes.csv,6706,apellido_paterno,V�zquez,Vázquez
+01_clientes.csv,6726,apellido_paterno,Mart�nez,Martínez
+01_clientes.csv,6728,apellido_paterno,Mart�n,Martín
+revision_nombres_ambiguos.csv,4,nombre_original,Viviana Ch�vez Lozano,Viviana Chávez Lozano
+revision_nombres_ambiguos.csv,4,apellido_paterno,Ch�vez,Chávez
+revision_nombres_ambiguos.csv,7,nombre_original,V�ctor G�mez Camacho,Víctor Gómez Camacho
+revision_nombres_ambiguos.csv,7,nombres,V�ctor,Víctor
+revision_nombres_ambiguos.csv,7,apellido_paterno,G�mez,Gómez
+revision_nombres_ambiguos.csv,9,nombre_original,Valentina Mercado Le�n,Valentina Mercado León
+revision_nombres_ambiguos.csv,9,apellido_materno,Le�n,León
+revision_nombres_ambiguos.csv,10,nombre_original,Susana S�nchez Gtz,Susana Sánchez Gtz
+revision_nombres_ambiguos.csv,10,apellido_paterno,S�nchez,Sánchez
+revision_nombres_ambiguos.csv,11,nombre_original,Sophia L�pez Hern�ndez,Sophia López Hernández
+revision_nombres_ambiguos.csv,11,apellido_paterno,L�pez,López
+revision_nombres_ambiguos.csv,11,apellido_materno,Hern�ndez,Hernández
+revision_nombres_ambiguos.csv,12,nombre_original,Sof�a Rangel Manjarrez,Sofía Rangel Manjarrez
+revision_nombres_ambiguos.csv,12,nombres,Sof�a,Sofía
+revision_nombres_ambiguos.csv,13,nombre_original,Sof�a Osuna Guzm�n,Sofía Osuna Guzmán
+revision_nombres_ambiguos.csv,13,nombres,Sof�a,Sofía
+revision_nombres_ambiguos.csv,13,apellido_materno,Guzm�n,Guzmán
+revision_nombres_ambiguos.csv,14,nombre_original,Sof�a M�ndez Mora,Sofía Méndez Mora
+revision_nombres_ambiguos.csv,14,nombres,Sof�a,Sofía
+revision_nombres_ambiguos.csv,14,apellido_paterno,M�ndez,Méndez
+revision_nombres_ambiguos.csv,15,nombre_original,Sof�a Hinojosa Morale,Sofía Hinojosa Morale
+revision_nombres_ambiguos.csv,15,nombres,Sof�a,Sofía
+revision_nombres_ambiguos.csv,16,nombre_original,Sergio O�Farrill Gonzalez,Sergio O'Farrill Gonzalez
+revision_nombres_ambiguos.csv,16,apellido_paterno,O�farrill,O'Farrill
+revision_nombres_ambiguos.csv,19,nombre_original,sara p�rez martos,sara Pérez martos
+revision_nombres_ambiguos.csv,19,apellido_paterno,P�rez,Pérez
+revision_nombres_ambiguos.csv,20,nombre_original,Santiago Urz�a Rocha,Santiago Urzúa Rocha
+revision_nombres_ambiguos.csv,20,apellido_paterno,Urz�a,Urzúa
+revision_nombres_ambiguos.csv,22,nombre_original,Samuel Gir�n L�pez,Samuel Girón López
+revision_nombres_ambiguos.csv,22,apellido_paterno,Gir�n,Girón
+revision_nombres_ambiguos.csv,22,apellido_materno,L�pez,López
+revision_nombres_ambiguos.csv,26,nombre_original,Ricardo Silva P�rez,Ricardo Silva Pérez
+revision_nombres_ambiguos.csv,26,apellido_materno,P�rez,Pérez
+revision_nombres_ambiguos.csv,28,nombre_original,Ricardo Abraham Medina Mart�n del Campo,Ricardo Abraham Medina Martín del Campo
+revision_nombres_ambiguos.csv,28,apellido_materno,Mart�n Del Campo,Martín Del Campo
+revision_nombres_ambiguos.csv,32,nombre_original,Paulina Osuna Guzm�n,Paulina Osuna Guzmán
+revision_nombres_ambiguos.csv,32,apellido_materno,Guzm�n,Guzmán
+revision_nombres_ambiguos.csv,34,nombre_original,paulina copado Ram�rez,paulina copado Ramírez
+revision_nombres_ambiguos.csv,34,apellido_materno,Ram�rez,Ramírez
+revision_nombres_ambiguos.csv,41,nombre_original,Octavio Garc�a Cabrera,Octavio García Cabrera
+revision_nombres_ambiguos.csv,41,apellido_paterno,Garc�a,García
+revision_nombres_ambiguos.csv,45,nombre_original,M�nica Brisa Enciso,Mónica Brisa Enciso
+revision_nombres_ambiguos.csv,45,nombres,M�nica Brisa,Mónica Brisa
+revision_nombres_ambiguos.csv,47,nombre_original,Mia Esc�rcega Garc�a,Mia Escárcega García
+revision_nombres_ambiguos.csv,47,apellido_paterno,Esc�rcega,Escárcega
+revision_nombres_ambiguos.csv,47,apellido_materno,Garc�a,García
+revision_nombres_ambiguos.csv,49,nombre_original,Mayra Garc�a chagollan,Mayra García chagollan
+revision_nombres_ambiguos.csv,49,apellido_paterno,Garc�a,García
+revision_nombres_ambiguos.csv,50,nombre_original,Marisol L�pez P�rez,Marisol López Pérez
+revision_nombres_ambiguos.csv,50,apellido_paterno,L�pez,López
+revision_nombres_ambiguos.csv,50,apellido_materno,P�rez,Pérez
+revision_nombres_ambiguos.csv,53,nombre_original,mariana Hern�ndez coronado,mariana Hernández coronado
+revision_nombres_ambiguos.csv,53,apellido_paterno,Hern�ndez,Hernández
+revision_nombres_ambiguos.csv,54,nombre_original,Mar�a Paula artigas,María Paula artigas
+revision_nombres_ambiguos.csv,54,nombres,Mar�a Paula,María Paula
+revision_nombres_ambiguos.csv,55,nombre_original,Mar�a Jos� gasc�n,María José Gascón
+revision_nombres_ambiguos.csv,55,nombres,Mar�a Jos�,María José
+revision_nombres_ambiguos.csv,55,apellido_paterno,Gasc�n,Gascón
+revision_nombres_ambiguos.csv,56,nombre_original,Mar�a Jos� de la Cruz,María José de la Cruz
+revision_nombres_ambiguos.csv,56,nombres,Mar�a Jos�,María José
+revision_nombres_ambiguos.csv,57,nombre_original,Mar�a Fernanda Rosales de Le�n,María Fernanda Rosales de León
+revision_nombres_ambiguos.csv,57,nombres,Mar�a Fernanda,María Fernanda
+revision_nombres_ambiguos.csv,57,apellido_materno,De Le�n,De León
+revision_nombres_ambiguos.csv,58,nombre_original,Mar�a Fernanda de la Torre Montiel,María Fernanda de la Torre Montiel
+revision_nombres_ambiguos.csv,58,nombres,Mar�a Fernanda,María Fernanda
+revision_nombres_ambiguos.csv,60,nombre_original,Mar�a de Lourdes Zendejas M,María de Lourdes Zendejas M
+revision_nombres_ambiguos.csv,60,nombres,Mar�a De Lourdes,María De Lourdes
+revision_nombres_ambiguos.csv,70,nombre_original,Leonel V�lez Herrera,Leonel Vélez Herrera
+revision_nombres_ambiguos.csv,70,apellido_paterno,V�lez,Vélez
+revision_nombres_ambiguos.csv,71,nombre_original,Laura Lucero Jim�nez,Laura Lucero Jiménez
+revision_nombres_ambiguos.csv,71,apellido_paterno,Jim�nez,Jiménez
+revision_nombres_ambiguos.csv,73,nombre_original,Kelsey Daniela Hern�ndez,Kelsey Daniela Hernández
+revision_nombres_ambiguos.csv,73,apellido_paterno,Hern�ndez,Hernández
+revision_nombres_ambiguos.csv,75,nombre_original,Karina Mu�oz Meza,Karina Muñoz Meza
+revision_nombres_ambiguos.csv,75,apellido_paterno,Mu�oz,Muñoz
+revision_nombres_ambiguos.csv,82,nombre_original,Juan Carlos Jim�nez,Juan Carlos Jiménez
+revision_nombres_ambiguos.csv,82,apellido_paterno,Jim�nez,Jiménez
+revision_nombres_ambiguos.csv,83,nombre_original,Jos� Eduardo L�pez de alba,José Eduardo López de alba
+revision_nombres_ambiguos.csv,83,nombres,Jos� Eduardo,José Eduardo
+revision_nombres_ambiguos.csv,83,apellido_paterno,L�pez,López
+revision_nombres_ambiguos.csv,85,nombre_original,Jonathan Trinidad P�rez,Jonathan Trinidad Pérez
+revision_nombres_ambiguos.csv,85,apellido_materno,P�rez,Pérez
+revision_nombres_ambiguos.csv,86,nombre_original,Jazmin Rodr�guez Casta�eda,Jazmin Rodríguez Castañeda
+revision_nombres_ambiguos.csv,86,apellido_paterno,Rodr�guez,Rodríguez
+revision_nombres_ambiguos.csv,86,apellido_materno,Casta�eda,Castañeda
+revision_nombres_ambiguos.csv,93,nombre_original,Jaqi Rodr�guez Lin,Jaqi Rodríguez Lin
+revision_nombres_ambiguos.csv,93,apellido_paterno,Rodr�guez,Rodríguez
+revision_nombres_ambiguos.csv,95,nombre_original,jaime michel Guti�rrez,jaime michel Gutiérrez
+revision_nombres_ambiguos.csv,95,apellido_materno,Guti�rrez,Gutiérrez
+revision_nombres_ambiguos.csv,96,nombre_original,Iv�n Paredes Cossu,Iván Paredes Cossu
+revision_nombres_ambiguos.csv,96,nombres,Iv�n,Iván
+revision_nombres_ambiguos.csv,99,nombre_original,H�ctor De Anda,Héctor De Anda
+revision_nombres_ambiguos.csv,99,nombres,H�ctor,Héctor
+revision_nombres_ambiguos.csv,100,nombre_original,hana Viktoria Madeleine Monta�o eu,hana Viktoria Madeleine Montaño eu
+revision_nombres_ambiguos.csv,100,apellido_paterno,Monta�o,Montaño
+revision_nombres_ambiguos.csv,107,nombre_original,Geovanna Loza Gonz�lez,Geovanna Loza González
+revision_nombres_ambiguos.csv,107,apellido_materno,Gonz�lez,González
+revision_nombres_ambiguos.csv,108,nombre_original,Gabriela Maga�a Herrada,Gabriela Magaña Herrada
+revision_nombres_ambiguos.csv,108,apellido_paterno,Maga�a,Magaña
+revision_nombres_ambiguos.csv,111,nombre_original,Fernanda Fern�ndez Carmona,Fernanda Fernández Carmona
+revision_nombres_ambiguos.csv,111,apellido_paterno,Fern�ndez,Fernández
+revision_nombres_ambiguos.csv,112,nombre_original,F�tima Rojas Carrillo,Fátima Rojas Carrillo
+revision_nombres_ambiguos.csv,112,nombres,F�tima,Fátima
+revision_nombres_ambiguos.csv,114,nombre_original,Esperanza Jim�nez Rodr�guez,Esperanza Jiménez Rodríguez
+revision_nombres_ambiguos.csv,114,apellido_paterno,Jim�nez,Jiménez
+revision_nombres_ambiguos.csv,114,apellido_materno,Rodr�guez,Rodríguez
+revision_nombres_ambiguos.csv,117,nombre_original,Elizabeth D�vila Echegollen,Elizabeth Dávila Echegollen
+revision_nombres_ambiguos.csv,117,apellido_paterno,D�vila,Dávila
+revision_nombres_ambiguos.csv,122,nombre_original,Diana Laura M�rquez,Diana Laura Márquez
+revision_nombres_ambiguos.csv,122,apellido_paterno,M�rquez,Márquez
+revision_nombres_ambiguos.csv,127,nombre_original,David Garc�a L�pez,David García López
+revision_nombres_ambiguos.csv,127,apellido_paterno,Garc�a,García
+revision_nombres_ambiguos.csv,127,apellido_materno,L�pez,López
+revision_nombres_ambiguos.csv,128,nombre_original,David Garc�a L�pez,David García López
+revision_nombres_ambiguos.csv,128,apellido_paterno,Garc�a,García
+revision_nombres_ambiguos.csv,128,apellido_materno,L�pez,López
+revision_nombres_ambiguos.csv,130,nombre_original,darlenne Ju�rez mor�n,darlenne Juárez Morán
+revision_nombres_ambiguos.csv,130,apellido_paterno,Ju�rez,Juárez
+revision_nombres_ambiguos.csv,130,apellido_materno,Mor�n,Morán
+revision_nombres_ambiguos.csv,132,nombre_original,Danitza Mu�oz Alvarado,Danitza Muñoz Alvarado
+revision_nombres_ambiguos.csv,132,apellido_paterno,Mu�oz,Muñoz
+revision_nombres_ambiguos.csv,135,nombre_original,Daniela Castillo Gonz�lez,Daniela Castillo González
+revision_nombres_ambiguos.csv,135,apellido_materno,Gonz�lez,González
+revision_nombres_ambiguos.csv,137,nombre_original,Daniel Medina Hern�ndez,Daniel Medina Hernández
+revision_nombres_ambiguos.csv,137,apellido_materno,Hern�ndez,Hernández
+revision_nombres_ambiguos.csv,139,nombre_original,Cristian C�rdenas Montes,Cristian Cárdenas Montes
+revision_nombres_ambiguos.csv,139,apellido_paterno,C�rdenas,Cárdenas
+revision_nombres_ambiguos.csv,141,nombre_original,Claudia Liliana L�pez de Luna,Claudia Liliana López de Luna
+revision_nombres_ambiguos.csv,141,apellido_paterno,L�pez,López
+revision_nombres_ambiguos.csv,142,nombre_original,C�sar Fonseca Michel,César Fonseca Michel
+revision_nombres_ambiguos.csv,142,nombres,C�sar,César
+revision_nombres_ambiguos.csv,144,nombre_original,Carolina Mart�nez Mart�nez,Carolina Martínez Martínez
+revision_nombres_ambiguos.csv,144,apellido_paterno,Mart�nez,Martínez
+revision_nombres_ambiguos.csv,144,apellido_materno,Mart�nez,Martínez
+revision_nombres_ambiguos.csv,145,nombre_original,Carlos Guzm�n Ocegueda,Carlos Guzmán Ocegueda
+revision_nombres_ambiguos.csv,145,apellido_paterno,Guzm�n,Guzmán
+revision_nombres_ambiguos.csv,150,nombre_original,B�rbara Garnica Sierra,Bárbara Garnica Sierra
+revision_nombres_ambiguos.csv,150,nombres,B�rbara,Bárbara
+revision_nombres_ambiguos.csv,153,nombre_original,Aranza Barbosa Garc�a,Aranza Barbosa García
+revision_nombres_ambiguos.csv,153,apellido_materno,Garc�a,García
+revision_nombres_ambiguos.csv,154,nombre_original,Araceli Flores Guti�rrez,Araceli Flores Gutiérrez
+revision_nombres_ambiguos.csv,154,apellido_materno,Guti�rrez,Gutiérrez
+revision_nombres_ambiguos.csv,155,nombre_original,Angla Guzm�n Cant�,Angla Guzmán Cantú
+revision_nombres_ambiguos.csv,155,apellido_paterno,Guzm�n,Guzmán
+revision_nombres_ambiguos.csv,155,apellido_materno,Cant�,Cantú
+revision_nombres_ambiguos.csv,164,nombre_original,Almendra Mart�nez Alvarado,Almendra Martínez Alvarado
+revision_nombres_ambiguos.csv,164,apellido_paterno,Mart�nez,Martínez
+revision_nombres_ambiguos.csv,165,nombre_original,Alexia S�nchez Coral,Alexia Sánchez Coral
+revision_nombres_ambiguos.csv,165,apellido_paterno,S�nchez,Sánchez
+revision_nombres_ambiguos.csv,167,nombre_original,Alejandra Mart�nez C�rdova,Alejandra Martínez Córdova
+revision_nombres_ambiguos.csv,167,apellido_paterno,Mart�nez,Martínez
+revision_nombres_ambiguos.csv,167,apellido_materno,C�rdova,Córdova
+revision_nombres_ambiguos.csv,169,nombre_original,Alejandra C�rdenas Leal,Alejandra Cárdenas Leal
+revision_nombres_ambiguos.csv,169,apellido_paterno,C�rdenas,Cárdenas

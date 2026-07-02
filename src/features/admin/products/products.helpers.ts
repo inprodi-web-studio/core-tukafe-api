@@ -1,9 +1,12 @@
 import { generateNanoId, normalizeString, toBase100Integer } from "@core/utils";
 import type {
+  CreateProductModifierParams,
   CreateProductRecipeParams,
   CreateProductServiceParams,
   CreateProductVariationParams,
+  NormalizedProductModifierParams,
   NormalizedProductVariationParams,
+  ValidatedProductModifierConfig,
   ValidatedProductVariation,
 } from "./products.types";
 
@@ -35,15 +38,35 @@ function normalizeProductVariationInput({
   };
 }
 
+function normalizeProductModifierInput({
+  modifierId,
+  optionIds,
+  visibleWhen,
+}: CreateProductModifierParams): NormalizedProductModifierParams {
+  return {
+    modifierId,
+    optionIds: optionIds == null ? null : [...optionIds],
+    visibleWhen:
+      visibleWhen?.map(({ variationGroupId, variationOptionId }) => ({
+        variationGroupId,
+        variationOptionId,
+      })) ?? [],
+  };
+}
+
 export const normalizeProductInput = ({
   name,
   price,
   recipe,
   imageUploadId,
+  categoryId,
+  categoryIds,
   taxIds,
   organizationIds,
   modifiers,
   modifierIds,
+  modifierConfigs,
+  isFeatured,
   variationGroupIds,
   variations,
   ...rest
@@ -59,15 +82,28 @@ export const normalizeProductInput = ({
         collapseWhitespace: true,
       })
     : null;
+  const normalizedCategoryIds = [
+    ...new Set([...(categoryId ? [categoryId] : []), ...(categoryIds ?? [])]),
+  ];
+  const normalizedModifierConfigs =
+    modifierConfigs?.map(normalizeProductModifierInput) ??
+    (modifierIds ?? modifiers ?? []).map((modifierId) => ({
+      modifierId,
+      optionIds: null,
+      visibleWhen: [],
+    }));
 
   return {
     name: normalizedName,
     priceCents: price == null ? null : toBase100Integer(price),
     recipe: normalizedRecipe,
     imageUploadId: normalizedImageUploadId,
+    categoryId: categoryId ?? normalizedCategoryIds[0] ?? null,
+    categoryIds: normalizedCategoryIds,
+    isFeatured: isFeatured ?? false,
     taxIds: [...new Set(taxIds ?? [])],
     organizationIds: [...new Set(organizationIds ?? [])],
-    modifierIds: [...new Set(modifierIds ?? modifiers ?? [])],
+    modifierConfigs: normalizedModifierConfigs,
     variationGroupIds: variationGroupIds ?? [],
     variations: (variations ?? []).map(normalizeProductVariationInput),
     ...rest,
@@ -139,12 +175,40 @@ export function buildProductVariationInsertPayloads(
 
 export function buildProductModifierInsertPayloads(
   productId: string,
-  modifierIds: string[],
+  modifierConfigs: ValidatedProductModifierConfig[],
   startSortOrder: number,
 ) {
-  return modifierIds.map((modifierId, index) => ({
+  return modifierConfigs.map(({ modifierId }, index) => ({
     productId,
     modifierId,
     sortOrder: startSortOrder + index,
   }));
+}
+
+export function buildProductModifierOptionInsertPayloads(
+  productId: string,
+  modifierConfigs: ValidatedProductModifierConfig[],
+) {
+  return modifierConfigs.flatMap(
+    ({ modifierId, optionIds }) =>
+      optionIds?.map((modifierOptionId) => ({
+        productId,
+        modifierId,
+        modifierOptionId,
+      })) ?? [],
+  );
+}
+
+export function buildProductModifierVisibilityRuleInsertPayloads(
+  productId: string,
+  modifierConfigs: ValidatedProductModifierConfig[],
+) {
+  return modifierConfigs.flatMap(({ modifierId, visibleWhen }) =>
+    visibleWhen.map(({ variationGroupId, variationOptionId }) => ({
+      productId,
+      modifierId,
+      variationGroupId,
+      variationOptionId,
+    })),
+  );
 }

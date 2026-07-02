@@ -16,6 +16,8 @@ const guestProductsServicesPlugin: FastifyPluginAsync = async (fastify) => {
     getConfiguration: products.getConfiguration,
     getCustomerProductOrderCount: products.getCustomerProductOrderCount,
     list: products.list,
+    listPopular: products.listPopular,
+    listRecommended: products.listRecommended,
   };
 };
 

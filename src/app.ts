@@ -24,6 +24,10 @@ import {
 import { adminModifiersRoutes, adminModifiersServicesPlugin } from "@features/admin/modifiers";
 import { adminOrdersRoutes, adminOrdersServicesPlugin } from "@features/admin/orders";
 import {
+  adminOrganizationsRoutes,
+  adminOrganizationsServicesPlugin,
+} from "@features/admin/organizations";
+import {
   adminProductcategoriesRoutes,
   adminProductcategoriesServicesPlugin,
 } from "@features/admin/productCategories";
@@ -59,6 +63,7 @@ import {
   guestProductCategoriesServicesPlugin,
 } from "@features/guest/productCategories";
 import { guestProductsRoutes, guestProductsServicesPlugin } from "@features/guest/products";
+import { stripeWebhookRoutes } from "@features/stripe";
 import Fastify from "fastify";
 import qs from "qs";
 
@@ -122,6 +127,7 @@ await server.register(adminProductsServicesPlugin);
 await server.register(adminCouponsServicesPlugin);
 await server.register(adminUploadsServicesPlugin);
 await server.register(adminOrdersServicesPlugin);
+await server.register(adminOrganizationsServicesPlugin);
 await server.register(adminWorkOrdersServicesPlugin);
 await server.register(adminIngredientsServicesPlugin);
 await server.register(adminSuppliesServicesPlugin);
@@ -137,6 +143,8 @@ await server.register(guestProductCategoriesServicesPlugin);
 await server.register(guestProductsServicesPlugin);
 
 // --- Routes
+await server.register(stripeWebhookRoutes, { prefix: "/api/stripe" });
+
 await server.register(
   async (app) => {
     await app.register(
@@ -149,6 +157,7 @@ await server.register(
         await adminApp.register(adminCouponsRoutes, { prefix: "/coupons" });
         await adminApp.register(adminUploadsRoutes, { prefix: "/uploads" });
         await adminApp.register(adminOrdersRoutes, { prefix: "/orders" });
+        await adminApp.register(adminOrganizationsRoutes, { prefix: "/organizations" });
         await adminApp.register(adminWorkOrdersRoutes, { prefix: "/work-orders" });
         await adminApp.register(adminProductcategoriesRoutes, { prefix: "/products/categories" });
         await adminApp.register(adminVariationGroupsRoutes, {

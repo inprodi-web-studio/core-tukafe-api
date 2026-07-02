@@ -36,6 +36,111 @@
       "when": 1778619600000,
       "tag": "0005_work_order_variation_selections",
       "breakpoints": false
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1778706000000,
+      "tag": "0006_order_payment_attempts",
+      "breakpoints": false
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1778792400000,
+      "tag": "0007_organization_coordinates",
+      "breakpoints": false
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1778878800000,
+      "tag": "0008_stripe_checkout",
+      "breakpoints": false
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1779138000000,
+      "tag": "0009_customer_product_favorites",
+      "breakpoints": false
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1779224400000,
+      "tag": "0010_cashback_program",
+      "breakpoints": false
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1782129600000,
+      "tag": "0011_customer_qr_login_tokens",
+      "breakpoints": false
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1782216000000,
+      "tag": "0012_legacy_customer_passwords",
+      "breakpoints": false
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1782302400000,
+      "tag": "0013_product_category_links",
+      "breakpoints": false
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1782388800000,
+      "tag": "0014_product_modifier_options",
+      "breakpoints": false
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1782993600000,
+      "tag": "0015_product_category_sort_order",
+      "breakpoints": false
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1782997200000,
+      "tag": "0016_api_key_config_id",
+      "breakpoints": false
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1783000800000,
+      "tag": "0017_api_key_reference_id",
+      "breakpoints": false
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1783004400000,
+      "tag": "0018_api_key_nullable_user_id",
+      "breakpoints": false
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1783008000000,
+      "tag": "0019_product_is_featured",
+      "breakpoints": false
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1783011600000,
+      "tag": "0020_product_modifier_visibility_rules",
+      "breakpoints": false
     }
   ]
 }

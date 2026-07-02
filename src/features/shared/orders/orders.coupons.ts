@@ -172,16 +172,16 @@ export function applyCouponToPreparedOrder({
 
   const eligibleItems = preparedPayload.items.filter((preparedOrderItem) => {
     const productId = preparedOrderItem.item.productId;
-    const categoryId = preparedOrderItem.productCategoryId;
+    const categoryIds = preparedOrderItem.productCategoryIds;
 
     const isIncluded =
       !hasIncludeRules ||
       ruleSets.includeProductIds.has(productId) ||
-      (categoryId ? ruleSets.includeCategoryIds.has(categoryId) : false);
+      categoryIds.some((categoryId) => ruleSets.includeCategoryIds.has(categoryId));
 
     const isExcluded =
       ruleSets.excludeProductIds.has(productId) ||
-      (categoryId ? ruleSets.excludeCategoryIds.has(categoryId) : false);
+      categoryIds.some((categoryId) => ruleSets.excludeCategoryIds.has(categoryId));
 
     if (!isIncluded || isExcluded) {
       return false;

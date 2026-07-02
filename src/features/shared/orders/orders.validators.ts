@@ -14,7 +14,7 @@ import {
   notFound,
   validation,
 } from "@core/utils";
-import { and, inArray, isNull } from "drizzle-orm";
+import { and, inArray, isNull, sql } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
 import {
   calculateIncludedTaxBreakdown,
@@ -35,6 +35,12 @@ interface ProductModifierConfig {
   maxSelect: number | null;
   multiSelect: boolean;
   sortOrder: number;
+  visibleWhen: ProductModifierVisibilityCondition[];
+}
+
+interface ProductModifierVisibilityCondition {
+  variationGroupId: string;
+  variationOptionId: string;
 }
 
 interface ModifierOptionLookupValue {
@@ -55,7 +61,15 @@ interface ProductLookup {
   categoryId: string | null;
   category: {
     isFourPlusOneEligible: boolean;
+    isCashbackEligible: boolean;
   } | null;
+  categories: Array<{
+    categoryId: string;
+    category: {
+      isFourPlusOneEligible: boolean;
+      isCashbackEligible: boolean;
+    };
+  }>;
   unit: {
     id: string;
     name: string;
@@ -87,6 +101,7 @@ interface SelectedVariationLookup {
     option: {
       id: string;
       name: string;
+      kitchenName: string | null;
     };
   }>;
 }
@@ -109,7 +124,9 @@ export interface PreparedOrderItem {
     modifiers: WorkOrderModifierSnapshot[];
   };
   isPromotionEligible: boolean;
+  isCashbackEligible: boolean;
   productCategoryId: string | null;
+  productCategoryIds: string[];
   sourceClientItemId: string | null;
   requestedRedeemFreeUnits: number;
   lineType: "paid" | "free";
@@ -121,6 +138,45 @@ export interface PreparedOrderPayload {
   subtotalCents: number;
   taxesCents: number;
   grandTotalCents: number;
+}
+
+async function productModifierOptionsTableExists(fastify: FastifyInstance): Promise<boolean> {
+  const result = await fastify.db.execute<{ exists: boolean }>(sql`
+    select to_regclass('public.product_modifier_option') is not null as "exists"
+  `);
+
+  return result.rows[0]?.exists ?? false;
+}
+
+async function productModifierVisibilityRulesTableExists(
+  fastify: FastifyInstance,
+): Promise<boolean> {
+  const result = await fastify.db.execute<{ exists: boolean }>(sql`
+    select to_regclass('public.product_modifier_visibility_rule') is not null as "exists"
+  `);
+
+  return result.rows[0]?.exists ?? false;
+}
+
+function isProductModifierVisibleForVariation(
+  productModifier: ProductModifierConfig,
+  variation: SelectedVariationLookup | null,
+) {
+  if (productModifier.visibleWhen.length === 0) {
+    return true;
+  }
+
+  if (!variation) {
+    return false;
+  }
+
+  return productModifier.visibleWhen.some((condition) =>
+    variation.selections.some(
+      (selection) =>
+        selection.group.id === condition.variationGroupId &&
+        selection.option.id === condition.variationOptionId,
+    ),
+  );
 }
 
 function resolveAllowedDecimalPlaces(unitPrecision: number): number {
@@ -152,6 +208,7 @@ function buildWorkOrderVariationSelections(
       groupCustomerLabel: selection.group.customerLabel,
       optionId: selection.option.id,
       optionName: selection.option.name,
+      optionKitchenName: selection.option.kitchenName,
     }));
 }
 
@@ -204,6 +261,10 @@ export async function buildOrderValidationContext(
         .filter((variationId): variationId is string => variationId !== null),
     ),
   ];
+  const [includeAllowedModifierOptions, includeModifierVisibilityRules] = await Promise.all([
+    productModifierOptionsTableExists(fastify),
+    productModifierVisibilityRulesTableExists(fastify),
+  ]);
 
   const activeOrganizationProducts = await fastify.db.query.organizationProductDB.findMany({
     where(table, { and, eq, inArray }) {
@@ -225,130 +286,181 @@ export async function buildOrderValidationContext(
     );
   }
 
-  const [products, variationsByProduct, selectedVariations, productModifierLinks] =
-    await Promise.all([
-      fastify.db.query.productsDB.findMany({
-        where(table, { and, inArray, isNull }) {
-          return and(inArray(table.id, uniqueProductIds), isNull(table.deletedAt));
-        },
-        columns: {
-          id: true,
-          name: true,
-          kitchenName: true,
-          priceCents: true,
-          categoryId: true,
-        },
-        with: {
-          category: {
-            columns: {
-              isFourPlusOneEligible: true,
-            },
+  const [
+    products,
+    variationsByProduct,
+    selectedVariations,
+    productModifierLinks,
+    allowedModifierOptions,
+    modifierVisibilityRules,
+  ] = await Promise.all([
+    fastify.db.query.productsDB.findMany({
+      where(table, { and, inArray, isNull }) {
+        return and(inArray(table.id, uniqueProductIds), isNull(table.deletedAt));
+      },
+      columns: {
+        id: true,
+        name: true,
+        kitchenName: true,
+        priceCents: true,
+        categoryId: true,
+      },
+      with: {
+        category: {
+          columns: {
+            isFourPlusOneEligible: true,
+            isCashbackEligible: true,
           },
-          unit: {
-            columns: {
-              id: true,
-              name: true,
-              abbreviation: true,
-              precision: true,
-            },
+        },
+        categories: {
+          columns: {
+            productId: false,
+            createdAt: false,
+            updatedAt: false,
           },
-          taxes: {
-            columns: {
-              productId: false,
-              taxId: false,
-            },
-            with: {
-              tax: {
-                columns: {
-                  id: true,
-                  name: true,
-                  rate: true,
-                },
+          with: {
+            category: {
+              columns: {
+                isFourPlusOneEligible: true,
+                isCashbackEligible: true,
               },
             },
           },
         },
-      }),
-      fastify.db
-        .select({
-          id: variationsDB.id,
-          productId: variationsDB.productId,
+        unit: {
+          columns: {
+            id: true,
+            name: true,
+            abbreviation: true,
+            precision: true,
+          },
+        },
+        taxes: {
+          columns: {
+            productId: false,
+            taxId: false,
+          },
+          with: {
+            tax: {
+              columns: {
+                id: true,
+                name: true,
+                rate: true,
+              },
+            },
+          },
+        },
+      },
+    }),
+    fastify.db
+      .select({
+        id: variationsDB.id,
+        productId: variationsDB.productId,
+      })
+      .from(variationsDB)
+      .where(
+        and(inArray(variationsDB.productId, uniqueProductIds), isNull(variationsDB.deletedAt)),
+      ),
+    uniqueVariationIds.length > 0
+      ? fastify.db.query.variationsDB.findMany({
+          where(table, { and, inArray, isNull }) {
+            return and(inArray(table.id, uniqueVariationIds), isNull(table.deletedAt));
+          },
+          columns: {
+            id: true,
+            productId: true,
+            priceCents: true,
+            kitchenName: true,
+            customerDescription: true,
+          },
+          with: {
+            selections: {
+              columns: {
+                variationId: false,
+                variationGroupId: false,
+                variationOptionId: false,
+              },
+              with: {
+                group: {
+                  columns: {
+                    id: true,
+                    name: true,
+                    customerLabel: true,
+                    sortOrder: true,
+                  },
+                },
+                option: {
+                  columns: {
+                    id: true,
+                    name: true,
+                  },
+                },
+              },
+            },
+          },
         })
-        .from(variationsDB)
-        .where(
-          and(inArray(variationsDB.productId, uniqueProductIds), isNull(variationsDB.deletedAt)),
-        ),
-      uniqueVariationIds.length > 0
-        ? fastify.db.query.variationsDB.findMany({
-            where(table, { and, inArray, isNull }) {
-              return and(inArray(table.id, uniqueVariationIds), isNull(table.deletedAt));
-            },
-            columns: {
-              id: true,
-              productId: true,
-              priceCents: true,
-              kitchenName: true,
-              customerDescription: true,
-            },
-            with: {
-              selections: {
-                columns: {
-                  variationId: false,
-                  variationGroupId: false,
-                  variationOptionId: false,
-                },
-                with: {
-                  group: {
-                    columns: {
-                      id: true,
-                      name: true,
-                      customerLabel: true,
-                      sortOrder: true,
-                    },
-                  },
-                  option: {
-                    columns: {
-                      id: true,
-                      name: true,
-                    },
-                  },
-                },
-              },
-            },
-          })
-        : Promise.resolve([]),
-      fastify.db.query.productModifiersDB.findMany({
-        where(table, { inArray }) {
-          return inArray(table.productId, uniqueProductIds);
-        },
-        columns: {
-          productId: true,
-          sortOrder: true,
-        },
-        with: {
-          modifier: {
-            columns: {
-              id: true,
-              name: true,
-              kitchenName: true,
-              multiSelect: true,
-              minSelect: true,
-              maxSelect: true,
-            },
-            with: {
-              options: {
-                columns: {
-                  id: true,
-                  name: true,
-                  kitchenName: true,
-                  priceCents: true,
-                },
+      : Promise.resolve([]),
+    fastify.db.query.productModifiersDB.findMany({
+      where(table, { inArray }) {
+        return inArray(table.productId, uniqueProductIds);
+      },
+      columns: {
+        productId: true,
+        sortOrder: true,
+      },
+      with: {
+        modifier: {
+          columns: {
+            id: true,
+            name: true,
+            kitchenName: true,
+            multiSelect: true,
+            minSelect: true,
+            maxSelect: true,
+          },
+          with: {
+            options: {
+              columns: {
+                id: true,
+                name: true,
+                kitchenName: true,
+                priceCents: true,
               },
             },
           },
         },
-      }),
-    ]);
+      },
+    }),
+    includeAllowedModifierOptions
+      ? fastify.db.query.productModifierOptionsDB.findMany({
+          where(table, { inArray }) {
+            return inArray(table.productId, uniqueProductIds);
+          },
+          columns: {
+            productId: true,
+            modifierId: true,
+            modifierOptionId: true,
+            createdAt: false,
+            updatedAt: false,
+          },
+        })
+      : Promise.resolve([]),
+    includeModifierVisibilityRules
+      ? fastify.db.query.productModifierVisibilityRulesDB.findMany({
+          where(table, { inArray }) {
+            return inArray(table.productId, uniqueProductIds);
+          },
+          columns: {
+            productId: true,
+            modifierId: true,
+            variationGroupId: true,
+            variationOptionId: true,
+            createdAt: false,
+            updatedAt: false,
+          },
+        })
+      : Promise.resolve([]),
+  ]);
 
   if (products.length !== uniqueProductIds.length) {
     throw notFound("product.notFound", "One or more products were not found");
@@ -362,7 +474,19 @@ export async function buildOrderValidationContext(
     products.map((product) => [product.id, product]),
   );
   const selectedVariationsById = new Map<string, SelectedVariationLookup>(
-    selectedVariations.map((variation) => [variation.id, variation]),
+    selectedVariations.map((variation) => [
+      variation.id,
+      {
+        ...variation,
+        selections: variation.selections.map((selection) => ({
+          ...selection,
+          option: {
+            ...selection.option,
+            kitchenName: null,
+          },
+        })),
+      },
+    ]),
   );
 
   const variationIdsByProductId = new Map<string, Set<string>>();
@@ -374,6 +498,25 @@ export async function buildOrderValidationContext(
 
   const productModifierConfigsByProductId = new Map<string, ProductModifierConfig[]>();
   const modifierOptionLookupByProductId = new Map<string, Map<string, ModifierOptionLookupValue>>();
+  const allowedOptionIdsByProductModifier = new Map<string, Set<string>>();
+  const visibilityRulesByProductModifier = new Map<string, ProductModifierVisibilityCondition[]>();
+
+  for (const allowedOption of allowedModifierOptions) {
+    const key = `${allowedOption.productId}:${allowedOption.modifierId}`;
+    const current = allowedOptionIdsByProductModifier.get(key) ?? new Set<string>();
+    current.add(allowedOption.modifierOptionId);
+    allowedOptionIdsByProductModifier.set(key, current);
+  }
+
+  for (const rule of modifierVisibilityRules) {
+    const key = `${rule.productId}:${rule.modifierId}`;
+    const currentRules = visibilityRulesByProductModifier.get(key) ?? [];
+    currentRules.push({
+      variationGroupId: rule.variationGroupId,
+      variationOptionId: rule.variationOptionId,
+    });
+    visibilityRulesByProductModifier.set(key, currentRules);
+  }
 
   for (const productModifier of productModifierLinks) {
     const productModifierConfigs =
@@ -386,13 +529,26 @@ export async function buildOrderValidationContext(
       maxSelect: productModifier.modifier.maxSelect,
       multiSelect: productModifier.modifier.multiSelect,
       sortOrder: productModifier.sortOrder,
+      visibleWhen:
+        visibilityRulesByProductModifier.get(
+          `${productModifier.productId}:${productModifier.modifier.id}`,
+        ) ?? [],
     });
     productModifierConfigsByProductId.set(productModifier.productId, productModifierConfigs);
 
     const modifierOptionLookup =
       modifierOptionLookupByProductId.get(productModifier.productId) ?? new Map();
 
-    for (const modifierOption of productModifier.modifier.options) {
+    const allowedOptionIds =
+      allowedOptionIdsByProductModifier.get(
+        `${productModifier.productId}:${productModifier.modifier.id}`,
+      ) ?? new Set<string>();
+    const modifierOptions =
+      allowedOptionIds.size > 0
+        ? productModifier.modifier.options.filter((option) => allowedOptionIds.has(option.id))
+        : productModifier.modifier.options;
+
+    for (const modifierOption of modifierOptions) {
       modifierOptionLookup.set(modifierOption.id, {
         modifierId: productModifier.modifier.id,
         modifierName: productModifier.modifier.name,
@@ -484,7 +640,7 @@ export function validateAndPrepareOrderPayload(
     }
 
     const selectedVariation = itemInput.variationId
-      ? context.selectedVariationsById.get(itemInput.variationId)
+      ? (context.selectedVariationsById.get(itemInput.variationId) ?? null)
       : null;
 
     if (itemInput.variationId && !selectedVariation) {
@@ -523,6 +679,14 @@ export function validateAndPrepareOrderPayload(
       }
     }
 
+    const productModifiers = context.productModifierConfigsByProductId.get(product.id) ?? [];
+    const visibleProductModifiers = productModifiers.filter((productModifier) =>
+      isProductModifierVisibleForVariation(productModifier, selectedVariation),
+    );
+    const visibleProductModifierIds = new Set(
+      visibleProductModifiers.map((productModifier) => productModifier.id),
+    );
+
     assertUniqueValues(
       itemInput.modifiers.map((modifier) => modifier.modifierOptionId),
       "orderItem.duplicateModifierOption",
@@ -547,9 +711,16 @@ export function validateAndPrepareOrderPayload(
         );
       }
 
+      if (!visibleProductModifierIds.has(modifierOption.modifierId)) {
+        throw validation(
+          "orderItem.hiddenModifier",
+          `Item #${itemPosition} contains a modifier that is not available for the selected variation of product "${product.name}"`,
+        );
+      }
+
       const totalPriceCents = calculateExtendedPriceCents(
         modifierOption.optionPriceCents,
-        selectedModifier.quantity,
+        selectedModifier.quantity * itemInput.quantity,
       );
       modifiersSubtotalCents += totalPriceCents;
 
@@ -581,8 +752,7 @@ export function validateAndPrepareOrderPayload(
       });
     }
 
-    const productModifiers = context.productModifierConfigsByProductId.get(product.id) ?? [];
-    for (const productModifier of productModifiers) {
+    for (const productModifier of visibleProductModifiers) {
       const selectedModifierCount =
         selectedModifierOptionsByModifierId.get(productModifier.id)?.length ?? 0;
 
@@ -629,6 +799,16 @@ export function validateAndPrepareOrderPayload(
       0,
     );
     const subtotalCents = grossTotalCents - taxesCents;
+    const productCategoryIds = [
+      ...new Set([
+        ...(product.categoryId ? [product.categoryId] : []),
+        ...product.categories.map((categoryLink) => categoryLink.categoryId),
+      ]),
+    ];
+    const allProductCategories = [
+      ...(product.category ? [product.category] : []),
+      ...product.categories.map((categoryLink) => categoryLink.category),
+    ];
 
     preparedOrderItems.push({
       item: {
@@ -661,8 +841,10 @@ export function validateAndPrepareOrderPayload(
         variationSelections: buildWorkOrderVariationSelections(selectedVariation ?? null),
         modifiers: workOrderModifierSnapshots,
       },
-      isPromotionEligible: product.category?.isFourPlusOneEligible ?? false,
+      isPromotionEligible: allProductCategories.some((category) => category.isFourPlusOneEligible),
+      isCashbackEligible: allProductCategories.some((category) => category.isCashbackEligible),
       productCategoryId: product.categoryId,
+      productCategoryIds,
       sourceClientItemId: hasManualPromotionMode ? itemInput.clientItemId : null,
       requestedRedeemFreeUnits: hasManualPromotionMode ? itemInput.redeemFreeUnits : 0,
       lineType: "paid",

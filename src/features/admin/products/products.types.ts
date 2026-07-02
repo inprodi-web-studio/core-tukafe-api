@@ -6,6 +6,8 @@ import type {
   Product,
   ProductCategory,
   ProductModifier,
+  ProductModifierOption,
+  ProductModifierVisibilityRule,
   ProductType,
   ProductVariationGroup,
   Supply,
@@ -28,13 +30,12 @@ export interface AdminProductsService {
   create(input: CreateProductServiceParams): Promise<ProductResponse>;
   assignOrganization(productId: string, organizationId: string): Promise<ProductResponse>;
   unassignOrganization(productId: string, organizationId: string): Promise<ProductResponse>;
-  createVariation(
+  createVariation(productId: string, input: CreateProductVariationParams): Promise<ProductResponse>;
+  createModifier(productId: string, input: CreateProductModifierParams): Promise<ProductResponse>;
+  updateModifierOptions(
     productId: string,
-    input: CreateProductVariationParams,
-  ): Promise<ProductResponse>;
-  createModifier(
-    productId: string,
-    input: CreateProductModifierParams,
+    modifierId: string,
+    input: UpdateProductModifierOptionsParams,
   ): Promise<ProductResponse>;
 }
 
@@ -47,6 +48,7 @@ export type ProductImageResponse = Pick<Upload, "id" | "name" | "path" | "visibi
 export interface ProductResponse extends Omit<Product, "categoryId" | "unitId" | "imageUploadId"> {
   unit: Unit;
   category: ProductCategoryResponse | null;
+  categories: ProductCategoryResponse[];
   image: ProductImageResponse | null;
   taxes: Array<Tax>;
   organizations: ProductOrganizationResponse[];
@@ -56,11 +58,14 @@ export interface ProductResponse extends Omit<Product, "categoryId" | "unitId" |
   variations: ProductVariationResponse[];
 }
 
-export interface ProductWithRelations
-  extends Omit<ProductResponse, "taxes" | "variationGroups" | "modifiers" | "organizations"> {
+export interface ProductWithRelations extends Omit<
+  ProductResponse,
+  "taxes" | "variationGroups" | "modifiers" | "organizations" | "categories"
+> {
   taxes: Array<{
     tax: Tax;
   }>;
+  categories: ProductCategoryLinkWithRelations[];
   organizations: ProductOrganizationLinkWithRelations[];
   variationGroups: ProductVariationGroupLinkWithRelations[];
   modifiers: ProductModifierLinkWithRelations[];
@@ -74,12 +79,15 @@ export interface CreateProductServiceParams {
   kitchenDescription?: string | null;
   unitId: string;
   categoryId?: string | null;
+  categoryIds?: string[] | null;
   imageUploadId?: string | null;
+  isFeatured?: boolean;
   productType: ProductType;
   taxIds?: string[] | null;
   organizationIds?: string[] | null;
   modifierIds?: string[] | null;
   modifiers?: string[] | null;
+  modifierConfigs?: CreateProductModifierParams[] | null;
   recipe?: CreateProductRecipeParams;
   variationGroupIds?: string[] | null;
   variations?: CreateProductVariationParams[] | null;
@@ -87,7 +95,31 @@ export interface CreateProductServiceParams {
 
 export interface CreateProductModifierParams {
   modifierId: string;
+  optionIds?: string[] | null;
+  visibleWhen?: ProductModifierVisibilityConditionParams[] | null;
 }
+
+export interface NormalizedProductModifierParams {
+  modifierId: string;
+  optionIds: string[] | null;
+  visibleWhen: ProductModifierVisibilityConditionParams[];
+}
+
+export interface UpdateProductModifierOptionsParams {
+  optionIds: string[] | null;
+  visibleWhen?: ProductModifierVisibilityConditionParams[] | null;
+}
+
+export interface ValidatedProductModifierConfig {
+  modifierId: string;
+  optionIds: string[] | null;
+  visibleWhen: ProductModifierVisibilityConditionParams[];
+}
+
+export type ProductModifierVisibilityConditionParams = Pick<
+  ProductModifierVisibilityRule,
+  "variationGroupId" | "variationOptionId"
+>;
 
 export interface CreateProductRecipeParams {
   description?: string | null;
@@ -188,9 +220,15 @@ export interface ProductVariationGroupResponse extends VariationGroup {
   options: ProductVariationGroupOptionResponse[];
 }
 
-export interface ProductVariationGroupOptionResponse
-  extends Omit<VariationGroupOption, "imageUploadId"> {
+export interface ProductVariationGroupOptionResponse extends Omit<
+  VariationGroupOption,
+  "imageUploadId"
+> {
   image: ProductImageResponse | null;
+}
+
+export interface ProductCategoryLinkWithRelations {
+  category: ProductCategoryResponse;
 }
 
 export interface ProductVariationGroupLinkWithRelations extends ProductVariationGroup {
@@ -198,7 +236,9 @@ export interface ProductVariationGroupLinkWithRelations extends ProductVariation
 }
 
 export interface ProductModifierLinkWithRelations extends ProductModifier {
-  modifier: ProductModifierResponse;
+  modifier: ModifierResponse;
+  allowedOptions: Array<Pick<ProductModifierOption, "modifierOptionId">>;
+  visibilityRules: ProductModifierVisibilityConditionParams[];
 }
 
 export interface ProductOrganizationLinkWithRelations extends OrganizationProduct {
@@ -207,10 +247,14 @@ export interface ProductOrganizationLinkWithRelations extends OrganizationProduc
 
 export type ProductOrganizationResponse = Pick<
   Organization,
-  "id" | "name" | "slug" | "address" | "logo"
+  "id" | "name" | "slug" | "address" | "latitude" | "longitude" | "logo"
 >;
 
-export type ProductModifierResponse = ModifierResponse;
+export type ProductModifierResponse = ModifierResponse & {
+  optionScope: "all" | "subset";
+  allowedOptionIds: string[] | null;
+  visibleWhen: ProductModifierVisibilityConditionParams[];
+};
 
 export interface ProductVariationResponse extends Omit<Variation, "productId" | "combinationKey"> {
   selections: ProductVariationSelectionResponse[];

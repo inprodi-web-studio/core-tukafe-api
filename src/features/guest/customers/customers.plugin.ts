@@ -14,6 +14,7 @@ const guestCustomersServicesPlugin: FastifyPluginAsync = async (fastify) => {
 
   fastify.guest.customers = {
     findOrCreateByPhone: customers.findOrCreateByPhone,
+    identifyWithQr: customers.identifyWithQr,
   };
 };
 

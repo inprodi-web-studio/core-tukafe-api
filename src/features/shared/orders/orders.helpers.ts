@@ -41,6 +41,7 @@ export function normalizeCreateOrderInput({
   items,
   customerId,
   couponCode,
+  cashbackRedeemCents,
   tip,
   ...rest
 }: CreateOrderParams): NormalizedCreateOrderParams {
@@ -73,6 +74,17 @@ export function normalizeCreateOrderInput({
     );
   }
 
+  const normalizedCashbackRedeemCents = cashbackRedeemCents ?? 0;
+  if (
+    !Number.isInteger(normalizedCashbackRedeemCents) ||
+    normalizedCashbackRedeemCents < 0
+  ) {
+    throw validation(
+      "cashback.redemption.invalidAmount",
+      "cashbackRedeemCents must be a non-negative integer",
+    );
+  }
+
   return {
     ...rest,
     customerId: customerId ?? null,
@@ -84,6 +96,7 @@ export function normalizeCreateOrderInput({
         removeWhitespace: true,
         maxLength: 64,
       }) || null,
+    cashbackRedeemCents: normalizedCashbackRedeemCents,
     comment: normalizeNullableText(comment),
     tip: normalizeOrderTipInput(tip),
     items: normalizedItems,

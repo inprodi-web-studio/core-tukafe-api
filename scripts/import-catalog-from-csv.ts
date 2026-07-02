@@ -30,6 +30,7 @@ interface ProductCategoryNode {
   name: string;
   icon: string;
   color: string;
+  sortOrder: number;
   isFourPlusOneEligible: boolean;
   image: unknown;
   children: ProductCategoryNode[];
@@ -85,6 +86,13 @@ interface TaxItem {
   rate: number;
 }
 
+interface CatalogOrganization {
+  id: string;
+  name: string;
+  slug: string;
+  created: boolean;
+}
+
 interface UploadResponseItem {
   id: string;
   name: string;
@@ -103,6 +111,12 @@ interface VariationPayload {
   kitchenDescription?: string | null;
   selections: Array<{ variationGroupId: string; variationOptionId: string }>;
   recipe?: RecipePayload;
+}
+
+interface ProductModifierPayload {
+  modifierId: string;
+  optionIds?: string[];
+  visibleWhen?: Array<{ variationGroupId: string; variationOptionId: string }>;
 }
 
 interface HttpErrorPayload {
@@ -214,12 +228,9 @@ class ApiClient {
               : (body as FormData),
       });
     } catch (error) {
-      throw new Error(
-        formatFetchError(`${method} ${this.baseUrl}${pathname}`, error),
-        {
-          cause: error,
-        },
-      );
+      throw new Error(formatFetchError(`${method} ${this.baseUrl}${pathname}`, error), {
+        cause: error,
+      });
     }
 
     const contentType = response.headers.get("content-type") ?? "";
@@ -307,6 +318,26 @@ const ORDERED_FILES = [
   "14_opciones_modificador.csv",
   "15_componentes_opcion_modificador.csv",
   "16_producto_modificadores.csv",
+] as const;
+
+const OPTIONAL_FILES = ["17_producto_modificador_visibilidad.csv"] as const;
+
+const CATALOG_ORGANIZATIONS = [
+  {
+    name: "Landmark",
+    slug: "landmark",
+    address: "P.º de los Virreyes 45, IS01, 45116 Zapopan, Jal.",
+  },
+  {
+    name: "Metropark",
+    slug: "metropark",
+    address: "Av. Ecónomos 6916, Rinconada del Parque, 45010 Zapopan, Jal.",
+  },
+  {
+    name: "Centro Joyero",
+    slug: "centro-joyero",
+    address: "P.º Hospicio 35A, Centro, 44360 Guadalajara, Jal.",
+  },
 ] as const;
 
 function tryRepairLatin1Mojibake(value: string) {
@@ -403,11 +434,7 @@ function levenshtein(left: string, right: string) {
     for (let j = 1; j <= right.length; j += 1) {
       const cost = left[i - 1] === right[j - 1] ? 0 : 1;
 
-      curr[j] = Math.min(
-        prev[j] + 1,
-        curr[j - 1] + 1,
-        prev[j - 1] + cost,
-      );
+      curr[j] = Math.min(prev[j] + 1, curr[j - 1] + 1, prev[j - 1] + cost);
     }
 
     for (let j = 0; j <= right.length; j += 1) {
@@ -430,11 +457,11 @@ function parseCsv(content: string) {
     const char = text[i];
 
     if (inQuotes) {
-      if (char === "\"") {
+      if (char === '"') {
         const nextChar = text[i + 1];
 
-        if (nextChar === "\"") {
-          field += "\"";
+        if (nextChar === '"') {
+          field += '"';
           i += 1;
         } else {
           inQuotes = false;
@@ -446,7 +473,7 @@ function parseCsv(content: string) {
       continue;
     }
 
-    if (char === "\"") {
+    if (char === '"') {
       inQuotes = true;
       continue;
     }
@@ -490,7 +517,7 @@ function parseCsv(content: string) {
       continue;
     }
 
-    const record: CsvRow = { __line: index + 1 };
+    const record = { __line: index + 1 } as CsvRow;
 
     for (let col = 0; col < headers.length; col += 1) {
       const header = headers[col] ?? `col_${col + 1}`;
@@ -531,6 +558,25 @@ async function loadCsvTable(csvDir: string, fileName: string): Promise<CsvTable>
   };
 }
 
+async function loadOptionalCsvTable(csvDir: string, fileName: string): Promise<CsvTable> {
+  const filePath = path.join(csvDir, fileName);
+
+  try {
+    return await loadCsvTable(csvDir, fileName);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+      throw error;
+    }
+
+    return {
+      fileName,
+      filePath,
+      headers: [],
+      rows: [],
+    };
+  }
+}
+
 function getCell(table: CsvTable, row: CsvRow, key: string, { required = false } = {}) {
   if (!(key in row)) {
     throw new Error(`Falta la columna "${key}" en ${table.fileName}.`);
@@ -539,9 +585,7 @@ function getCell(table: CsvTable, row: CsvRow, key: string, { required = false }
   const value = cleanText(row[key]);
 
   if (required && value.length === 0) {
-    throw new Error(
-      `Campo requerido vacío: ${table.fileName}:${row.__line} columna "${key}".`,
-    );
+    throw new Error(`Campo requerido vacío: ${table.fileName}:${row.__line} columna "${key}".`);
   }
 
   return value;
@@ -639,19 +683,14 @@ function resolveSingle(
   const best = scored[0];
   const second = scored[1];
 
-  if (
-    best &&
-    best.distance <= maxDistance &&
-    (!second || second.distance > best.distance)
-  ) {
+  if (best && best.distance <= maxDistance && (!second || second.distance > best.distance)) {
     return best.candidate;
   }
 
   const includeMatches = normalizedCandidates.filter((candidate) => {
     const candidateCanonical = canonicalize(candidate);
     return (
-      candidateCanonical.includes(sourceCanonical) ||
-      sourceCanonical.includes(candidateCanonical)
+      candidateCanonical.includes(sourceCanonical) || sourceCanonical.includes(candidateCanonical)
     );
   });
 
@@ -745,11 +784,7 @@ function findUnit(units: UnitItem[], unitValue: string) {
   const best = scored[0];
   const second = scored[1];
 
-  if (
-    best &&
-    best.distance <= 1 &&
-    (!second || second.distance > best.distance)
-  ) {
+  if (best && best.distance <= 1 && (!second || second.distance > best.distance)) {
     return best.unit;
   }
 
@@ -787,10 +822,7 @@ function inferUnitPayload(unitValue: string) {
   };
 }
 
-async function fetchPaginated<T>(
-  api: ApiClient,
-  pathname: string,
-): Promise<T[]> {
+async function fetchPaginated<T>(api: ApiClient, pathname: string): Promise<T[]> {
   const items: T[] = [];
   let page = 1;
   const pageSize = 100;
@@ -886,13 +918,10 @@ function resolveCategoryIdByPath(
       2,
     );
 
-    selectedNode =
-      currentNodes.find((node) => node.name === resolvedName) ?? null;
+    selectedNode = currentNodes.find((node) => node.name === resolvedName) ?? null;
 
     if (!selectedNode) {
-      throw new Error(
-        `No se encontró categoría "${part}" en la ruta "${inputPath}" (${context}).`,
-      );
+      throw new Error(`No se encontró categoría "${part}" en la ruta "${inputPath}" (${context}).`);
     }
 
     currentNodes = selectedNode.children ?? [];
@@ -901,12 +930,126 @@ function resolveCategoryIdByPath(
   return selectedNode?.id ?? null;
 }
 
+function resolveCategoryIdsFromCell(
+  input: string,
+  categoryTree: ProductCategoryNode[],
+  context: string,
+) {
+  const categoryPaths = cleanText(input)
+    .split(",")
+    .map((value) => cleanText(value))
+    .filter(Boolean);
+
+  const categoryIds = categoryPaths
+    .map((categoryPath) => resolveCategoryIdByPath(categoryPath, categoryTree, context))
+    .filter((categoryId): categoryId is string => categoryId !== null);
+
+  return [...new Set(categoryIds)];
+}
+
 function getOptionalCell(row: CsvRow, key: string) {
   if (!(key in row)) {
     return "";
   }
 
   return cleanText(row[key]);
+}
+
+function parseOptionalNumberCell(table: CsvTable, row: CsvRow, key: string) {
+  if (!(key in row)) {
+    return undefined;
+  }
+
+  return parseNumber(table, row, key);
+}
+
+function parseOptionalYesNoCell(table: CsvTable, row: CsvRow, key: string, fallback = false) {
+  if (!(key in row)) {
+    return fallback;
+  }
+
+  return parseYesNo(table, row, key, fallback);
+}
+
+function getVariationSelectionPairs(table: CsvTable, row: CsvRow) {
+  if ("nombre_grupo_variacion" in row || "nombre_opcion" in row) {
+    const variationGroupName = getCell(table, row, "nombre_grupo_variacion", { required: true });
+    const optionName = getCell(table, row, "nombre_opcion", { required: true });
+
+    return [{ variationGroupName, optionName }];
+  }
+
+  const indexes = table.headers
+    .map((header) => /^nombre_grupo_variacion_(\d+)$/.exec(header)?.[1])
+    .filter((value): value is string => Boolean(value))
+    .map((value) => Number(value))
+    .sort((left, right) => left - right);
+
+  if (indexes.length === 0) {
+    throw new Error(
+      `Faltan columnas de selección en ${table.fileName}. Usa nombre_grupo_variacion/nombre_opcion o nombre_grupo_variacion_1/nombre_opcion_1.`,
+    );
+  }
+
+  return indexes.flatMap((index) => {
+    const variationGroupName = getOptionalCell(row, `nombre_grupo_variacion_${index}`);
+    const optionName = getOptionalCell(row, `nombre_opcion_${index}`);
+
+    if (!variationGroupName && !optionName) {
+      return [];
+    }
+
+    if (!variationGroupName || !optionName) {
+      throw new Error(
+        `Par de selección incompleto en ${table.fileName}:${row.__line}. Revisa nombre_grupo_variacion_${index}/nombre_opcion_${index}.`,
+      );
+    }
+
+    return [{ variationGroupName, optionName }];
+  });
+}
+
+function getAllowedModifierOptionIds(
+  table: CsvTable,
+  row: CsvRow,
+  modifier: Modifier,
+): string[] | null {
+  const rawAllowedOptions = getOptionalCell(row, "opciones_permitidas");
+
+  if (rawAllowedOptions.length === 0) {
+    return null;
+  }
+
+  const optionNames = rawAllowedOptions
+    .split("|")
+    .map((value) => cleanText(value))
+    .filter(Boolean);
+
+  if (optionNames.length === 0) {
+    throw new Error(
+      `opciones_permitidas no contiene opciones válidas en ${table.fileName}:${row.__line}.`,
+    );
+  }
+
+  const optionIds = optionNames.map((optionName) => {
+    const option = findByName(
+      optionName,
+      modifier.options,
+      "opción de modificador",
+      `${table.fileName}:${row.__line}`,
+    );
+
+    return option.id;
+  });
+  const uniqueOptionIds = new Set(optionIds);
+
+  if (uniqueOptionIds.size !== optionIds.length) {
+    throw new Error(
+      `opciones_permitidas contiene opciones duplicadas para "${modifier.name}" en ${table.fileName}:${row.__line}.`,
+    );
+  }
+
+  return optionIds;
 }
 
 const IMAGE_EXTENSION_TO_MIME: Record<string, string> = {
@@ -1097,7 +1240,10 @@ async function uploadImageAsset({
   form.set("maxHeight", "1600");
   form.append("file", new Blob([fileBuffer], { type: mimeType }), fileName);
 
-  const response = await api.postMultipart<{ data: UploadResponseItem[] }>("/api/admin/uploads", form);
+  const response = await api.postMultipart<{ data: UploadResponseItem[] }>(
+    "/api/admin/uploads",
+    form,
+  );
   const uploadId = response.data[0]?.id;
 
   if (!uploadId) {
@@ -1114,6 +1260,10 @@ function parseArgs() {
 
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index];
+
+    if (!arg) {
+      continue;
+    }
 
     if (!arg.startsWith("--")) {
       continue;
@@ -1142,26 +1292,17 @@ function parseArgs() {
       process.env.API_URL ??
       process.env.PUBLIC_URL ??
       "http://localhost:3000",
-    csvDir:
-      options.get("csv-dir") ??
-      path.resolve(process.cwd(), "templates/importacion-catalogo"),
+    csvDir: options.get("csv-dir") ?? path.resolve(process.cwd(), "templates/importacion-catalogo"),
     email:
-      options.get("email") ??
-      process.env.CATALOG_IMPORT_ADMIN_EMAIL ??
-      "amurillo@inprodi.com.mx",
-    password:
-      options.get("password") ??
-      process.env.CATALOG_IMPORT_ADMIN_PASSWORD ??
-      "Asdf123456",
-    imagesDir:
-      options.get("images-dir") ??
-      process.env.CATALOG_IMPORT_IMAGES_DIR ??
-      "",
+      options.get("email") ?? process.env.CATALOG_IMPORT_ADMIN_EMAIL ?? "amurillo@inprodi.com.mx",
+    password: options.get("password") ?? process.env.CATALOG_IMPORT_ADMIN_PASSWORD ?? "Asdf123456",
+    imagesDir: options.get("images-dir") ?? process.env.CATALOG_IMPORT_IMAGES_DIR ?? "",
   };
 }
 
 function printHelp() {
-  console.log(`
+  console.log(
+    `
 Uso:
   node --import tsx scripts/import-catalog-from-csv.ts [opciones]
 
@@ -1172,7 +1313,8 @@ Opciones:
   --password <password>       Password admin para login
   --images-dir <ruta>         Carpeta de imágenes de categorías/productos (opcional)
   --help                      Mostrar ayuda
-`.trim());
+`.trim(),
+  );
 }
 
 function extractPortFromUrl(url: string) {
@@ -1203,9 +1345,7 @@ function createDbClient() {
     throw new Error("No se encontró DATABASE_URL en el entorno.");
   }
 
-  const rejectUnauthorized = cleanText(
-    process.env.DATABASE_SSL_REJECT_UNAUTHORIZED,
-  ).toLowerCase();
+  const rejectUnauthorized = cleanText(process.env.DATABASE_SSL_REJECT_UNAUTHORIZED).toLowerCase();
   const sslRejectUnauthorized = rejectUnauthorized !== "false";
   const ca = cleanText(process.env.DATABASE_SSL_CA_CERT).replace(/\\n/g, "\n");
 
@@ -1233,107 +1373,86 @@ async function withDbClient<T>(executor: (client: pg.Client) => Promise<T>) {
   }
 }
 
-async function ensurePopupOrganization(ownerUserId: string) {
+async function ensureCatalogOrganizations(ownerUserId: string) {
   return withDbClient(async (client) => {
-    const activeOrganizationsResult = await client.query<{
+    const ensuredOrganizations: CatalogOrganization[] = [];
+    const existingIds = new Set<string>();
+
+    const existingMemberIdsResult = await client.query<{ id: string }>(`select id from "member";`);
+    const existingMemberIds = new Set(existingMemberIdsResult.rows.map((row) => row.id));
+
+    const organizationRowsResult = await client.query<{
       id: string;
       name: string;
       slug: string;
-      deleted_at: string | null;
     }>(
-      `select id, name, slug, deleted_at
-       from "organization"
-       where deleted_at is null
-       order by created_at asc;`,
+      `select id, name, slug
+       from "organization";`,
     );
 
-    const organizations = activeOrganizationsResult.rows;
-    const allSlugRows = await client.query<{ slug: string }>(
-      `select slug from "organization" where slug is not null;`,
-    );
-    const byName = organizations.find(
-      (organization) => canonicalize(organization.name) === canonicalize("Pop Up"),
-    );
-    const bySlug = organizations.find(
-      (organization) => canonicalize(organization.slug) === canonicalize("pop-up"),
-    );
-    const existing = byName ?? bySlug ?? null;
+    for (const organization of organizationRowsResult.rows) {
+      existingIds.add(organization.id);
+    }
 
-    const existingIds = new Set(organizations.map((organization) => organization.id));
-    const existingSlugs = new Set(
-      allSlugRows.rows.map((row) => cleanText(row.slug).toLowerCase()),
-    );
+    for (const target of CATALOG_ORGANIZATIONS) {
+      const existing = organizationRowsResult.rows.find(
+        (organization) => canonicalize(organization.slug) === canonicalize(target.slug),
+      );
 
-    let popupId = existing?.id ?? "";
-    let popupCreated = false;
-    let popupSlug = existing?.slug ?? "";
+      let organizationId = existing?.id ?? "";
+      let created = false;
 
-    // Product create schema currently requires nanoid organization IDs.
-    if (!existing || !isNanoId(existing.id)) {
       if (existing && !isNanoId(existing.id)) {
-        console.warn(
-          `ADVERTENCIA: organización "Pop Up" existente tiene ID no-nanoid (${existing.id}). Se creará una nueva organización compatible para el importador.`,
+        throw new Error(
+          `La sucursal "${target.name}" ya existe con ID no compatible (${existing.id}). El endpoint de productos requiere nanoid; recrea la sucursal con el seed actualizado o ajusta ese ID antes de importar.`,
         );
       }
 
-      do {
-        popupId = createNanoId();
-      } while (existingIds.has(popupId));
+      if (!existing) {
+        do {
+          organizationId = createNanoId();
+        } while (existingIds.has(organizationId));
 
-      let slugIndex = 1;
-      popupSlug = "pop-up";
-      while (existingSlugs.has(popupSlug)) {
-        slugIndex += 1;
-        popupSlug = `pop-up-${slugIndex}`;
+        await client.query(
+          `insert into "organization" (id, name, slug, address, created_at, updated_at)
+           values ($1, $2, $3, $4, now(), now());`,
+          [organizationId, target.name, target.slug, target.address],
+        );
+
+        existingIds.add(organizationId);
+        created = true;
+      } else {
+        await client.query(
+          `update "organization"
+           set name = $1, address = $2, updated_at = now(), deleted_at = null
+           where id = $3;`,
+          [target.name, target.address, organizationId],
+        );
       }
 
-      await client.query(
-        `insert into "organization" (id, name, slug, address, created_at, updated_at)
-         values ($1, $2, $3, $4, now(), now());`,
-        [
-          popupId,
-          "Pop Up",
-          popupSlug,
-          "Sin direccion fisica (sucursal temporal).",
-        ],
-      );
-
-      popupCreated = true;
-    }
-
-    const memberResult = await client.query<{ id: string }>(
-      `select id from "member"
-       where user_id = $1 and organization_id = $2
-       limit 1;`,
-      [ownerUserId, popupId],
-    );
-
-    if (!memberResult.rows[0]) {
       let memberId = createNanoId();
-      // Keep generating until we find a free member ID.
-      // Collision risk is extremely low, this loop is a safety net.
-      while (
-        (
-          await client.query<{ id: string }>(`select id from "member" where id = $1 limit 1;`, [
-            memberId,
-          ])
-        ).rows.length > 0
-      ) {
+      while (existingMemberIds.has(memberId)) {
         memberId = createNanoId();
       }
 
       await client.query(
         `insert into "member" (id, user_id, organization_id, role, created_at, updated_at)
-         values ($1, $2, $3, 'owner', now(), now());`,
-        [memberId, ownerUserId, popupId],
+         values ($1, $2, $3, 'owner', now(), now())
+         on conflict (organization_id, user_id)
+         do update set role = 'owner', updated_at = now();`,
+        [memberId, ownerUserId, organizationId],
       );
+      existingMemberIds.add(memberId);
+
+      ensuredOrganizations.push({
+        id: organizationId,
+        name: target.name,
+        slug: target.slug,
+        created,
+      });
     }
 
-    return {
-      id: popupId,
-      created: popupCreated,
-      slug: popupSlug || existing?.slug || "pop-up",
-    };
+    return ensuredOrganizations;
   });
 }
 
@@ -1399,7 +1518,9 @@ async function loadExistingProductsFromDb() {
 }
 
 function buildProductReferenceResolver(productRows: CsvRow[], table: CsvTable) {
-  const names = productRows.map((row) => getCell(table, row, "nombre_producto", { required: true }));
+  const names = productRows.map((row) =>
+    getCell(table, row, "nombre_producto", { required: true }),
+  );
 
   return {
     names,
@@ -1455,10 +1576,7 @@ function findByName<T extends NamedEntity>(
   return row;
 }
 
-async function ensureCreate<T>(
-  createFn: () => Promise<T>,
-  onConflict: () => Promise<T>,
-) {
+async function ensureCreate<T>(createFn: () => Promise<T>, onConflict: () => Promise<T>) {
   try {
     return await createFn();
   } catch (error) {
@@ -1468,6 +1586,119 @@ async function ensureCreate<T>(
 
     throw error;
   }
+}
+
+async function findExistingProductCategoryByNameAndParent(name: string, parentId: string | null) {
+  return withDbClient(async (client) => {
+    const result = parentId
+      ? await client.query<{ id: string; name: string }>(
+          `select id, name
+             from product_category
+            where name = $1
+              and parent_id = $2
+            limit 2`,
+          [name, parentId],
+        )
+      : await client.query<{ id: string; name: string }>(
+          `select id, name
+             from product_category
+            where name = $1
+              and parent_id is null
+            limit 2`,
+          [name],
+        );
+
+    if (result.rows.length === 1) {
+      return result.rows[0] ?? null;
+    }
+
+    return null;
+  });
+}
+
+async function updateProductCategorySortOrder(categoryId: string, sortOrder: number) {
+  await withDbClient(async (client) => {
+    await client.query(
+      `update product_category
+          set sort_order = $2,
+              updated_at = now()
+        where id = $1
+          and sort_order <> $2`,
+      [categoryId, sortOrder],
+    );
+  });
+}
+
+async function updateProductFeaturedState(productId: string, isFeatured: boolean) {
+  await withDbClient(async (client) => {
+    await client.query(
+      `update product
+          set is_featured = $2,
+              updated_at = now()
+        where id = $1
+          and is_featured <> $2`,
+      [productId, isFeatured],
+    );
+  });
+}
+
+async function loadProductCategoryTreeFromDb(): Promise<ProductCategoryNode[]> {
+  const rows = await withDbClient(async (client) => {
+    const result = await client.query<{
+      id: string;
+      name: string;
+      icon: string;
+      color: string;
+      sortOrder: number;
+      isFourPlusOneEligible: boolean;
+      parentId: string | null;
+    }>(
+      `select id,
+              name,
+              icon,
+              color,
+              sort_order as "sortOrder",
+              is_four_plus_one_eligible as "isFourPlusOneEligible",
+              parent_id as "parentId"
+         from product_category
+        order by sort_order asc, name asc, id asc`,
+    );
+
+    return result.rows;
+  });
+
+  const nodes = new Map<string, ProductCategoryNode>();
+  const parents = new Map<string, string | null>();
+
+  for (const row of rows) {
+    nodes.set(row.id, {
+      id: row.id,
+      name: row.name,
+      icon: row.icon,
+      color: row.color,
+      sortOrder: row.sortOrder,
+      isFourPlusOneEligible: row.isFourPlusOneEligible,
+      image: null,
+      children: [],
+    });
+    parents.set(row.id, row.parentId);
+  }
+
+  const roots: ProductCategoryNode[] = [];
+
+  for (const [id, node] of nodes) {
+    const parentId = parents.get(id) ?? null;
+    const parent = parentId ? nodes.get(parentId) : null;
+
+    if (parent) {
+      parent.children.push(node);
+      continue;
+    }
+
+    roots.push(node);
+  }
+
+  return roots;
 }
 
 async function main() {
@@ -1500,7 +1731,7 @@ async function main() {
   console.log(`CSV DIR: ${config.csvDir}`);
   console.log(`IMAGES DIR: ${config.imagesDir ?? "(no configurado)"}`);
   console.log(`Admin: ${config.email}`);
-  console.log(`Org objetivo: Pop Up`);
+  console.log(`Orgs objetivo: Landmark, Metropark, Centro Joyero`);
   console.log(`Tax obligatorio: IVA`);
   console.log("------------------------------------------");
 
@@ -1513,12 +1744,14 @@ async function main() {
     );
   }
 
-  const csvTables = await Promise.all(
-    ORDERED_FILES.map((fileName) => loadCsvTable(config.csvDir, fileName)),
-  );
+  const [requiredCsvTables, optionalCsvTables] = await Promise.all([
+    Promise.all(ORDERED_FILES.map((fileName) => loadCsvTable(config.csvDir, fileName))),
+    Promise.all(OPTIONAL_FILES.map((fileName) => loadOptionalCsvTable(config.csvDir, fileName))),
+  ]);
+  const csvTables = [...requiredCsvTables, ...optionalCsvTables];
 
   const tableByName = new Map(csvTables.map((table) => [table.fileName, table]));
-  const table = (fileName: (typeof ORDERED_FILES)[number]) => {
+  const table = (fileName: (typeof ORDERED_FILES)[number] | (typeof OPTIONAL_FILES)[number]) => {
     const found = tableByName.get(fileName);
     if (!found) {
       throw new Error(`No se encontró la tabla ${fileName}.`);
@@ -1549,12 +1782,14 @@ async function main() {
   const user = await api.login(config.email, config.password);
   console.log(`Sesión iniciada con: ${user.email}`);
 
-  const popupOrganization = await ensurePopupOrganization(user.id);
-  console.log(
-    popupOrganization.created
-      ? `Organización creada: Pop Up (${popupOrganization.id})`
-      : `Organización encontrada: Pop Up (${popupOrganization.id})`,
-  );
+  const catalogOrganizations = await ensureCatalogOrganizations(user.id);
+  for (const organization of catalogOrganizations) {
+    console.log(
+      organization.created
+        ? `Organización creada: ${organization.name} (${organization.id})`
+        : `Organización actualizada: ${organization.name} (${organization.id})`,
+    );
+  }
 
   const ivaTax = await ensureIvaTax(api);
   console.log(
@@ -1563,14 +1798,14 @@ async function main() {
       : `Impuesto encontrado: IVA (${ivaTax.id})`,
   );
 
-  const organizationIds = [popupOrganization.id];
+  const organizationIds = catalogOrganizations.map((organization) => organization.id);
 
   // 1) Product categories
   console.log("1/16 Importando categorías de producto...");
   const productCategoriesTable = table("01_categorias_producto.csv");
-  let productCategoryTree = await api.get<{
-    data: ProductCategoryNode[];
-  }>("/api/admin/products/categories");
+  let productCategoryTree = {
+    data: await loadProductCategoryTreeFromDb(),
+  };
   const productCategoryNameToId = new Map<string, string>();
   const existingCategoryKeys = new Set<string>();
   for (const item of flattenProductCategories(productCategoryTree.data)) {
@@ -1611,12 +1846,20 @@ async function main() {
       const parentNameRaw = getCell(productCategoriesTable, row, "categoria_padre");
       const icon = getCell(productCategoriesTable, row, "icono", { required: true });
       const color = getCell(productCategoriesTable, row, "color_hex", { required: true });
+      const sortOrder =
+        parseOptionalNumberCell(productCategoriesTable, row, "orden_categoria") ?? 0;
       const isFourPlusOneEligible = parseYesNo(
         productCategoriesTable,
         row,
         "aplica_4_mas_1",
         false,
       );
+
+      if (!Number.isInteger(sortOrder) || sortOrder < 0) {
+        throw new Error(
+          `orden_categoria inválido en ${productCategoriesTable.fileName}:${row.__line}. Debe ser un entero mayor o igual a 0.`,
+        );
+      }
 
       let parentId: string | null = null;
 
@@ -1637,9 +1880,14 @@ async function main() {
 
       const categoryKey = buildCategoryKey(name, parentId);
       if (existingCategoryKeys.has(categoryKey)) {
+        const existingCategory = await findExistingProductCategoryByNameAndParent(name, parentId);
+        if (existingCategory) {
+          await updateProductCategorySortOrder(existingCategory.id, sortOrder);
+        }
+
         if (imagePath) {
           console.log(
-            `  - Imagen omitida para categoría "${name}" porque ya existe y no se actualiza en importación.`,
+            `  - Categoría "${name}" ya existe: orden actualizado, imagen omitida porque no se actualiza en importación.`,
           );
         }
         pendingProductCategories.splice(index, 1);
@@ -1664,6 +1912,7 @@ async function main() {
             name,
             icon,
             color,
+            sortOrder,
             isFourPlusOneEligible,
             parentId,
             imageUploadId,
@@ -1691,6 +1940,12 @@ async function main() {
             return { id: entry.id, name: entry.name };
           }
 
+          const existingFromDb = await findExistingProductCategoryByNameAndParent(name, parentId);
+
+          if (existingFromDb) {
+            return existingFromDb;
+          }
+
           throw new Error(
             `Conflicto creando categoría "${name}" y no se pudo identificar el registro existente.`,
           );
@@ -1700,7 +1955,9 @@ async function main() {
       productCategoryNameToId.set(created.name, created.id);
       existingCategoryKeys.add(categoryKey);
       if (imagePath && imageUploadId) {
-        console.log(`  + Imagen asignada a categoría "${created.name}" (${path.basename(imagePath)}).`);
+        console.log(
+          `  + Imagen asignada a categoría "${created.name}" (${path.basename(imagePath)}).`,
+        );
       }
       pendingProductCategories.splice(index, 1);
       progressed = true;
@@ -1710,19 +1967,15 @@ async function main() {
       const unresolved = pendingProductCategories
         .map((row) => getCell(productCategoriesTable, row, "nombre_categoria"))
         .join(", ");
-      throw new Error(
-        `No fue posible resolver categorías con padre pendiente: ${unresolved}`,
-      );
+      throw new Error(`No fue posible resolver categorías con padre pendiente: ${unresolved}`);
     }
   }
 
-  productCategoryTree = await api.get<{ data: ProductCategoryNode[] }>(
-    "/api/admin/products/categories",
-  );
+  productCategoryTree = {
+    data: await loadProductCategoryTreeFromDb(),
+  };
   const flatProductCategories = flattenProductCategories(productCategoryTree.data);
-  console.log(
-    `  OK categorías producto: ${flatProductCategories.length} disponibles.`,
-  );
+  console.log(`  OK categorías producto: ${flatProductCategories.length} disponibles.`);
 
   // 2) Ingredient categories
   console.log("2/16 Importando categorías de ingredientes...");
@@ -1767,19 +2020,14 @@ async function main() {
   // 3) Supply categories
   console.log("3/16 Importando categorías de insumos...");
   const supplyCategoriesTable = table("05_categorias_insumo.csv");
-  let supplyCategories = await fetchPaginated<NamedEntity>(
-    api,
-    "/api/admin/supplies/categories",
-  );
+  let supplyCategories = await fetchPaginated<NamedEntity>(api, "/api/admin/supplies/categories");
 
   for (const row of supplyCategoriesTable.rows) {
     const name = getCell(supplyCategoriesTable, row, "nombre_categoria", { required: true });
     const icon = getCell(supplyCategoriesTable, row, "icono", { required: true });
     const color = getCell(supplyCategoriesTable, row, "color_hex", { required: true });
 
-    const exists = supplyCategories.find(
-      (item) => canonicalize(item.name) === canonicalize(name),
-    );
+    const exists = supplyCategories.find((item) => canonicalize(item.name) === canonicalize(name));
     if (exists) {
       continue;
     }
@@ -1797,10 +2045,7 @@ async function main() {
     supplyCategories.push(created);
   }
 
-  supplyCategories = await fetchPaginated<NamedEntity>(
-    api,
-    "/api/admin/supplies/categories",
-  );
+  supplyCategories = await fetchPaginated<NamedEntity>(api, "/api/admin/supplies/categories");
   console.log(`  OK categorías insumo: ${supplyCategories.length}.`);
 
   // 4) Ingredients
@@ -1849,16 +2094,16 @@ async function main() {
 
   for (const row of ingredientsTable.rows) {
     const name = getCell(ingredientsTable, row, "nombre_ingrediente", { required: true });
-    const categoryName = getCell(ingredientsTable, row, "categoria_ingrediente", { required: true });
+    const categoryName = getCell(ingredientsTable, row, "categoria_ingrediente", {
+      required: true,
+    });
     const unitValue = getCell(ingredientsTable, row, "unidad_base", { required: true });
     const baseCostPerUnit = parseNumber(ingredientsTable, row, "costo_por_unidad", {
       required: true,
     });
     const description = toNullable(getCell(ingredientsTable, row, "descripcion"));
 
-    const exists = ingredients.find(
-      (item) => canonicalize(item.name) === canonicalize(name),
-    );
+    const exists = ingredients.find((item) => canonicalize(item.name) === canonicalize(name));
     if (exists) {
       continue;
     }
@@ -1869,10 +2114,7 @@ async function main() {
       "categoría de ingrediente",
       `${ingredientsTable.fileName}:${row.__line}`,
     );
-    const unit = await ensureUnit(
-      unitValue,
-      `${ingredientsTable.fileName}:${row.__line}`,
-    );
+    const unit = await ensureUnit(unitValue, `${ingredientsTable.fileName}:${row.__line}`);
 
     const created = await ensureCreate(
       () =>
@@ -1891,19 +2133,13 @@ async function main() {
     ingredients.push(created);
   }
 
-  ingredients = await fetchPaginated<{ id: string; name: string }>(
-    api,
-    "/api/admin/ingredients",
-  );
+  ingredients = await fetchPaginated<{ id: string; name: string }>(api, "/api/admin/ingredients");
   console.log(`  OK ingredientes: ${ingredients.length}.`);
 
   // 5) Supplies
   console.log("5/16 Importando insumos...");
   const suppliesTable = table("06_insumos.csv");
-  let supplies = await fetchPaginated<{ id: string; name: string }>(
-    api,
-    "/api/admin/supplies",
-  );
+  let supplies = await fetchPaginated<{ id: string; name: string }>(api, "/api/admin/supplies");
 
   for (const row of suppliesTable.rows) {
     const name = getCell(suppliesTable, row, "nombre_insumo", { required: true });
@@ -1925,10 +2161,7 @@ async function main() {
       "categoría de insumo",
       `${suppliesTable.fileName}:${row.__line}`,
     );
-    const unit = await ensureUnit(
-      unitValue,
-      `${suppliesTable.fileName}:${row.__line}`,
-    );
+    const unit = await ensureUnit(unitValue, `${suppliesTable.fileName}:${row.__line}`);
 
     const created = await ensureCreate(
       () =>
@@ -1951,10 +2184,7 @@ async function main() {
   console.log("6/16 Importando grupos de variación y opciones...");
   const variationGroupsTable = table("07_grupos_variacion.csv");
   const variationOptionsTable = table("08_opciones_grupo_variacion.csv");
-  let variationGroups = await fetchPaginated<VariationGroup>(
-    api,
-    "/api/admin/variations/groups",
-  );
+  let variationGroups = await fetchPaginated<VariationGroup>(api, "/api/admin/variations/groups");
 
   const optionsByGroup = new Map<string, CsvRow[]>();
   for (const row of variationOptionsTable.rows) {
@@ -1995,9 +2225,7 @@ async function main() {
     const rawOptions = optionsByGroup.get(name) ?? [];
 
     if (rawOptions.length === 0) {
-      throw new Error(
-        `El grupo "${name}" no tiene opciones en ${variationOptionsTable.fileName}.`,
-      );
+      throw new Error(`El grupo "${name}" no tiene opciones en ${variationOptionsTable.fileName}.`);
     }
 
     const optionsPayload = [...rawOptions]
@@ -2008,9 +2236,7 @@ async function main() {
       })
       .map((row, index) => ({
         name: getCell(variationOptionsTable, row, "nombre_opcion", { required: true }),
-        customerDescription: toNullable(
-          getCell(variationOptionsTable, row, "descripcion_cliente"),
-        ),
+        customerDescription: toNullable(getCell(variationOptionsTable, row, "descripcion_cliente")),
         sortOrder: parseNumber(variationOptionsTable, row, "orden_opcion") ?? index,
       }));
 
@@ -2022,20 +2248,14 @@ async function main() {
           options: optionsPayload,
         }),
       async () => {
-        const refreshed = await fetchPaginated<VariationGroup>(
-          api,
-          "/api/admin/variations/groups",
-        );
+        const refreshed = await fetchPaginated<VariationGroup>(api, "/api/admin/variations/groups");
         const found = findByName(name, refreshed, "grupo de variación", "conflicto");
         return refreshed.find((item) => item.id === found.id) as VariationGroup;
       },
     );
   }
 
-  variationGroups = await fetchPaginated<VariationGroup>(
-    api,
-    "/api/admin/variations/groups",
-  );
+  variationGroups = await fetchPaginated<VariationGroup>(api, "/api/admin/variations/groups");
   console.log(`  OK grupos variación: ${variationGroups.length}.`);
 
   // 7) Modifiers + options + option components
@@ -2047,7 +2267,9 @@ async function main() {
 
   const modifierOptionsRowsByModifier = new Map<string, CsvRow[]>();
   for (const row of modifierOptionsTable.rows) {
-    const modifierName = getCell(modifierOptionsTable, row, "nombre_modificador", { required: true });
+    const modifierName = getCell(modifierOptionsTable, row, "nombre_modificador", {
+      required: true,
+    });
     const resolvedModifierName = resolveSingle(
       modifierName,
       modifiersTable.rows.map((entry) =>
@@ -2091,7 +2313,9 @@ async function main() {
     const minSelect = parseNumber(modifiersTable, row, "minimo_selecciones") ?? 0;
     const maxSelectRaw = getCell(modifiersTable, row, "maximo_selecciones");
     const maxSelect =
-      maxSelectRaw.length === 0 ? null : Number(parseNumber(modifiersTable, row, "maximo_selecciones"));
+      maxSelectRaw.length === 0
+        ? null
+        : Number(parseNumber(modifiersTable, row, "maximo_selecciones"));
 
     const exists = modifiers.find((item) => canonicalize(item.name) === canonicalize(name));
     if (exists) {
@@ -2252,6 +2476,7 @@ async function main() {
   const variationSelectionsTable = table("11_selecciones_variacion_producto.csv");
   const productRecipesTable = table("12_recetas_producto.csv");
   const productModifiersTable = table("16_producto_modificadores.csv");
+  const productModifierVisibilityTable = table("17_producto_modificador_visibilidad.csv");
 
   const productRefResolver = buildProductReferenceResolver(productsTable.rows, productsTable);
   const productNames = productRefResolver.names;
@@ -2312,7 +2537,9 @@ async function main() {
 
   const modifierRowsByProduct = new Map<string, CsvRow[]>();
   for (const row of productModifiersTable.rows) {
-    const rawProductName = getCell(productModifiersTable, row, "nombre_producto", { required: true });
+    const rawProductName = getCell(productModifiersTable, row, "nombre_producto", {
+      required: true,
+    });
     const products = productRefResolver.resolveManyForModifier(
       rawProductName,
       `${productModifiersTable.fileName}:${row.__line}`,
@@ -2322,6 +2549,27 @@ async function main() {
       const rows = modifierRowsByProduct.get(productName) ?? [];
       rows.push(row);
       modifierRowsByProduct.set(productName, rows);
+    }
+  }
+
+  const visibilityRowsByProductModifier = new Map<string, CsvRow[]>();
+  for (const row of productModifierVisibilityTable.rows) {
+    const rawProductName = getCell(productModifierVisibilityTable, row, "nombre_producto", {
+      required: true,
+    });
+    const modifierName = getCell(productModifierVisibilityTable, row, "nombre_modificador", {
+      required: true,
+    });
+    const products = productRefResolver.resolveManyForModifier(
+      rawProductName,
+      `${productModifierVisibilityTable.fileName}:${row.__line}`,
+    );
+
+    for (const productName of products) {
+      const key = `${productName}\u0000${modifierName}`;
+      const rows = visibilityRowsByProductModifier.get(key) ?? [];
+      rows.push(row);
+      visibilityRowsByProductModifier.set(key, rows);
     }
   }
 
@@ -2417,10 +2665,13 @@ async function main() {
       );
     }
 
+    const isFeatured = parseOptionalYesNoCell(productsTable, productRow, "destacado", false);
     const existing = existingProducts.find(
       (product) => canonicalize(product.name) === canonicalize(productName),
     );
     if (existing) {
+      await updateProductFeaturedState(existing.id, isFeatured);
+
       if (imagePath) {
         console.log(
           `  - Imagen omitida para "${productName}" porque el producto ya existe (solo se carga imagen en creación).`,
@@ -2431,22 +2682,21 @@ async function main() {
     }
 
     const categoryPath = getCell(productsTable, productRow, "ruta_categoria_producto");
-    const categoryId = resolveCategoryIdByPath(
+    const categoryIds = resolveCategoryIdsFromCell(
       categoryPath,
       productCategoryTree.data,
       `${productsTable.fileName}:${productRow.__line}`,
     );
+    const categoryId = categoryIds[0] ?? null;
     const unitValue = getCell(productsTable, productRow, "unidad_venta", { required: true });
-    const unit = await ensureUnit(
-      unitValue,
-      `${productsTable.fileName}:${productRow.__line}`,
-    );
+    const unit = await ensureUnit(unitValue, `${productsTable.fileName}:${productRow.__line}`);
 
     const linkedVariationGroupRows = variationGroupRowsByProduct.get(productName) ?? [];
     const variationGroupIds = [...linkedVariationGroupRows]
       .sort((left, right) => {
         const leftOrder = parseNumber(productVariationGroupsTable, left, "orden_en_producto") ?? 0;
-        const rightOrder = parseNumber(productVariationGroupsTable, right, "orden_en_producto") ?? 0;
+        const rightOrder =
+          parseNumber(productVariationGroupsTable, right, "orden_en_producto") ?? 0;
         return leftOrder - rightOrder;
       })
       .map((row) => {
@@ -2493,12 +2743,9 @@ async function main() {
       }
 
       const relatedSelectionRows = selectionRows.filter((selectionRow) => {
-        const aliasSelection = getCell(
-          variationSelectionsTable,
-          selectionRow,
-          "alias_variacion",
-          { required: true },
-        );
+        const aliasSelection = getCell(variationSelectionsTable, selectionRow, "alias_variacion", {
+          required: true,
+        });
         const resolvedAlias = resolveSingle(
           aliasSelection,
           variationAliases,
@@ -2509,37 +2756,43 @@ async function main() {
         return canonicalize(resolvedAlias) === canonicalize(alias);
       });
 
-      const selectionsPayload = relatedSelectionRows.map((selectionRow) => {
-        const variationGroupName = getCell(
-          variationSelectionsTable,
-          selectionRow,
-          "nombre_grupo_variacion",
-          { required: true },
-        );
-        const variationGroup = findByName(
-          variationGroupName,
-          variationGroups,
-          "grupo de variación",
-          `${variationSelectionsTable.fileName}:${selectionRow.__line}`,
-        ) as VariationGroup;
-        const optionName = getCell(variationSelectionsTable, selectionRow, "nombre_opcion", {
-          required: true,
-        });
-        const option = findByName(
-          optionName,
-          variationGroup.options as Array<{ id: string; name: string }>,
-          "opción de variación",
-          `${variationSelectionsTable.fileName}:${selectionRow.__line}`,
-        ) as VariationOption;
+      const seenSelectionGroupIds = new Set<string>();
+      const selectionsPayload = relatedSelectionRows.flatMap((selectionRow) => {
+        const selectionPairs = getVariationSelectionPairs(variationSelectionsTable, selectionRow);
 
-        return {
-          variationGroupId: variationGroup.id,
-          variationOptionId: option.id,
-        };
+        return selectionPairs.map(({ variationGroupName, optionName }) => {
+          const variationGroup = findByName(
+            variationGroupName,
+            variationGroups,
+            "grupo de variación",
+            `${variationSelectionsTable.fileName}:${selectionRow.__line}`,
+          ) as VariationGroup;
+          const option = findByName(
+            optionName,
+            variationGroup.options as Array<{ id: string; name: string }>,
+            "opción de variación",
+            `${variationSelectionsTable.fileName}:${selectionRow.__line}`,
+          ) as VariationOption;
+
+          if (seenSelectionGroupIds.has(variationGroup.id)) {
+            throw new Error(
+              `Selección duplicada para el grupo "${variationGroup.name}" en ${variationSelectionsTable.fileName}:${selectionRow.__line} variación "${alias}".`,
+            );
+          }
+
+          seenSelectionGroupIds.add(variationGroup.id);
+
+          return {
+            variationGroupId: variationGroup.id,
+            variationOptionId: option.id,
+          };
+        });
       });
 
       const variationRecipeRows = recipeRows.filter((recipeRow) => {
-        const level = getCell(productRecipesTable, recipeRow, "nivel_receta", { required: true }).toLowerCase();
+        const level = getCell(productRecipesTable, recipeRow, "nivel_receta", {
+          required: true,
+        }).toLowerCase();
         if (level !== "variacion" && level !== "variación") {
           return false;
         }
@@ -2580,16 +2833,15 @@ async function main() {
     });
 
     const productRecipeRows = recipeRows.filter((recipeRow) => {
-      const level = getCell(productRecipesTable, recipeRow, "nivel_receta", { required: true }).toLowerCase();
+      const level = getCell(productRecipesTable, recipeRow, "nivel_receta", {
+        required: true,
+      }).toLowerCase();
       return level === "producto";
     });
-    const baseRecipe = buildRecipe(
-      productRecipeRows,
-      `producto ${productName}`,
-    );
+    const baseRecipe = buildRecipe(productRecipeRows, `producto ${productName}`);
 
     const modifierLinkRows = modifierRowsByProduct.get(productName) ?? [];
-    const modifierIds = [...modifierLinkRows]
+    const modifierConfigs: ProductModifierPayload[] = [...modifierLinkRows]
       .sort((left, right) => {
         const leftOrder = parseNumber(productModifiersTable, left, "orden_en_producto") ?? 0;
         const rightOrder = parseNumber(productModifiersTable, right, "orden_en_producto") ?? 0;
@@ -2599,18 +2851,67 @@ async function main() {
         const modifierName = getCell(productModifiersTable, modifierRow, "nombre_modificador", {
           required: true,
         });
-        return findByName(
+        const modifier = findByName(
           modifierName,
           modifiers,
           "modificador",
           `${productModifiersTable.fileName}:${modifierRow.__line}`,
-        ).id;
+        ) as Modifier;
+        const optionIds = getAllowedModifierOptionIds(productModifiersTable, modifierRow, modifier);
+        const visibilityRows =
+          visibilityRowsByProductModifier.get(`${productName}\u0000${modifierName}`) ?? [];
+        const visibleWhen = visibilityRows.map((visibilityRow) => {
+          const variationGroupName = getCell(
+            productModifierVisibilityTable,
+            visibilityRow,
+            "nombre_grupo_variacion",
+            { required: true },
+          );
+          const optionName = getCell(
+            productModifierVisibilityTable,
+            visibilityRow,
+            "nombre_opcion_variacion",
+            {
+              required: true,
+            },
+          );
+          const variationGroup = findByName(
+            variationGroupName,
+            variationGroups,
+            "grupo de variación",
+            `${productModifierVisibilityTable.fileName}:${visibilityRow.__line}`,
+          );
+          const option = findByName(
+            optionName,
+            variationGroup.options as Array<{ id: string; name: string }>,
+            "opción de variación",
+            `${productModifierVisibilityTable.fileName}:${visibilityRow.__line}`,
+          );
+
+          return {
+            variationGroupId: variationGroup.id,
+            variationOptionId: option.id,
+          };
+        });
+        const visibilityKeys = visibleWhen.map(
+          ({ variationGroupId, variationOptionId }) => `${variationGroupId}:${variationOptionId}`,
+        );
+        if (new Set(visibilityKeys).size !== visibilityKeys.length) {
+          throw new Error(
+            `Condición de visibilidad duplicada para "${productName}" / "${modifierName}" en ${productModifierVisibilityTable.fileName}.`,
+          );
+        }
+
+        return {
+          modifierId: modifier.id,
+          ...(optionIds ? { optionIds } : {}),
+          ...(visibleWhen.length > 0 ? { visibleWhen } : {}),
+        };
       });
 
     const price = parseNumber(productsTable, productRow, "precio_mxn");
     const finalPrice = variationPayloads.length > 0 ? undefined : price;
-    const finalRecipe =
-      variationPayloads.length > 0 ? undefined : baseRecipe;
+    const finalRecipe = variationPayloads.length > 0 ? undefined : baseRecipe;
     const imageUploadId = imagePath
       ? await uploadImageAsset({
           api,
@@ -2627,14 +2928,16 @@ async function main() {
       kitchenDescription: toNullable(getCell(productsTable, productRow, "descripcion_cocina")),
       unitId: unit.id,
       categoryId,
+      ...(categoryIds.length > 0 ? { categoryIds } : {}),
       imageUploadId,
       taxIds: [ivaTax.id],
       organizationIds,
-      ...(modifierIds.length > 0 ? { modifierIds } : {}),
+      ...(modifierConfigs.length > 0 ? { modifierConfigs } : {}),
       ...(variationGroupIds.length > 0 ? { variationGroupIds } : {}),
       ...(variationPayloads.length > 0 ? { variations: variationPayloads } : {}),
       ...(finalRecipe ? { recipe: finalRecipe } : {}),
       productType,
+      isFeatured,
     };
 
     const created = await ensureCreate(
@@ -2662,7 +2965,9 @@ async function main() {
   console.log("5) Insumos");
   console.log("6) Grupos de variación + opciones");
   console.log("7) Modificadores + opciones + componentes");
-  console.log("8) Productos + grupos + variaciones + selecciones + recetas + producto-modificadores");
+  console.log(
+    "8) Productos + grupos + variaciones + selecciones + recetas + producto-modificadores",
+  );
 }
 
 main().catch((error) => {

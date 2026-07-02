@@ -17,10 +17,10 @@ const apiKey = pgTable(
     name: text("name"),
     start: text("start"),
     prefix: text("prefix"),
+    configId: text("config_id"),
     key: text("key").notNull(),
-    userId: text("user_id")
-      .notNull()
-      .references(() => userDB.id, { onDelete: "cascade" }),
+    referenceId: text("reference_id"),
+    userId: text("user_id").references(() => userDB.id, { onDelete: "cascade" }),
     refillInterval: integer("refill_interval"),
     refillAmount: integer("refill_amount"),
     lastRefillAt: timestamp("last_refill_at", { mode: "date" }),

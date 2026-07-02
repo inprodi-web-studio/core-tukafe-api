@@ -35,6 +35,7 @@ export interface WorkOrderVariationSelectionSnapshot {
   groupCustomerLabel: string | null;
   optionId: string;
   optionName: string;
+  optionKitchenName?: string | null;
 }
 
 const workOrders = pgTable(

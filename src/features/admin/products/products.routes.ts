@@ -5,6 +5,7 @@ import { createModifierRoutes } from "./createModifier";
 import { createVariationRoutes } from "./createVariation";
 import { listRoutes } from "./list";
 import { unassignOrganizationRoutes } from "./unassignOrganization";
+import { updateModifierOptionsRoutes } from "./updateModifierOptions";
 
 export async function adminProductsRoutes(server: FastifyInstance) {
   await server.register(listRoutes);
@@ -13,4 +14,5 @@ export async function adminProductsRoutes(server: FastifyInstance) {
   await server.register(unassignOrganizationRoutes);
   await server.register(createVariationRoutes);
   await server.register(createModifierRoutes);
+  await server.register(updateModifierOptionsRoutes);
 }

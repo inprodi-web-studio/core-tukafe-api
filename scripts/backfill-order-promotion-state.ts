@@ -51,9 +51,18 @@ async function backfillPromotionState() {
     const eligibleProductsResult = await client.query<{ id: string }>(`
       select p.id
       from product p
-      inner join product_category pc on pc.id = p.category_id
+      left join product_category pc on pc.id = p.category_id
       where p.deleted_at is null
-        and pc.is_four_plus_one_eligible = true
+        and (
+          pc.is_four_plus_one_eligible = true
+          or exists (
+            select 1
+            from product_category_link pcl
+            inner join product_category linked_pc on linked_pc.id = pcl.category_id
+            where pcl.product_id = p.id
+              and linked_pc.is_four_plus_one_eligible = true
+          )
+        )
     `);
 
     const eligibleProductIds = new Set(eligibleProductsResult.rows.map((row) => row.id));

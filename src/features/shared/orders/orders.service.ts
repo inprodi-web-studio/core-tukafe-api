@@ -1,6 +1,8 @@
 import {
   couponPeriodUsagesDB,
   couponRedemptionsDB,
+  customerCashbackAccountsDB,
+  customerCashbackLedgerDB,
   customersDB,
   customerOrderPromotionStatesDB,
   orderPaymentAttemptsDB,
@@ -75,6 +77,26 @@ interface CalculatedOrderPayload {
   nextPromotionState: OrderPromotionState | null;
   tipCents: number;
   grandTotalCents: number;
+  amountDueCents: number;
+  cashbackBalanceCents: number | null;
+  cashbackRedemptionCents: number;
+  cashbackEarnedCents: number;
+  cashbackEligiblePaidCents: number;
+}
+
+interface OrderCalculationOptions {
+  allowCashbackRedemption?: boolean;
+  exposeCashbackBalance?: boolean;
+}
+
+interface CreateOrderOptions extends OrderCalculationOptions {
+  requirePaymentForPositiveAmountDue?: boolean;
+}
+
+interface CashbackAccountSnapshot {
+  balanceCents: number;
+  totalEarnedCents: number;
+  totalRedeemedCents: number;
 }
 
 interface OrderItemResponseMetadata {
@@ -246,7 +268,7 @@ async function loadCouponByCode({
   return coupon;
 }
 
-async function loadOrder(
+export async function loadOrder(
   fastify: FastifyInstance,
   id: string,
   safe = false,
@@ -293,8 +315,9 @@ function normalizePaymentAttemptResponse(
 ): OrderPaymentAttemptResponse {
   return {
     ...paymentAttempt,
-    provider: "zettle",
+    provider: paymentAttempt.provider as OrderPaymentAttemptResponse["provider"],
     status: paymentAttempt.status as OrderPaymentAttemptResponse["status"],
+    customerId: paymentAttempt.customerId ?? null,
     orderId: paymentAttempt.orderId ?? null,
     transactionId: paymentAttempt.transactionId ?? null,
     referenceNumber: paymentAttempt.referenceNumber ?? null,
@@ -302,13 +325,14 @@ function normalizePaymentAttemptResponse(
     entryMode: paymentAttempt.entryMode ?? null,
     authorizationCode: paymentAttempt.authorizationCode ?? null,
     obfuscatedPan: paymentAttempt.obfuscatedPan ?? null,
+    orderPayload: paymentAttempt.orderPayload ?? null,
     rawResponse: paymentAttempt.rawResponse ?? null,
     failureCode: paymentAttempt.failureCode ?? null,
     failureMessage: paymentAttempt.failureMessage ?? null,
   };
 }
 
-async function loadPaymentAttempt(
+export async function loadPaymentAttempt(
   fastify: FastifyInstance,
   paymentAttemptId: string,
 ): Promise<OrderPaymentAttemptResponse> {
@@ -333,6 +357,7 @@ async function lockPaymentAttempt(
     select
       id,
       organization_id as "organizationId",
+      customer_id as "customerId",
       order_id as "orderId",
       provider,
       reference,
@@ -345,6 +370,7 @@ async function lockPaymentAttempt(
       entry_mode as "entryMode",
       authorization_code as "authorizationCode",
       obfuscated_pan as "obfuscatedPan",
+      order_payload as "orderPayload",
       raw_response as "rawResponse",
       failure_code as "failureCode",
       failure_message as "failureMessage",
@@ -382,7 +408,12 @@ async function markPaymentAttemptRequiresReconciliation(
       failureMessage: message,
       updatedAt: sql`now()`,
     })
-    .where(and(eq(orderPaymentAttemptsDB.id, paymentAttemptId), eq(orderPaymentAttemptsDB.status, "paid_unlinked")));
+    .where(
+      and(
+        eq(orderPaymentAttemptsDB.id, paymentAttemptId),
+        eq(orderPaymentAttemptsDB.status, "paid_unlinked"),
+      ),
+    );
 }
 
 async function loadCustomerPromotionState(
@@ -406,6 +437,65 @@ async function loadCustomerPromotionState(
   return {
     progressCount: state.progressCount,
     candidateProductIds: state.candidateProductIds,
+  };
+}
+
+async function loadCustomerCashbackAccount(
+  fastify: FastifyInstance,
+  customerId: string,
+): Promise<CashbackAccountSnapshot> {
+  const account = await fastify.db.query.customerCashbackAccountsDB.findFirst({
+    where(table, { eq: eqOperator }) {
+      return eqOperator(table.customerId, customerId);
+    },
+    columns: {
+      balanceCents: true,
+      totalEarnedCents: true,
+      totalRedeemedCents: true,
+    },
+  });
+
+  return {
+    balanceCents: account?.balanceCents ?? 0,
+    totalEarnedCents: account?.totalEarnedCents ?? 0,
+    totalRedeemedCents: account?.totalRedeemedCents ?? 0,
+  };
+}
+
+async function lockCustomerCashbackAccount(
+  tx: TransactionDb,
+  customerId: string,
+): Promise<CashbackAccountSnapshot> {
+  await tx
+    .insert(customerCashbackAccountsDB)
+    .values({
+      customerId,
+      balanceCents: 0,
+      totalEarnedCents: 0,
+      totalRedeemedCents: 0,
+      version: 0,
+    })
+    .onConflictDoNothing();
+
+  const result = await tx.execute(sql`
+    select
+      balance_cents as "balanceCents",
+      total_earned_cents as "totalEarnedCents",
+      total_redeemed_cents as "totalRedeemedCents"
+    from customer_cashback_account
+    where customer_id = ${customerId}
+    for update
+  `);
+
+  const row = result.rows[0];
+  if (!row) {
+    throw new Error("Failed to lock customer cashback account");
+  }
+
+  return {
+    balanceCents: Number(row.balanceCents ?? 0),
+    totalEarnedCents: Number(row.totalEarnedCents ?? 0),
+    totalRedeemedCents: Number(row.totalRedeemedCents ?? 0),
   };
 }
 
@@ -434,6 +524,135 @@ async function lockCustomerPromotionState(
     candidateProductIds: Array.isArray(row.candidateProductIds)
       ? row.candidateProductIds.filter((value): value is string => typeof value === "string")
       : [],
+  };
+}
+
+function distributeIntegerAmountByWeights({
+  total,
+  weights,
+}: {
+  total: number;
+  weights: number[];
+}): number[] {
+  if (total <= 0 || weights.length === 0) {
+    return weights.map(() => 0);
+  }
+
+  const weightSum = weights.reduce((accumulator, value) => accumulator + Math.max(0, value), 0);
+  if (weightSum <= 0) {
+    return weights.map(() => 0);
+  }
+
+  const rawShares = weights.map((weight) => (total * Math.max(0, weight)) / weightSum);
+  const baseShares = rawShares.map((value) => Math.floor(value));
+  let remaining = total - baseShares.reduce((accumulator, value) => accumulator + value, 0);
+
+  const sortedByRemainder = rawShares
+    .map((value, index) => ({
+      index,
+      remainder: value - Math.floor(value),
+    }))
+    .sort((left, right) => {
+      if (right.remainder !== left.remainder) {
+        return right.remainder - left.remainder;
+      }
+
+      return left.index - right.index;
+    });
+
+  for (const candidate of sortedByRemainder) {
+    if (remaining <= 0) {
+      break;
+    }
+
+    baseShares[candidate.index] = (baseShares[candidate.index] ?? 0) + 1;
+    remaining -= 1;
+  }
+
+  return baseShares;
+}
+
+function calculateCashbackAmounts({
+  payload,
+  customerId,
+  requestedRedemptionCents,
+  cashbackBalanceCents,
+  orderGrandTotalCents,
+  allowCashbackRedemption,
+}: {
+  payload: PreparedOrderPayload;
+  customerId: string | null;
+  requestedRedemptionCents: number;
+  cashbackBalanceCents: number | null;
+  orderGrandTotalCents: number;
+  allowCashbackRedemption: boolean;
+}): {
+  amountDueCents: number;
+  cashbackRedemptionCents: number;
+  cashbackEarnedCents: number;
+  cashbackEligiblePaidCents: number;
+} {
+  if (requestedRedemptionCents > 0 && !allowCashbackRedemption) {
+    throw validation(
+      "cashback.redemption.notAllowed",
+      "Cashback redemption is only available for authenticated customer orders",
+    );
+  }
+
+  if (requestedRedemptionCents > 0 && !customerId) {
+    throw validation("cashback.customerRequired", "A customer is required to redeem cashback");
+  }
+
+  if (requestedRedemptionCents > (cashbackBalanceCents ?? 0)) {
+    throw validation("cashback.insufficientBalance", "Cashback balance is insufficient", {
+      balanceCents: cashbackBalanceCents ?? 0,
+      requestedCents: requestedRedemptionCents,
+    });
+  }
+
+  if (requestedRedemptionCents > orderGrandTotalCents) {
+    throw validation(
+      "cashback.redemption.exceedsOrderTotal",
+      "Cashback redemption cannot exceed order total",
+      {
+        orderTotalCents: orderGrandTotalCents,
+        requestedCents: requestedRedemptionCents,
+      },
+    );
+  }
+
+  const itemTotals = payload.items.map((preparedOrderItem) =>
+    Math.max(0, preparedOrderItem.item.grandTotalCents ?? 0),
+  );
+  const itemTotalCents = itemTotals.reduce((total, itemTotal) => total + itemTotal, 0);
+  const redemptionAppliedToItemsCents = Math.min(requestedRedemptionCents, itemTotalCents);
+  const redemptionByItem = distributeIntegerAmountByWeights({
+    total: redemptionAppliedToItemsCents,
+    weights: itemTotals,
+  });
+
+  let cashbackEligibleTotalCents = 0;
+  let cashbackEligibleRedemptionCents = 0;
+
+  for (const [index, preparedOrderItem] of payload.items.entries()) {
+    if (!preparedOrderItem.isCashbackEligible) {
+      continue;
+    }
+
+    cashbackEligibleTotalCents += itemTotals[index] ?? 0;
+    cashbackEligibleRedemptionCents += redemptionByItem[index] ?? 0;
+  }
+
+  const cashbackEligiblePaidCents = customerId
+    ? Math.max(0, cashbackEligibleTotalCents - cashbackEligibleRedemptionCents)
+    : 0;
+  const cashbackEarnedCents = Math.floor(cashbackEligiblePaidCents / 10);
+
+  return {
+    amountDueCents: orderGrandTotalCents - requestedRedemptionCents,
+    cashbackRedemptionCents: requestedRedemptionCents,
+    cashbackEarnedCents,
+    cashbackEligiblePaidCents,
   };
 }
 
@@ -744,7 +963,9 @@ function calculatePreparedOrder({
   promotionState,
   coupon,
   couponPeriodContext,
+  cashbackBalanceCents,
   now,
+  options,
 }: {
   preparedPayload: PreparedOrderPayload;
   input: NormalizedCreateOrderParams;
@@ -754,7 +975,9 @@ function calculatePreparedOrder({
     periodType: "day" | "week" | "month" | null;
     periodStartDate: string | null;
   };
+  cashbackBalanceCents: number | null;
   now: Date;
+  options?: OrderCalculationOptions;
 }): CalculatedOrderPayload {
   const workingPreparedPayload = clonePreparedPayload(preparedPayload);
   const hasManualRedemptionMode = input.items.some((item) => item.clientItemId !== null);
@@ -789,6 +1012,15 @@ function calculatePreparedOrder({
   }
 
   const tipCents = calculateTipCents(input.tip, effectivePayload.grandTotalCents);
+  const grandTotalCents = effectivePayload.grandTotalCents + tipCents;
+  const cashbackAmounts = calculateCashbackAmounts({
+    payload: effectivePayload,
+    customerId: input.customerId,
+    requestedRedemptionCents: input.cashbackRedeemCents,
+    cashbackBalanceCents,
+    orderGrandTotalCents: grandTotalCents,
+    allowCashbackRedemption: options?.allowCashbackRedemption ?? false,
+  });
 
   return {
     payload: effectivePayload,
@@ -805,13 +1037,20 @@ function calculatePreparedOrder({
         : null,
     nextPromotionState: promotionResult?.nextState ?? null,
     tipCents,
-    grandTotalCents: effectivePayload.grandTotalCents + tipCents,
+    grandTotalCents,
+    amountDueCents: cashbackAmounts.amountDueCents,
+    cashbackBalanceCents:
+      options?.exposeCashbackBalance && input.customerId ? cashbackBalanceCents : null,
+    cashbackRedemptionCents: cashbackAmounts.cashbackRedemptionCents,
+    cashbackEarnedCents: cashbackAmounts.cashbackEarnedCents,
+    cashbackEligiblePaidCents: cashbackAmounts.cashbackEligiblePaidCents,
   };
 }
 
 export async function previewOrder(
   fastify: FastifyInstance,
   input: CreateOrderParams,
+  options: OrderCalculationOptions = {},
 ): Promise<OrderPreviewResponse> {
   const normalizedInput = normalizeCreateOrderInput(input);
   await validateOrderContext(fastify, normalizedInput);
@@ -846,17 +1085,42 @@ export async function previewOrder(
         candidateProductIds: [],
       })
     : null;
+  const cashbackAccount = normalizedInput.customerId
+    ? await loadCustomerCashbackAccount(fastify, normalizedInput.customerId)
+    : null;
 
   if (normalizedInput.items.length === 0) {
+    const cashbackAmounts = calculateCashbackAmounts({
+      payload: {
+        items: [],
+        subtotalCents: 0,
+        taxesCents: 0,
+        grandTotalCents: 0,
+      },
+      customerId: normalizedInput.customerId,
+      requestedRedemptionCents: normalizedInput.cashbackRedeemCents,
+      cashbackBalanceCents: cashbackAccount?.balanceCents ?? null,
+      orderGrandTotalCents: 0,
+      allowCashbackRedemption: options.allowCashbackRedemption ?? false,
+    });
+
     return {
       tipType: normalizedInput.tip.type,
       tipRateBps: normalizedInput.tip.rateBps,
       tipCents: 0,
       promotionDiscountCents: 0,
       couponDiscountCents: 0,
+      cashbackBalanceCents:
+        options.exposeCashbackBalance && normalizedInput.customerId
+          ? (cashbackAccount?.balanceCents ?? 0)
+          : null,
+      cashbackRedemptionCents: cashbackAmounts.cashbackRedemptionCents,
+      cashbackEarnedCents: cashbackAmounts.cashbackEarnedCents,
+      cashbackEligiblePaidCents: cashbackAmounts.cashbackEligiblePaidCents,
       subtotalCents: 0,
       taxesCents: 0,
       grandTotalCents: 0,
+      amountDueCents: cashbackAmounts.amountDueCents,
       items: [],
       promotion: promotionState ? buildPromotionStateSnapshot(promotionState) : null,
       coupon: null,
@@ -871,7 +1135,9 @@ export async function previewOrder(
     promotionState,
     coupon,
     couponPeriodContext,
+    cashbackBalanceCents: cashbackAccount?.balanceCents ?? null,
     now,
+    options,
   });
 
   validateManualRedemptionWasApplied({
@@ -885,9 +1151,14 @@ export async function previewOrder(
     tipCents: calculatedOrder.tipCents,
     promotionDiscountCents: calculatedOrder.promotion?.discountCents ?? 0,
     couponDiscountCents: calculatedOrder.coupon?.discountCents ?? 0,
+    cashbackBalanceCents: calculatedOrder.cashbackBalanceCents,
+    cashbackRedemptionCents: calculatedOrder.cashbackRedemptionCents,
+    cashbackEarnedCents: calculatedOrder.cashbackEarnedCents,
+    cashbackEligiblePaidCents: calculatedOrder.cashbackEligiblePaidCents,
     subtotalCents: calculatedOrder.payload.subtotalCents,
     taxesCents: calculatedOrder.payload.taxesCents,
     grandTotalCents: calculatedOrder.grandTotalCents,
+    amountDueCents: calculatedOrder.amountDueCents,
     items: mapPreparedPayloadItemsToResponse(calculatedOrder.payload),
     promotion: calculatedOrder.promotion,
     coupon: calculatedOrder.coupon,
@@ -908,11 +1179,15 @@ export async function createOrderPaymentAttempt(
   }
 
   const preview = await previewOrder(fastify, input);
-  if (preview.grandTotalCents !== input.amountCents) {
-    throw validation("order.paymentAttempt.amountMismatch", "Payment amount does not match order total", {
-      expectedAmountCents: preview.grandTotalCents,
-      receivedAmountCents: input.amountCents,
-    });
+  if (preview.amountDueCents !== input.amountCents) {
+    throw validation(
+      "order.paymentAttempt.amountMismatch",
+      "Payment amount does not match order total",
+      {
+        expectedAmountCents: preview.amountDueCents,
+        receivedAmountCents: input.amountCents,
+      },
+    );
   }
 
   const paymentAttemptId = generateNanoId();
@@ -948,10 +1223,14 @@ export async function recordOrderPaymentAttemptResult(
   }
 
   if (input.amountCents != null && input.amountCents !== currentAttempt.amountCents) {
-    throw validation("order.paymentAttempt.amountMismatch", "Paid amount does not match attempt amount", {
-      expectedAmountCents: currentAttempt.amountCents,
-      receivedAmountCents: input.amountCents,
-    });
+    throw validation(
+      "order.paymentAttempt.amountMismatch",
+      "Paid amount does not match attempt amount",
+      {
+        expectedAmountCents: currentAttempt.amountCents,
+        receivedAmountCents: input.amountCents,
+      },
+    );
   }
 
   const nextStatus =
@@ -1000,11 +1279,15 @@ export async function recordOrderPaymentAttemptResult(
 export async function createOrder(
   fastify: FastifyInstance,
   input: CreateOrderParams,
+  options: CreateOrderOptions = {},
 ): Promise<OrderResponse> {
   const normalizedInput = normalizeCreateOrderInput(input);
 
   if (normalizedInput.paymentAttemptId) {
-    const existingPaymentAttempt = await loadPaymentAttempt(fastify, normalizedInput.paymentAttemptId);
+    const existingPaymentAttempt = await loadPaymentAttempt(
+      fastify,
+      normalizedInput.paymentAttemptId,
+    );
     if (existingPaymentAttempt.status === "completed" && existingPaymentAttempt.orderId) {
       const existingOrder = await loadOrder(fastify, existingPaymentAttempt.orderId, true);
       if (existingOrder) {
@@ -1105,6 +1388,9 @@ export async function createOrder(
               candidateProductIds: [],
             })
           : null;
+        const cashbackAccount = normalizedInput.customerId
+          ? await lockCustomerCashbackAccount(tx, normalizedInput.customerId)
+          : null;
 
         const calculatedOrder = calculatePreparedOrder({
           preparedPayload: preparedOrderPayload,
@@ -1112,7 +1398,9 @@ export async function createOrder(
           promotionState,
           coupon,
           couponPeriodContext,
+          cashbackBalanceCents: cashbackAccount?.balanceCents ?? null,
           now,
+          options,
         });
 
         validateManualRedemptionWasApplied({
@@ -1120,13 +1408,27 @@ export async function createOrder(
           promotion: calculatedOrder.promotion,
         });
 
-        if (paymentAttempt && paymentAttempt.amountCents !== calculatedOrder.grandTotalCents) {
+        if (
+          options.requirePaymentForPositiveAmountDue &&
+          calculatedOrder.amountDueCents > 0 &&
+          !paymentAttempt
+        ) {
+          throw validation(
+            "order.paymentAttempt.required",
+            "A paid payment attempt is required for orders with amount due",
+            {
+              amountDueCents: calculatedOrder.amountDueCents,
+            },
+          );
+        }
+
+        if (paymentAttempt && paymentAttempt.amountCents !== calculatedOrder.amountDueCents) {
           throw validation(
             "order.paymentAttempt.amountMismatch",
             "Paid amount does not match recalculated order total",
             {
               paidAmountCents: paymentAttempt.amountCents,
-              orderTotalCents: calculatedOrder.grandTotalCents,
+              orderTotalCents: calculatedOrder.amountDueCents,
             },
           );
         }
@@ -1166,9 +1468,13 @@ export async function createOrder(
             tipCents: calculatedOrder.tipCents,
             promotionDiscountCents: calculatedOrder.promotion?.discountCents ?? 0,
             couponDiscountCents: calculatedOrder.coupon?.discountCents ?? 0,
+            cashbackRedemptionCents: calculatedOrder.cashbackRedemptionCents,
+            cashbackEarnedCents: calculatedOrder.cashbackEarnedCents,
+            cashbackEligiblePaidCents: calculatedOrder.cashbackEligiblePaidCents,
             subtotalCents: calculatedOrder.payload.subtotalCents,
             taxesCents: calculatedOrder.payload.taxesCents,
             grandTotalCents: calculatedOrder.grandTotalCents,
+            amountDueCents: calculatedOrder.amountDueCents,
           })
           .returning({
             id: ordersDB.id,
@@ -1277,6 +1583,58 @@ export async function createOrder(
                   updatedAt: sql`now()`,
                 },
               });
+          }
+        }
+
+        if (normalizedInput.customerId && cashbackAccount) {
+          let nextCashbackBalance = cashbackAccount.balanceCents;
+
+          if (calculatedOrder.cashbackRedemptionCents > 0) {
+            nextCashbackBalance -= calculatedOrder.cashbackRedemptionCents;
+
+            await tx
+              .update(customerCashbackAccountsDB)
+              .set({
+                balanceCents: nextCashbackBalance,
+                totalRedeemedCents: sql`${customerCashbackAccountsDB.totalRedeemedCents} + ${calculatedOrder.cashbackRedemptionCents}`,
+                version: sql`${customerCashbackAccountsDB.version} + 1`,
+                updatedAt: sql`now()`,
+              })
+              .where(eq(customerCashbackAccountsDB.customerId, normalizedInput.customerId));
+
+            await tx.insert(customerCashbackLedgerDB).values({
+              id: generateNanoId(),
+              customerId: normalizedInput.customerId,
+              orderId,
+              organizationId: normalizedInput.organizationId,
+              movementType: "redeemed",
+              amountCents: calculatedOrder.cashbackRedemptionCents,
+              balanceAfterCents: nextCashbackBalance,
+            });
+          }
+
+          if (calculatedOrder.cashbackEarnedCents > 0) {
+            nextCashbackBalance += calculatedOrder.cashbackEarnedCents;
+
+            await tx
+              .update(customerCashbackAccountsDB)
+              .set({
+                balanceCents: nextCashbackBalance,
+                totalEarnedCents: sql`${customerCashbackAccountsDB.totalEarnedCents} + ${calculatedOrder.cashbackEarnedCents}`,
+                version: sql`${customerCashbackAccountsDB.version} + 1`,
+                updatedAt: sql`now()`,
+              })
+              .where(eq(customerCashbackAccountsDB.customerId, normalizedInput.customerId));
+
+            await tx.insert(customerCashbackLedgerDB).values({
+              id: generateNanoId(),
+              customerId: normalizedInput.customerId,
+              orderId,
+              organizationId: normalizedInput.organizationId,
+              movementType: "earned",
+              amountCents: calculatedOrder.cashbackEarnedCents,
+              balanceAfterCents: nextCashbackBalance,
+            });
           }
         }
 

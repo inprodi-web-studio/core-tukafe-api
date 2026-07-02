@@ -1,6 +1,6 @@
 import { relations, sql } from "drizzle-orm";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
-import { boolean, check, index, pgTable, text, uniqueIndex } from "drizzle-orm/pg-core";
+import { boolean, check, index, integer, pgTable, text, uniqueIndex } from "drizzle-orm/pg-core";
 
 import { generateTimestamps } from "@core/utils";
 import { uploadsDB } from "./upload.schema";
@@ -12,7 +12,9 @@ const productCategories = pgTable(
     name: text("name").notNull(),
     icon: text("icon").notNull(),
     color: text("color").notNull(),
+    sortOrder: integer("sort_order").notNull().default(0),
     isFourPlusOneEligible: boolean("is_four_plus_one_eligible").notNull().default(false),
+    isCashbackEligible: boolean("is_cashback_eligible").notNull().default(false),
     imageUploadId: text("image_upload_id").references(() => uploadsDB.id, {
       onDelete: "restrict",
     }),
@@ -27,8 +29,10 @@ const productCategories = pgTable(
       .on(table.name)
       .where(sql`${table.parentId} IS NULL`),
     index("product_category_parent_id_idx").on(table.parentId),
+    index("product_category_parent_sort_order_idx").on(table.parentId, table.sortOrder),
     index("product_category_image_upload_id_idx").on(table.imageUploadId),
     check("product_category_color_hex_check", sql`${table.color} ~ '^#[0-9A-Fa-f]{6}$'`),
+    check("product_category_sort_order_non_negative_check", sql`${table.sortOrder} >= 0`),
     check(
       "product_category_parent_not_self_check",
       sql`${table.parentId} IS NULL OR ${table.parentId} <> ${table.id}`,

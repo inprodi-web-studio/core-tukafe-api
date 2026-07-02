@@ -12,10 +12,7 @@ export async function loginWithEmailOrPhone(request: FastifyRequest, reply: Fast
           throw badRequest("auth.identifierRequired", "Email or phone number is required");
         })();
 
-  const response = await request.server.customer.auth.loginWithEmailOrPhone(
-    input,
-    request.headers,
-  );
+  const response = await request.server.customer.auth.loginWithEmailOrPhone(input, request.headers);
 
   return reply.status(200).send(response);
 }

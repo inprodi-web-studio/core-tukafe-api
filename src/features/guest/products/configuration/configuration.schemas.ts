@@ -42,6 +42,12 @@ const modifierStepSchema = z.object({
   minSelect: z.number().int().nonnegative(),
   maxSelect: z.number().int().nonnegative().nullable(),
   sortOrder: z.number().int().nonnegative(),
+  visibleWhen: z.array(
+    z.object({
+      variationGroupId: z.string(),
+      variationOptionId: z.string(),
+    }),
+  ),
   options: z.array(
     z.object({
       id: z.string(),
@@ -57,6 +63,7 @@ export const configurationResponseSchema = z.object({
   product: z.object({
     id: z.string(),
     name: z.string(),
+    isFeatured: z.boolean(),
     productType: z.enum(["simple", "assembled", "compound"]),
     image: imageSchema.nullable(),
   }),

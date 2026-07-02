@@ -1,0 +1,6 @@
+archivo,linea_csv,columna,valor
+01_clientes.csv,149,nombres,Reneé
+01_clientes.csv,6582,apellido_paterno,Verdón
+01_clientes.csv,6641,apellido_paterno,Sención
+revision_nombres_ambiguos.csv,147,nombre_original,Britany Verdión Cortes
+revision_nombres_ambiguos.csv,147,apellido_paterno,Verdión

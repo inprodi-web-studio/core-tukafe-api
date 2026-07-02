@@ -1,0 +1,2 @@
+ALTER TABLE "apikey"
+ALTER COLUMN "user_id" DROP NOT NULL;

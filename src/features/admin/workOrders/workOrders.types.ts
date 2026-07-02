@@ -1,4 +1,4 @@
-import type { WorkOrder, WorkOrderStatus } from "@core/db/schemas";
+import type { Upload, WorkOrder, WorkOrderStatus } from "@core/db/schemas";
 import type { ListQueryParams } from "@core/types";
 import type { PaginatedResult } from "@core/utils";
 
@@ -15,7 +15,9 @@ export interface CompleteWorkOrderServiceParams {
   completedByUserId: string;
 }
 
-export type WorkOrderResponse = WorkOrder;
+export type WorkOrderResponse = WorkOrder & {
+  productImage?: Pick<Upload, "id" | "name" | "path" | "visibility" | "mimeType"> | null;
+};
 
 export interface AdminWorkOrdersService {
   list(input: ListWorkOrdersServiceParams): Promise<PaginatedResult<WorkOrderResponse>>;

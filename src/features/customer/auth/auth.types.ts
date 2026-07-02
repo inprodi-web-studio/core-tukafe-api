@@ -8,6 +8,11 @@ export interface CustomerAuthService {
   ): Promise<LoginWithEmailOrPhoneResponse>;
   resendOTP(input: ResendOTPInput): Promise<void>;
   verifyPhone(input: VerifyPhoneInput): Promise<VerifyPhoneResponse>;
+  requestPasswordReset(input: RequestPasswordResetInput): Promise<void>;
+  validatePasswordResetCode(input: ValidatePasswordResetCodeInput): Promise<void>;
+  resetPassword(input: ResetPasswordInput): Promise<void>;
+  changePassword(input: ChangePasswordInput, requestHeaders?: RequestHeaders): Promise<void>;
+  createQrLoginToken(input: CreateQrLoginTokenInput): Promise<CreateQrLoginTokenResponse>;
 }
 
 export interface SignupResponse {
@@ -58,4 +63,33 @@ export interface VerifyPhoneResponse {
   userId: string;
   email: string;
   phone: string;
+}
+
+export interface ChangePasswordInput {
+  currentPassword: string;
+  newPassword: string;
+}
+
+export interface RequestPasswordResetInput {
+  phone: string;
+}
+
+export interface ValidatePasswordResetCodeInput {
+  phone: string;
+  code: string;
+}
+
+export interface ResetPasswordInput {
+  phone: string;
+  code: string;
+  newPassword: string;
+}
+
+export interface CreateQrLoginTokenInput {
+  customerId: string;
+}
+
+export interface CreateQrLoginTokenResponse {
+  payload: string;
+  expiresAt: string;
 }

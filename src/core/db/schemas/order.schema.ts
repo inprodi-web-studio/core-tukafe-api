@@ -40,9 +40,13 @@ const orders = pgTable(
     tipCents: integer("tip_cents").notNull().default(0),
     promotionDiscountCents: integer("promotion_discount_cents").notNull().default(0),
     couponDiscountCents: integer("coupon_discount_cents").notNull().default(0),
+    cashbackRedemptionCents: integer("cashback_redemption_cents").notNull().default(0),
+    cashbackEarnedCents: integer("cashback_earned_cents").notNull().default(0),
+    cashbackEligiblePaidCents: integer("cashback_eligible_paid_cents").notNull().default(0),
     subtotalCents: integer("subtotal_cents").notNull().default(0),
     taxesCents: integer("taxes_cents").notNull().default(0),
     grandTotalCents: integer("grand_total_cents").notNull().default(0),
+    amountDueCents: integer("amount_due_cents").notNull().default(0),
     ...generateTimestamps(),
   },
   (table) => [
@@ -61,6 +65,18 @@ const orders = pgTable(
       sql`${table.promotionDiscountCents} >= 0`,
     ),
     check("order_coupon_discount_cents_non_negative_check", sql`${table.couponDiscountCents} >= 0`),
+    check(
+      "order_cashback_redemption_cents_non_negative_check",
+      sql`${table.cashbackRedemptionCents} >= 0`,
+    ),
+    check(
+      "order_cashback_earned_cents_non_negative_check",
+      sql`${table.cashbackEarnedCents} >= 0`,
+    ),
+    check(
+      "order_cashback_eligible_paid_cents_non_negative_check",
+      sql`${table.cashbackEligiblePaidCents} >= 0`,
+    ),
     check("order_tip_type_check", sql`${table.tipType} in ('none', 'percentage', 'amount')`),
     check(
       "order_tip_type_rate_consistency_check",
@@ -71,9 +87,18 @@ const orders = pgTable(
       sql`(${table.tipType} = 'none' and ${table.tipCents} = 0) or (${table.tipType} <> 'none' and ${table.tipCents} >= 0)`,
     ),
     check("order_grand_total_cents_non_negative_check", sql`${table.grandTotalCents} >= 0`),
+    check("order_amount_due_cents_non_negative_check", sql`${table.amountDueCents} >= 0`),
+    check(
+      "order_cashback_redemption_lte_grand_total_check",
+      sql`${table.cashbackRedemptionCents} <= ${table.grandTotalCents}`,
+    ),
     check(
       "order_grand_total_consistency_check",
       sql`${table.grandTotalCents} = ${table.subtotalCents} + ${table.taxesCents} + ${table.tipCents}`,
+    ),
+    check(
+      "order_amount_due_cashback_consistency_check",
+      sql`${table.amountDueCents} = ${table.grandTotalCents} - ${table.cashbackRedemptionCents}`,
     ),
   ],
 );
@@ -85,6 +110,7 @@ const orderPaymentAttempts = pgTable(
     organizationId: text("organization_id")
       .notNull()
       .references(() => organizationDB.id, { onDelete: "restrict" }),
+    customerId: text("customer_id").references(() => customersDB.id, { onDelete: "set null" }),
     orderId: text("order_id").references(() => orders.id, { onDelete: "set null" }),
     provider: text("provider").notNull().default("zettle"),
     reference: text("reference").notNull(),
@@ -97,6 +123,7 @@ const orderPaymentAttempts = pgTable(
     entryMode: text("entry_mode"),
     authorizationCode: text("authorization_code"),
     obfuscatedPan: text("obfuscated_pan"),
+    orderPayload: jsonb("order_payload").$type<Record<string, unknown> | null>(),
     rawResponse: jsonb("raw_response").$type<Record<string, unknown> | null>(),
     failureCode: text("failure_code"),
     failureMessage: text("failure_message"),
@@ -111,7 +138,8 @@ const orderPaymentAttempts = pgTable(
       table.createdAt,
     ),
     index("order_payment_attempt_order_id_idx").on(table.orderId),
-    check("order_payment_attempt_provider_check", sql`${table.provider} in ('zettle')`),
+    index("order_payment_attempt_customer_id_idx").on(table.customerId),
+    check("order_payment_attempt_provider_check", sql`${table.provider} in ('zettle', 'stripe')`),
     check(
       "order_payment_attempt_status_check",
       sql`${table.status} in ('pending', 'paid_unlinked', 'completed', 'cancelled', 'failed', 'requires_reconciliation')`,
@@ -316,6 +344,10 @@ export const orderPaymentAttemptsRelations = relations(orderPaymentAttemptsDB, (
   organization: one(organizationDB, {
     fields: [orderPaymentAttemptsDB.organizationId],
     references: [organizationDB.id],
+  }),
+  customer: one(customersDB, {
+    fields: [orderPaymentAttemptsDB.customerId],
+    references: [customersDB.id],
   }),
   order: one(ordersDB, {
     fields: [orderPaymentAttemptsDB.orderId],

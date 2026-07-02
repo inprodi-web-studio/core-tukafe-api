@@ -1,4 +1,5 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
+import { withConfigurationFavoriteState } from "../products.helpers";
 import type { Params } from "./configuration.schemas";
 
 export async function getConfiguration(
@@ -11,5 +12,11 @@ export async function getConfiguration(
     request.params.productId,
   );
 
-  return reply.status(200).send(configuration);
+  const configurationWithFavorite = await withConfigurationFavoriteState(
+    request.server,
+    request.customerAuth.customer.id,
+    configuration,
+  );
+
+  return reply.status(200).send(configurationWithFavorite);
 }

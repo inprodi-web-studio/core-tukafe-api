@@ -10,7 +10,9 @@ export interface GuestProductCategoryListItem {
   name: string;
   icon: string;
   color: string;
+  sortOrder: number;
   isFourPlusOneEligible: boolean;
+  isCashbackEligible: boolean;
   image: GuestProductCategoryImage | null;
   children: GuestProductCategoryListItem[];
 }

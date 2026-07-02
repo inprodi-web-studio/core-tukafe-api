@@ -59,15 +59,20 @@ function apiKeyAuthHandler({
       });
 
       if (!verification.valid || !verification.key) {
+        const message =
+          typeof verification.error?.message === "string"
+            ? verification.error.message
+            : "The provided API key is invalid";
+
         throw unauthorized(
           "apiKey.invalid",
-          verification.error?.message ?? "The provided API key is invalid",
+          message,
         );
       }
 
       request.apiKeyAuth = {
         id: verification.key.id,
-        userId: verification.key.userId,
+        userId: verification.key.referenceId,
         name: verification.key.name ?? null,
         prefix: verification.key.prefix ?? null,
         start: verification.key.start ?? null,

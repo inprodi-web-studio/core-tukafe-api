@@ -6,7 +6,9 @@ export const createBodySchema = z
     name: z.string().nonempty(),
     icon: z.string().nonempty(),
     color: colorSchema,
+    sortOrder: z.number().int().nonnegative().optional(),
     isFourPlusOneEligible: z.boolean().optional(),
+    isCashbackEligible: z.boolean().optional(),
     imageUploadId: z.string().nonempty().nullish(),
     parentId: z.string().nullish(),
   })
@@ -27,7 +29,9 @@ export const createResponseSchema = z.object({
   name: z.string(),
   icon: z.string(),
   color: z.string(),
+  sortOrder: z.number().int().nonnegative(),
   isFourPlusOneEligible: z.boolean(),
+  isCashbackEligible: z.boolean(),
   image: imageSchema.nullable(),
   parentId: z.string().nullish(),
 });

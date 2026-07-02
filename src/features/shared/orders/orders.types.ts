@@ -8,7 +8,7 @@ import type {
 } from "@core/db/schemas";
 
 export type OrderTipType = "none" | "percentage" | "amount";
-export type OrderPaymentProvider = "zettle";
+export type OrderPaymentProvider = "zettle" | "stripe";
 export type OrderPaymentAttemptStatus =
   | "pending"
   | "paid_unlinked"
@@ -41,6 +41,7 @@ export interface CreateOrderParams {
   customerId?: string | null;
   paymentAttemptId?: string | null;
   couponCode?: string | null;
+  cashbackRedeemCents?: number | null;
   comment?: string | null;
   tip?: CreateOrderTipParams | null;
   items: CreateOrderItemParams[];
@@ -105,6 +106,7 @@ export interface NormalizedCreateOrderParams extends Omit<
 > {
   customerId: string | null;
   couponCode: string | null;
+  cashbackRedeemCents: number;
   comment: string | null;
   tip: NormalizedCreateOrderTipParams;
   items: NormalizedCreateOrderItemParams[];
@@ -189,8 +191,13 @@ export interface OrderPreviewResponse {
   subtotalCents: number;
   taxesCents: number;
   grandTotalCents: number;
+  amountDueCents: number;
   promotionDiscountCents: number;
   couponDiscountCents: number;
+  cashbackBalanceCents: number | null;
+  cashbackRedemptionCents: number;
+  cashbackEarnedCents: number;
+  cashbackEligiblePaidCents: number;
   items: OrderPreviewItemResponse[];
   promotion: OrderPromotionResponse | null;
   coupon: OrderCouponResponse | null;

@@ -1,7 +1,22 @@
 nombre_grupo_variacion,nombre_opcion,descripcion_cliente,orden_opcion
-Tipo de Leche,Leche Entera,,1
-Tipo de Leche,Leche Light,,2
-Tipo de Leche,Leche Deslactosada,,3
-Tipo de Leche,Leche de Almendra,,4
-Tipo de Leche,Leche de Avena,,5
-Tipo de Leche,Leche de Coco,,6
+Tipo de Leche,Entera,,1
+Tipo de Leche,Light,,2
+Tipo de Leche,Deslactosada,,3
+Tipo de Leche,Almendra,,4
+Tipo de Leche,Avena Oatly,,5
+Tipo de Leche,Coco,,6
+Tipo de Leche,Soya Vainilla,,7
+Tipo de Café,Tukafe Tradición,"Café de altura de Chiapas, 100% mexicano.",1
+Tipo de Café,Tukafe Distinción,Una selección especial de nuestro café de altura de Chiapas.,2
+Envase,Vaso,,1
+Envase,Lata,,2
+Tamaño Espresso,Sencillo,,1
+Tamaño Espresso,Doble,,2
+Base de Bebida,Agua de Coco,,1
+Base de Bebida,Leche de Coco,,2
+Cold Foam,Cold Foam Fresa,,1
+Cold Foam,Cold Foam,,2
+Cold Foam,Cold Foam Vainilla,,3
+Cold Foam,Cold Foam Vainilla Sugar Free,,4
+Estancia,Para Aquí,,1
+Estancia,Para Llevar,,2

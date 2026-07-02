@@ -192,6 +192,11 @@ function parseArgs() {
 
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index];
+
+    if (!arg) {
+      continue;
+    }
+
     if (!arg.startsWith("--")) {
       continue;
     }
@@ -567,9 +572,10 @@ async function main() {
           select distinct c.id
           from "product_category" c
           left join "product" p on p.category_id = c.id and p.deleted_at is null
+          left join "product_category_link" pcl on pcl.category_id = c.id
           left join "product_category" ch on ch.parent_id = c.id
           where c.id = any($1::text[])
-            and (p.id is not null or ch.id is not null);
+            and (p.id is not null or pcl.product_id is not null or ch.id is not null);
           `,
           [targetProductCategoryIds],
         )

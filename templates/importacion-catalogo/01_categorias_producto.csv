@@ -1,3 +1,14 @@
-nombre_categoria,categoria_padre,icono,color_hex,aplica_4_mas_1,archivo_imagen
-Café,,CoffeeBeanIcon,#12b886,SI,hot_americano
-Matcha,,PintGlassIcon,#40c057,SI,hot_matcha
+nombre_categoria,categoria_padre,orden_categoria,icono,color_hex,aplica_4_mas_1,archivo_imagen
+Café,,3,CoffeeBeanIcon,#fd7e14,SI,hot_americano
+Frappé,,7,CircleDashedIcon,#15aabf,SI,latte_frappe
+Especialidades,,4,CircleDashedIcon,#82c91e,SI,lottus_cold
+Matcha,,5,CircleDashedIcon,#37b24d,SI,matcha_matcha_matcha
+Chai,,6,CircleDashedIcon,#ae3ec9,SI,hot_chai
+Fresh Soda,,7,CircleDashedIcon,#22b8cf,SI,soda_moras
+Not Coffee,,8,CircleDashedIcon,#f03e3e,SI,nutella_latte
+Panadería,,9,CircleDashedIcon,#9775fa,NO,croissant_chocolate
+Bocadillos,,10,CircleDashedIcon,#f76707,NO,sandwich_pavo
+Ready to Go,,12,CircleDashedIcon,#228be6,NO,patrona_mia_lata
+Tukafe en Casa,,11,CircleDashedIcon,#7950f2,SI,tukafe_distincion
+Osito Tukafe,,2,CircleDashedIcon,#d6336c,SI,osito_cafe
+Combos,,1,CircleDashedIcon,#5c7cfa,NO,latte_bread

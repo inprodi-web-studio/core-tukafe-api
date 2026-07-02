@@ -1,2 +1,8 @@
 nombre_grupo_variacion,etiqueta_cliente,orden_grupo
-Tipo de Leche,¿Qué tipo de leche quieres?,1
+Tipo de Café,¿Qué tipo de café prefieres?,
+Tipo de Leche,¿Qué tipo de leche prefieres?,
+Envase,¿Lo quieres en vaso o en lata?,
+Tamaño Espresso,¿Cómo quieres tu espresso?,
+Base de Bebida,¿Cómo quieres la base de tu bebida?,
+Cold Foam,¿Quiéres cold foam para tu bebida?,
+Estancia,¿Para aquí o para llevar?,

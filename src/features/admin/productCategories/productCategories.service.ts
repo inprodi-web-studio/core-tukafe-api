@@ -16,6 +16,7 @@ import {
   getMatchedAncestorRows,
   getMatchedRootIds,
   normalizeProductCategoryInput,
+  normalizeProductCategoryUpdateInput,
 } from "./productCategories.helpers";
 import type { AdminProductCategoriesService } from "./productCategories.types";
 
@@ -57,6 +58,7 @@ export function adminProductcategoriesService(
 
     async list({ page, pageSize, search } = {}) {
       const defaultOrderBy: [SQL, ...SQL[]] = [
+        asc(productCategoriesDB.sortOrder),
         asc(productCategoriesDB.name),
         asc(productCategoriesDB.id),
       ];
@@ -120,7 +122,16 @@ export function adminProductcategoriesService(
     },
 
     async create(input) {
-      const { name, parentId, color, icon, imageUploadId, isFourPlusOneEligible } =
+      const {
+        name,
+        parentId,
+        color,
+        icon,
+        imageUploadId,
+        sortOrder,
+        isFourPlusOneEligible,
+        isCashbackEligible,
+      } =
         normalizeProductCategoryInput(input);
 
       if (parentId) {
@@ -158,7 +169,9 @@ export function adminProductcategoriesService(
             name,
             icon,
             color,
+            sortOrder,
             isFourPlusOneEligible,
+            isCashbackEligible,
             imageUploadId: imageUpload?.id ?? null,
             parentId,
           })
@@ -186,6 +199,92 @@ export function adminProductcategoriesService(
           throw conflict(
             "productCategory.duplicatedName",
             parentId
+              ? "A category with this name already exists under the selected parent"
+              : "A root category with this name already exists",
+          );
+        }
+
+        throw error;
+      }
+    },
+
+    async update(id, input) {
+      const existingCategory = await fastify.admin.productCategories.get(id);
+      if (!existingCategory) {
+        throw notFound("productCategory.notFound", "The product category was not found");
+      }
+
+      const normalizedInput = normalizeProductCategoryUpdateInput(input);
+
+      if (normalizedInput.parentId && normalizedInput.parentId === id) {
+        throw badRequest(
+          "productCategory.invalidParent",
+          "A category cannot be assigned as its own parent",
+        );
+      }
+
+      if (normalizedInput.parentId) {
+        await fastify.admin.productCategories.get(normalizedInput.parentId);
+      }
+
+      const imageUpload =
+        "imageUploadId" in normalizedInput && normalizedInput.imageUploadId
+          ? await fastify.db.query.uploadsDB.findFirst({
+              columns: {
+                id: true,
+                mimeType: true,
+              },
+              where(uploadTable, { eq }) {
+                return eq(uploadTable.id, normalizedInput.imageUploadId as string);
+              },
+            })
+          : null;
+
+      if ("imageUploadId" in normalizedInput && normalizedInput.imageUploadId && !imageUpload) {
+        throw notFound("upload.notFound", "The image upload was not found");
+      }
+
+      if (imageUpload && !imageUpload.mimeType.toLowerCase().startsWith("image/")) {
+        throw badRequest(
+          "productCategory.invalidImageUpload",
+          "The selected upload must be an image file",
+        );
+      }
+
+      try {
+        const [updatedCategory] = await fastify.db
+          .update(productCategoriesDB)
+          .set({
+            ...normalizedInput,
+            updatedAt: sql`now()`,
+          })
+          .where(sql`${productCategoriesDB.id} = ${id}`)
+          .returning({
+            id: productCategoriesDB.id,
+          });
+
+        if (!updatedCategory) {
+          throw notFound("productCategory.notFound", "The product category was not found");
+        }
+
+        const category = await fastify.admin.productCategories.get(updatedCategory.id);
+
+        if (!category) {
+          throw new Error("Failed to retrieve updated product category");
+        }
+
+        return category;
+      } catch (error) {
+        const pgError = getPgError(error);
+
+        if (
+          pgError?.code === "23505" &&
+          (pgError.constraint === "product_category_parent_name_unique" ||
+            pgError.constraint === "product_category_root_name_unique")
+        ) {
+          throw conflict(
+            "productCategory.duplicatedName",
+            normalizedInput.parentId ?? existingCategory.parentId
               ? "A category with this name already exists under the selected parent"
               : "A root category with this name already exists",
           );

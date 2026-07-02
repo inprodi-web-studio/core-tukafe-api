@@ -1,5 +1,8 @@
 export interface GuestCustomersService {
-  findOrCreateByPhone(input: FindOrCreateCustomerByPhoneInput): Promise<FindOrCreateCustomerByPhoneResponse>;
+  findOrCreateByPhone(
+    input: FindOrCreateCustomerByPhoneInput,
+  ): Promise<FindOrCreateCustomerByPhoneResponse>;
+  identifyWithQr(input: IdentifyCustomerWithQrInput): Promise<IdentifyCustomerWithQrResponse>;
 }
 
 export interface FindOrCreateCustomerByPhoneInput {
@@ -8,6 +11,14 @@ export interface FindOrCreateCustomerByPhoneInput {
 
 export interface FindOrCreateCustomerByPhoneResponse {
   created: boolean;
+  customer: GuestCustomerResponse;
+}
+
+export interface IdentifyCustomerWithQrInput {
+  payload: string;
+}
+
+export interface IdentifyCustomerWithQrResponse {
   customer: GuestCustomerResponse;
 }
 

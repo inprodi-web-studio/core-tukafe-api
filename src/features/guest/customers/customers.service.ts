@@ -1,12 +1,24 @@
-import { customersDB } from "@core/db/schemas";
-import { generateNanoId, getPgError, normalizePresets, normalizeString } from "@core/utils";
-import { eq } from "drizzle-orm";
+import { customerQrLoginTokensDB, customersDB } from "@core/db/schemas";
+import {
+  badRequest,
+  generateNanoId,
+  getPgError,
+  normalizePresets,
+  normalizeString,
+} from "@core/utils";
+import { createHash } from "node:crypto";
+import { and, eq, gt, isNull } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
 import type {
   FindOrCreateCustomerByPhoneResponse,
   GuestCustomerResponse,
   GuestCustomersService,
+  IdentifyCustomerWithQrResponse,
 } from "./customers.types";
+
+const QR_LOGIN_TOKEN_SCHEME = "tukafe:";
+const QR_LOGIN_TOKEN_HOST = "customer-login";
+const QR_LOGIN_TOKEN_PATTERN = /^[A-Za-z0-9_-]{32,256}$/;
 
 const customerColumns = {
   id: true,
@@ -50,6 +62,29 @@ function mapGuestCustomerResponse(customer: GuestCustomerRow): GuestCustomerResp
   };
 }
 
+function parseQrLoginTokenPayload(payload: string): string {
+  try {
+    const url = new URL(payload);
+    const token = url.searchParams.get("token") ?? "";
+
+    if (
+      url.protocol !== QR_LOGIN_TOKEN_SCHEME ||
+      url.hostname !== QR_LOGIN_TOKEN_HOST ||
+      !QR_LOGIN_TOKEN_PATTERN.test(token)
+    ) {
+      throw new Error("Invalid QR payload");
+    }
+
+    return token;
+  } catch {
+    throw badRequest("customer.qr.invalid", "El código QR no es válido o ya expiró");
+  }
+}
+
+function hashQrLoginToken(rawToken: string): string {
+  return createHash("sha256").update(rawToken).digest("hex");
+}
+
 async function loadActiveCustomerByPhone(
   fastify: FastifyInstance,
   normalizedPhone: string,
@@ -88,6 +123,44 @@ async function loadActiveCustomerByUserId(
 
 export function guestCustomersService(fastify: FastifyInstance): GuestCustomersService {
   return {
+    async identifyWithQr({ payload }): Promise<IdentifyCustomerWithQrResponse> {
+      const rawToken = parseQrLoginTokenPayload(payload);
+      const tokenHash = hashQrLoginToken(rawToken);
+
+      const [consumedToken] = await fastify.db
+        .update(customerQrLoginTokensDB)
+        .set({ usedAt: new Date() })
+        .where(
+          and(
+            eq(customerQrLoginTokensDB.tokenHash, tokenHash),
+            isNull(customerQrLoginTokensDB.usedAt),
+            gt(customerQrLoginTokensDB.expiresAt, new Date()),
+          ),
+        )
+        .returning({
+          customerId: customerQrLoginTokensDB.customerId,
+        });
+
+      if (!consumedToken) {
+        throw badRequest("customer.qr.invalid", "El código QR no es válido o ya expiró");
+      }
+
+      const customer = await fastify.db.query.customersDB.findFirst({
+        where(table, { and, eq, isNull }) {
+          return and(eq(table.id, consumedToken.customerId), isNull(table.deletedAt));
+        },
+        columns: customerColumns,
+      });
+
+      if (!customer) {
+        throw badRequest("customer.qr.invalid", "El código QR no es válido o ya expiró");
+      }
+
+      return {
+        customer: mapGuestCustomerResponse(customer),
+      };
+    },
+
     async findOrCreateByPhone({ phone }): Promise<FindOrCreateCustomerByPhoneResponse> {
       const normalizedPhone = normalizeString(phone, normalizePresets.phone);
 
@@ -185,7 +258,10 @@ export function guestCustomersService(fastify: FastifyInstance): GuestCustomersS
           }
 
           if (userWithPhone) {
-            const concurrentCustomerByUser = await loadActiveCustomerByUserId(fastify, userWithPhone.id);
+            const concurrentCustomerByUser = await loadActiveCustomerByUserId(
+              fastify,
+              userWithPhone.id,
+            );
 
             if (concurrentCustomerByUser) {
               return {

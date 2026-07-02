@@ -17,6 +17,15 @@ const workOrderVariationSelectionSnapshotSchema = z.object({
   groupCustomerLabel: z.string().nullable(),
   optionId: z.string(),
   optionName: z.string(),
+  optionKitchenName: z.string().nullable().optional(),
+});
+
+const workOrderProductImageSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  path: z.string(),
+  visibility: z.enum(["PUBLIC", "PRIVATE"]),
+  mimeType: z.string(),
 });
 
 export const workOrderResponseSchema = z.object({
@@ -38,6 +47,7 @@ export const workOrderResponseSchema = z.object({
   status: z.enum(["open", "completed"]),
   completedAt: z.date().nullable(),
   completedByUserId: z.string().nullable(),
+  productImage: workOrderProductImageSchema.nullable().optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });

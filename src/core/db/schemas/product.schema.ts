@@ -40,6 +40,7 @@ const products = pgTable(
     imageUploadId: text("image_upload_id").references(() => uploadsDB.id, {
       onDelete: "restrict",
     }),
+    isFeatured: boolean("is_featured").notNull().default(false),
     productType: productTypeEnum("product_type").notNull().default("simple"),
     ...generateTimestamps({ withDeletedAt: true }),
   },
@@ -51,6 +52,7 @@ const products = pgTable(
     index("product_name_idx").on(table.name),
     index("product_unit_id_idx").on(table.unitId),
     index("product_category_id_idx").on(table.categoryId),
+    index("product_is_featured_idx").on(table.isFeatured),
     index("product_image_upload_id_idx").on(table.imageUploadId),
     index("product_product_type_idx").on(table.productType),
   ],
@@ -74,6 +76,27 @@ const productTax = pgTable(
     }),
     index("product_tax_product_id_idx").on(table.productId),
     index("product_tax_tax_id_idx").on(table.taxId),
+  ],
+);
+
+const productCategoryLink = pgTable(
+  "product_category_link",
+  {
+    productId: text("product_id")
+      .notNull()
+      .references(() => productsDB.id, { onDelete: "cascade" }),
+    categoryId: text("category_id")
+      .notNull()
+      .references(() => productCategoriesDB.id, { onDelete: "cascade" }),
+    ...generateTimestamps(),
+  },
+  (table) => [
+    primaryKey({
+      name: "product_category_link_pk",
+      columns: [table.productId, table.categoryId],
+    }),
+    index("product_category_link_product_id_idx").on(table.productId),
+    index("product_category_link_category_id_idx").on(table.categoryId),
   ],
 );
 
@@ -103,6 +126,7 @@ const organizationProduct = pgTable(
 
 export const productsDB = products;
 export const productTaxDB = productTax;
+export const productCategoryLinksDB = productCategoryLink;
 export const organizationProductDB = organizationProduct;
 export const productsRelations = relations(productsDB, ({ one, many }) => ({
   unit: one(unitsDB, {
@@ -118,6 +142,7 @@ export const productsRelations = relations(productsDB, ({ one, many }) => ({
     references: [uploadsDB.id],
   }),
   taxes: many(productTaxDB),
+  categories: many(productCategoryLinksDB),
   organizations: many(organizationProductDB),
 }));
 export const productTaxRelations = relations(productTaxDB, ({ one }) => ({
@@ -128,6 +153,16 @@ export const productTaxRelations = relations(productTaxDB, ({ one }) => ({
   tax: one(taxDB, {
     fields: [productTaxDB.taxId],
     references: [taxDB.id],
+  }),
+}));
+export const productCategoryLinksRelations = relations(productCategoryLinksDB, ({ one }) => ({
+  product: one(productsDB, {
+    fields: [productCategoryLinksDB.productId],
+    references: [productsDB.id],
+  }),
+  category: one(productCategoriesDB, {
+    fields: [productCategoryLinksDB.categoryId],
+    references: [productCategoriesDB.id],
   }),
 }));
 export const organizationProductRelations = relations(organizationProductDB, ({ one }) => ({
@@ -143,5 +178,6 @@ export const organizationProductRelations = relations(organizationProductDB, ({ 
 
 export type Product = typeof productsDB.$inferSelect;
 export type ProductTax = typeof productTaxDB.$inferSelect;
+export type ProductCategoryLink = typeof productCategoryLinksDB.$inferSelect;
 export type OrganizationProduct = typeof organizationProductDB.$inferSelect;
 export type ProductType = (typeof productTypeEnum.enumValues)[number];

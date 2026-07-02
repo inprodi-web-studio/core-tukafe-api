@@ -20,7 +20,9 @@ const categorySchema = z.object({
   name: z.string(),
   icon: z.string(),
   color: z.string(),
+  sortOrder: z.number().int().nonnegative(),
   isFourPlusOneEligible: z.boolean(),
+  isCashbackEligible: z.boolean(),
   parentId: z.string().nullable(),
   image: imageSchema.nullable(),
 });
@@ -36,6 +38,8 @@ const organizationSchema = z.object({
   name: z.string(),
   slug: z.string(),
   address: z.string(),
+  latitude: z.number().nullable(),
+  longitude: z.number().nullable(),
   logo: z.string().nullable(),
 });
 
@@ -78,11 +82,13 @@ const productSchema = z.object({
   id: z.string(),
   name: z.string(),
   priceCents: z.number().int().nonnegative().nullable(),
+  isFeatured: z.boolean(),
   customerDescription: z.string().nullable(),
   productType: z.enum(["simple", "assembled", "compound"]),
   image: imageSchema.nullable(),
   unit: unitSchema,
   category: categorySchema.nullable(),
+  categories: z.array(categorySchema),
   organizations: z.array(organizationSchema),
   taxes: z.array(taxSchema),
   variationGroups: z.array(variationGroupSchema),

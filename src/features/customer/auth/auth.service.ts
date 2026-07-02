@@ -1,4 +1,15 @@
-import { customersDB, ordersDB } from "@core/db/schemas";
+import { hashPassword, verifyPassword } from "better-auth/crypto";
+import { compare as compareBcrypt } from "bcryptjs";
+import { createHash, randomBytes } from "node:crypto";
+
+import {
+  accountDB,
+  customerQrLoginTokensDB,
+  customersDB,
+  legacyCustomerPasswordsDB,
+  ordersDB,
+  verificationDB,
+} from "@core/db/schemas";
 import {
   badRequest,
   conflict,
@@ -11,15 +22,162 @@ import { eq } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
 import {
   getCustomerAccessByIdentifier,
+  mapChangePasswordError,
   mapLoginError,
+  mapPasswordResetError,
   mapResendError,
   mapSignupError,
   mapVerificationError,
 } from "./auth.helpers";
 import type { CustomerAuthService, SignupResponse } from "./auth.types";
 
+const QR_LOGIN_TOKEN_TTL_MS = 2 * 60 * 1000;
+const QR_LOGIN_PAYLOAD_PREFIX = "tukafe://customer-login?token=";
+
+function hashQrLoginToken(rawToken: string): string {
+  return createHash("sha256").update(rawToken).digest("hex");
+}
+
+function buildQrLoginPayload(rawToken: string): string {
+  return `${QR_LOGIN_PAYLOAD_PREFIX}${encodeURIComponent(rawToken)}`;
+}
+
+async function isCredentialPasswordValid(
+  fastify: FastifyInstance,
+  input: { userId: string; password: string },
+) {
+  const account = await fastify.db.query.accountDB.findFirst({
+    where(table, { and, eq }) {
+      return and(eq(table.userId, input.userId), eq(table.providerId, "credential"));
+    },
+    columns: {
+      password: true,
+    },
+  });
+
+  if (!account?.password) {
+    return false;
+  }
+
+  try {
+    return await verifyPassword({
+      hash: account.password,
+      password: input.password,
+    });
+  } catch {
+    return false;
+  }
+}
+
+function getAuthErrorCode(error: unknown) {
+  if (typeof error !== "object" || error === null) {
+    return undefined;
+  }
+
+  const body = "body" in error ? (error as { body?: unknown }).body : undefined;
+
+  if (body && typeof body === "object" && "code" in body) {
+    const code = (body as { code?: unknown }).code;
+    return typeof code === "string" ? code : undefined;
+  }
+
+  if ("code" in error) {
+    const code = (error as { code?: unknown }).code;
+    return typeof code === "string" ? code : undefined;
+  }
+
+  return undefined;
+}
+
+function isInvalidCredentialLoginError(error: unknown) {
+  const code = getAuthErrorCode(error);
+  return code === "INVALID_EMAIL_OR_PASSWORD" || code === "INVALID_PHONE_NUMBER_OR_PASSWORD";
+}
+
+async function migrateLegacyCustomerPassword(
+  fastify: FastifyInstance,
+  input: { userId: string; password: string },
+) {
+  const legacyPassword = await fastify.db.query.legacyCustomerPasswordsDB.findFirst({
+    where(table, { eq }) {
+      return eq(table.userId, input.userId);
+    },
+  });
+
+  if (!legacyPassword) {
+    return false;
+  }
+
+  if (legacyPassword.algorithm !== "legacy-bcrypt") {
+    return false;
+  }
+
+  const isValid = await compareBcrypt(input.password, legacyPassword.passwordHash);
+
+  if (!isValid) {
+    return false;
+  }
+
+  const passwordHash = await hashPassword(input.password);
+
+  await fastify.db.transaction(async (tx) => {
+    await tx
+      .insert(accountDB)
+      .values({
+        id: generateNanoId(),
+        userId: input.userId,
+        accountId: input.userId,
+        providerId: "credential",
+        password: passwordHash,
+      })
+      .onConflictDoUpdate({
+        target: [accountDB.providerId, accountDB.accountId],
+        set: {
+          password: passwordHash,
+          updatedAt: new Date(),
+        },
+      });
+
+    await tx
+      .delete(legacyCustomerPasswordsDB)
+      .where(eq(legacyCustomerPasswordsDB.userId, input.userId));
+  });
+
+  return true;
+}
+
+async function ensureCredentialPasswordValidOrMigrated(
+  fastify: FastifyInstance,
+  input: { userId: string; password: string },
+) {
+  const passwordIsValid = await isCredentialPasswordValid(fastify, input);
+
+  if (passwordIsValid) {
+    return true;
+  }
+
+  return await migrateLegacyCustomerPassword(fastify, input);
+}
+
 export function customerAuthService(fastify: FastifyInstance): CustomerAuthService {
   return {
+    async createQrLoginToken({ customerId }) {
+      const rawToken = randomBytes(32).toString("base64url");
+      const expiresAt = new Date(Date.now() + QR_LOGIN_TOKEN_TTL_MS);
+
+      await fastify.db.insert(customerQrLoginTokensDB).values({
+        id: generateNanoId(),
+        customerId,
+        tokenHash: hashQrLoginToken(rawToken),
+        expiresAt,
+      });
+
+      return {
+        payload: buildQrLoginPayload(rawToken),
+        expiresAt: expiresAt.toISOString(),
+      };
+    },
+
     async signupWithPhone({ name, middleName, lastName, email, phone, password }) {
       let userId: string | undefined;
 
@@ -51,8 +209,8 @@ export function customerAuthService(fastify: FastifyInstance): CustomerAuthServi
         await fastify.auth.api.sendPhoneNumberOTP({
           body: { phoneNumber: phone },
         });
-      } catch {
-        fastify.log.error("Failed to send OTP. Unknown Error.");
+      } catch (e) {
+        mapResendError(e);
       }
 
       const response: SignupResponse = {
@@ -73,15 +231,15 @@ export function customerAuthService(fastify: FastifyInstance): CustomerAuthServi
         phone: normalizedPhone,
       });
 
-      if (userAccess && !userAccess.isCustomer) {
-        throw unauthorized(
-          "auth.customerAccessOnly",
-          "This account is not enabled for customer access",
-        );
-      }
+      if (normalizedPhone && userAccess) {
+        const passwordIsValid = await ensureCredentialPasswordValidOrMigrated(fastify, {
+          userId: userAccess.id,
+          password,
+        });
 
-      if (userAccess && (!userAccess.phoneNumber || userAccess.phoneNumberVerified !== true)) {
-        throw badRequest("auth.phoneNotVerified", "Phone number must be verified before login");
+        if (!passwordIsValid) {
+          throw badRequest("auth.invalidCredentials", "Invalid phone number or password");
+        }
       }
 
       let responseToken: string | null = null;
@@ -125,7 +283,53 @@ export function customerAuthService(fastify: FastifyInstance): CustomerAuthServi
           headerToken = headers.get("set-auth-token");
         }
       } catch (e) {
-        mapLoginError(e);
+        let recoveredWithLegacyPassword = false;
+
+        if (
+          normalizedEmail &&
+          userAccess &&
+          isInvalidCredentialLoginError(e) &&
+          (await migrateLegacyCustomerPassword(fastify, {
+            userId: userAccess.id,
+            password,
+          }))
+        ) {
+          try {
+            const { response, headers } = await fastify.auth.api.signInEmail({
+              body: {
+                email: normalizedEmail,
+                password,
+                rememberMe: true,
+              },
+              headers: requestHeaders,
+              returnHeaders: true,
+            });
+
+            userId = response.user.id ?? "";
+            userEmail = response.user.email ?? null;
+            userPhone = response.user.phoneNumber ?? userPhone;
+            responseToken = response.token ?? null;
+            headerToken = headers.get("set-auth-token");
+            recoveredWithLegacyPassword = true;
+          } catch (retryError) {
+            mapLoginError(retryError);
+          }
+        }
+
+        if (!recoveredWithLegacyPassword) {
+          mapLoginError(e);
+        }
+      }
+
+      if (userAccess && (!userAccess.phoneNumber || userAccess.phoneNumberVerified !== true)) {
+        throw badRequest("auth.phoneNotVerified", "Phone number must be verified before login");
+      }
+
+      if (userAccess && !userAccess.isCustomer) {
+        throw unauthorized(
+          "auth.customerAccessOnly",
+          "This account is not enabled for customer access",
+        );
       }
 
       const token = headerToken ?? responseToken;
@@ -281,6 +485,90 @@ export function customerAuthService(fastify: FastifyInstance): CustomerAuthServi
         email: user.email,
         phone: user.phoneNumber ?? phone,
       };
+    },
+
+    async changePassword({ currentPassword, newPassword }, requestHeaders) {
+      try {
+        await fastify.auth.api.changePassword({
+          body: {
+            currentPassword,
+            newPassword,
+            revokeOtherSessions: false,
+          },
+          headers: requestHeaders,
+        });
+      } catch (e) {
+        mapChangePasswordError(e);
+      }
+    },
+
+    async requestPasswordReset({ phone }) {
+      const normalizedPhone = normalizeString(phone, normalizePresets.phone);
+
+      try {
+        await fastify.auth.api.requestPasswordResetPhoneNumber({
+          body: {
+            phoneNumber: normalizedPhone,
+          },
+        });
+      } catch (e) {
+        mapPasswordResetError(e);
+      }
+    },
+
+    async validatePasswordResetCode({ phone, code }) {
+      const normalizedPhone = normalizeString(phone, normalizePresets.phone);
+      const phoneResetIdentifier = `${normalizedPhone}-request-password-reset`;
+      const verification = await fastify.db.query.verificationDB.findFirst({
+        where(table, { eq }) {
+          return eq(table.identifier, phoneResetIdentifier);
+        },
+      });
+
+      if (!verification) {
+        throw badRequest("auth.otpNotFound", "No pending verification found for this phone number");
+      }
+
+      if (verification.expiresAt < new Date()) {
+        throw badRequest("auth.otpExpired", "The verification code has expired");
+      }
+
+      const [otpValue, attempts = "0"] = verification.value.split(":");
+      const currentAttempts = Number.parseInt(attempts, 10) || 0;
+      const allowedAttempts = 5;
+
+      if (currentAttempts >= allowedAttempts) {
+        await fastify.db
+          .delete(verificationDB)
+          .where(eq(verificationDB.identifier, phoneResetIdentifier));
+
+        throw badRequest("auth.tooManyAttempts", "Too many attempts");
+      }
+
+      if (code !== otpValue) {
+        await fastify.db
+          .update(verificationDB)
+          .set({ value: `${otpValue}:${currentAttempts + 1}` })
+          .where(eq(verificationDB.identifier, phoneResetIdentifier));
+
+        throw badRequest("auth.invalidOTP", "The verification code is incorrect");
+      }
+    },
+
+    async resetPassword({ phone, code, newPassword }) {
+      const normalizedPhone = normalizeString(phone, normalizePresets.phone);
+
+      try {
+        await fastify.auth.api.resetPasswordPhoneNumber({
+          body: {
+            phoneNumber: normalizedPhone,
+            otp: code,
+            newPassword,
+          },
+        });
+      } catch (e) {
+        mapPasswordResetError(e);
+      }
     },
   };
 }

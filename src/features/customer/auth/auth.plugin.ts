@@ -8,8 +8,13 @@ declare module "@core/types/feature-namespaces" {
     auth: {
       resendOTP: CustomerAuthService["resendOTP"];
       verifyPhone: CustomerAuthService["verifyPhone"];
+      requestPasswordReset: CustomerAuthService["requestPasswordReset"];
+      validatePasswordResetCode: CustomerAuthService["validatePasswordResetCode"];
+      resetPassword: CustomerAuthService["resetPassword"];
       signupWithPhone: CustomerAuthService["signupWithPhone"];
       loginWithEmailOrPhone: CustomerAuthService["loginWithEmailOrPhone"];
+      changePassword: CustomerAuthService["changePassword"];
+      createQrLoginToken: CustomerAuthService["createQrLoginToken"];
     };
   }
 }
@@ -20,8 +25,13 @@ const customerAuthServicesPlugin: FastifyPluginAsync = async (fastify) => {
   fastify.customer.auth = {
     resendOTP: authService.resendOTP,
     verifyPhone: authService.verifyPhone,
+    requestPasswordReset: authService.requestPasswordReset,
+    validatePasswordResetCode: authService.validatePasswordResetCode,
+    resetPassword: authService.resetPassword,
     signupWithPhone: authService.signupWithPhone,
     loginWithEmailOrPhone: authService.loginWithEmailOrPhone,
+    changePassword: authService.changePassword,
+    createQrLoginToken: authService.createQrLoginToken,
   };
 };
 

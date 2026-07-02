@@ -15,6 +15,7 @@ const customers = pgTable(
     middleName: text("middle_name"),
     lastName: text("last_name"),
     email: text("email"),
+    stripeCustomerId: text("stripe_customer_id"),
     groupId: text("group_id").references(() => customerGroupsDB.id, {
       onDelete: "set null",
     }),
@@ -29,6 +30,9 @@ const customers = pgTable(
     uniqueIndex("customer_phone_active_unique")
       .on(table.phone)
       .where(sql`${table.deletedAt} IS NULL AND ${table.phone} IS NOT NULL`),
+    uniqueIndex("customer_stripe_customer_id_unique")
+      .on(table.stripeCustomerId)
+      .where(sql`${table.stripeCustomerId} IS NOT NULL`),
     index("customer_group_id_idx").on(table.groupId),
     index("customer_phone_idx").on(table.phone),
     index("customer_user_id_idx").on(table.userId),

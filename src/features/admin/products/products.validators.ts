@@ -12,8 +12,10 @@ import type {
   CreateProductRecipeParams,
   CreateProductRecipeSupplyParams,
   CreateProductServiceParams,
+  NormalizedProductModifierParams,
   NormalizedProductVariationParams,
   ProductVariationGroupResponse,
+  ValidatedProductModifierConfig,
   ValidatedProductRecipe,
   ValidatedProductVariationConfig,
 } from "./products.types";
@@ -208,13 +210,18 @@ export async function validateProductRecipe(
   return validateOptionalRecipe(fastify, recipe);
 }
 
-export async function validateProductModifiers(
+export async function validateProductModifierConfigs(
   fastify: FastifyInstance,
-  modifierIds: string[],
-): Promise<string[]> {
-  if (modifierIds.length === 0) {
+  modifierConfigs: NormalizedProductModifierParams[],
+  options: {
+    variationGroups?: ProductVariationGroupResponse[];
+  } = {},
+): Promise<ValidatedProductModifierConfig[]> {
+  if (modifierConfigs.length === 0) {
     return [];
   }
+
+  const modifierIds = modifierConfigs.map(({ modifierId }) => modifierId);
 
   assertUniqueValues(
     modifierIds,
@@ -228,6 +235,15 @@ export async function validateProductModifiers(
     },
     columns: {
       id: true,
+      name: true,
+      minSelect: true,
+    },
+    with: {
+      options: {
+        columns: {
+          id: true,
+        },
+      },
     },
   });
 
@@ -235,7 +251,135 @@ export async function validateProductModifiers(
     throw notFound("modifier.notFound", "One or more modifiers were not found");
   }
 
-  return modifierIds;
+  const modifiersById = new Map(matchedModifiers.map((modifier) => [modifier.id, modifier]));
+
+  const variationGroupsById = new Map(
+    (options.variationGroups ?? []).map((variationGroup) => [variationGroup.id, variationGroup]),
+  );
+
+  return modifierConfigs.map(({ modifierId, optionIds, visibleWhen }) => {
+    const modifier = modifiersById.get(modifierId);
+
+    if (!modifier) {
+      throw notFound("modifier.notFound", "One or more modifiers were not found");
+    }
+
+    if (optionIds === null) {
+      return {
+        modifierId,
+        optionIds,
+        visibleWhen: validateModifierVisibilityConditions(
+          visibleWhen,
+          variationGroupsById,
+          modifier.name,
+        ),
+      };
+    }
+
+    if (optionIds.length === 0) {
+      throw validation(
+        "productModifier.emptyOptionScope",
+        `Product modifier "${modifier.name}" must include at least one allowed option`,
+      );
+    }
+
+    assertUniqueValues(
+      optionIds,
+      "productModifier.duplicateOption",
+      `Product modifier "${modifier.name}" cannot contain duplicated options`,
+    );
+
+    if (modifier.minSelect > optionIds.length) {
+      throw validation(
+        "productModifier.minSelectImpossible",
+        `Product modifier "${modifier.name}" requires at least ${modifier.minSelect} selection(s), but only ${optionIds.length} option(s) are allowed`,
+      );
+    }
+
+    const modifierOptionIds = new Set(modifier.options.map((option) => option.id));
+    const hasInvalidOption = optionIds.some((optionId) => !modifierOptionIds.has(optionId));
+
+    if (hasInvalidOption) {
+      throw validation(
+        "productModifier.invalidOption",
+        `One or more allowed options do not belong to modifier "${modifier.name}"`,
+      );
+    }
+
+    return {
+      modifierId,
+      optionIds,
+      visibleWhen: validateModifierVisibilityConditions(
+        visibleWhen,
+        variationGroupsById,
+        modifier.name,
+      ),
+    };
+  });
+}
+
+function validateModifierVisibilityConditions(
+  visibleWhen: NormalizedProductModifierParams["visibleWhen"],
+  variationGroupsById: ReadonlyMap<string, ProductVariationGroupResponse>,
+  modifierName: string,
+) {
+  if (visibleWhen.length === 0) {
+    return [];
+  }
+
+  if (variationGroupsById.size === 0) {
+    throw validation(
+      "productModifierVisibility.variationRequired",
+      `Product modifier "${modifierName}" cannot include visibility rules without product variation groups`,
+    );
+  }
+
+  const conditionKeys = visibleWhen.map(
+    ({ variationGroupId, variationOptionId }) => `${variationGroupId}:${variationOptionId}`,
+  );
+  assertUniqueValues(
+    conditionKeys,
+    "productModifierVisibility.duplicateCondition",
+    `Product modifier "${modifierName}" cannot contain duplicated visibility conditions`,
+  );
+
+  for (const condition of visibleWhen) {
+    const variationGroup = variationGroupsById.get(condition.variationGroupId);
+
+    if (!variationGroup) {
+      throw validation(
+        "productModifierVisibility.invalidVariationGroup",
+        `Visibility rules for modifier "${modifierName}" must use variation groups assigned to the product`,
+      );
+    }
+
+    const hasOption = variationGroup.options.some(
+      (variationOption) => variationOption.id === condition.variationOptionId,
+    );
+
+    if (!hasOption) {
+      throw validation(
+        "productModifierVisibility.invalidVariationOption",
+        `Visibility rules for modifier "${modifierName}" must use options that belong to their variation group`,
+      );
+    }
+  }
+
+  return [...visibleWhen];
+}
+
+export async function validateProductModifiers(
+  fastify: FastifyInstance,
+  modifierIds: string[],
+): Promise<string[]> {
+  const modifierConfigs = modifierIds.map((modifierId) => ({
+    modifierId,
+    optionIds: null,
+    visibleWhen: [],
+  }));
+  const validatedConfigs = await validateProductModifierConfigs(fastify, modifierConfigs);
+
+  return validatedConfigs.map(({ modifierId }) => modifierId);
 }
 
 export async function validateProductOrganizations(
