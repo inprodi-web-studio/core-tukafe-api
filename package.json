@@ -21,6 +21,7 @@
     "db:studio": "drizzle-kit studio",
     "auth:generate": "better-auth generate --config ./src/core/config/auth.config.ts",
     "auth:migrate": "better-auth migrate --config ./src/core/config/auth.config.ts",
+    "api-key:generate": "node --env-file-if-exists=.env --import tsx scripts/generate-api-key.ts",
     "scaffold": "plop --plopfile scripts/scaffold/plopfile.mjs",
     "scaffold:feature": "plop --plopfile scripts/scaffold/plopfile.mjs feature",
     "scaffold:action": "plop --plopfile scripts/scaffold/plopfile.mjs action",
