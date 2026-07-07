@@ -148,5 +148,17 @@ export const mapProductResponse = (product: ProductWithRelations): ProductRespon
         }),
         recipe: variation.recipe ? mapRecipeResponse(variation.recipe) : null,
       })),
+    compoundComponents: [...product.compoundComponents]
+      .sort((left, right) => {
+        if (left.sortOrder !== right.sortOrder) {
+          return left.sortOrder - right.sortOrder;
+        }
+
+        return left.componentProduct.id.localeCompare(right.componentProduct.id);
+      })
+      .map(({ componentProduct, ...component }) => ({
+        ...component,
+        product: componentProduct,
+      })),
   };
 };

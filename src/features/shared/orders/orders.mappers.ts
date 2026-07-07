@@ -46,6 +46,24 @@ export function mapOrderResponse(
         displayUnitPriceCents:
           item.unitPriceCents +
           (item.quantity > 0 ? Math.round(item.modifiersSubtotalCents / item.quantity) : 0),
+        compoundComponents: [...item.compoundComponents]
+          .sort((left, right) => {
+            if (left.sortOrder !== right.sortOrder) {
+              return left.sortOrder - right.sortOrder;
+            }
+
+            return left.id.localeCompare(right.id);
+          })
+          .map(({ orderItemId: _orderItemId, ...component }) => ({
+            ...component,
+            slotId: component.slotId ?? null,
+            slotOptionId: component.slotOptionId ?? null,
+            slotLabel: component.slotLabel ?? null,
+            variationId: component.variationId ?? null,
+            componentLabel: component.componentLabel ?? null,
+            productKitchenName: component.productKitchenName ?? null,
+            variationName: component.variationName ?? null,
+          })),
         modifiers: [...item.modifiers]
           .sort((left, right) => {
             if (left.sortOrder !== right.sortOrder) {

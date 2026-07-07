@@ -151,6 +151,38 @@ export interface GuestProductConfiguration {
   pricing: GuestProductConfigurationPricing;
   steps: GuestProductConfigurationStep[];
   variations: GuestProductConfigurationVariation[];
+  compoundComponents: GuestProductConfigurationCompoundComponent[];
+  compoundSlots: GuestProductConfigurationCompoundSlot[];
+}
+
+export interface GuestProductConfigurationCompoundComponent {
+  componentId: string;
+  quantity: number;
+  sortOrder: number;
+  label: string | null;
+  product: GuestProductConfigurationProduct;
+  pricing: GuestProductConfigurationPricing;
+  steps: GuestProductConfigurationStep[];
+  variations: GuestProductConfigurationVariation[];
+}
+
+export interface GuestProductConfigurationCompoundSlot {
+  slotId: string;
+  label: string;
+  quantity: number;
+  sortOrder: number;
+  options: GuestProductConfigurationCompoundSlotOption[];
+}
+
+export interface GuestProductConfigurationCompoundSlotOption {
+  optionId: string;
+  productId: string;
+  sortOrder: number;
+  label: string | null;
+  product: GuestProductConfigurationProduct;
+  pricing: GuestProductConfigurationPricing;
+  steps: GuestProductConfigurationStep[];
+  variations: GuestProductConfigurationVariation[];
 }
 
 export interface GuestProductCustomerOrderCount {

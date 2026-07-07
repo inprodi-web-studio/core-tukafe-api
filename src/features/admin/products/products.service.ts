@@ -1,6 +1,7 @@
 import {
   organizationProductDB,
   productCategoryLinksDB,
+  productCompoundComponentsDB,
   productModifierOptionsDB,
   productModifierVisibilityRulesDB,
   productModifiersDB,
@@ -31,6 +32,7 @@ import {
   buildProductModifierInsertPayloads,
   buildProductModifierOptionInsertPayloads,
   buildProductModifierVisibilityRuleInsertPayloads,
+  buildProductCompoundComponentInsertPayloads,
   buildProductVariationInsertPayloads,
   normalizeProductInput,
   normalizeProductVariationsInput,
@@ -39,6 +41,7 @@ import { mapProductResponse, sortVariationGroupResponse } from "./products.mappe
 import type { AdminProductsService } from "./products.types";
 import {
   validateProductBasePrice,
+  validateProductCompoundComponents,
   validateProductModifierConfigs,
   validateProductOrganizations,
   validateProductRecipe,
@@ -80,309 +83,344 @@ async function getProductVariationGroupsForValidation(fastify: FastifyInstance, 
 export function adminProductsService(fastify: FastifyInstance): AdminProductsService {
   return {
     async get(id, { safe = false } = {}) {
-      const [product, recipe, productVariationGroups, variations, productModifiers] =
-        await Promise.all([
-          fastify.db.query.productsDB.findFirst({
-            where(productTable, { eq }) {
-              return eq(productTable.id, id);
-            },
-            columns: {
-              unitId: false,
-              categoryId: false,
-              imageUploadId: false,
-            },
-            with: {
-              unit: true,
-              image: {
-                columns: {
-                  id: true,
-                  name: true,
-                  path: true,
-                  visibility: true,
-                  mimeType: true,
-                },
-              },
-              category: {
-                columns: {
-                  imageUploadId: false,
-                },
-                with: {
-                  image: {
-                    columns: {
-                      id: true,
-                      name: true,
-                      path: true,
-                      visibility: true,
-                      mimeType: true,
-                    },
-                  },
-                },
-              },
-              categories: {
-                columns: {
-                  productId: false,
-                  categoryId: false,
-                  createdAt: false,
-                  updatedAt: false,
-                },
-                with: {
-                  category: {
-                    columns: {
-                      imageUploadId: false,
-                    },
-                    with: {
-                      image: {
-                        columns: {
-                          id: true,
-                          name: true,
-                          path: true,
-                          visibility: true,
-                          mimeType: true,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-              taxes: {
-                with: {
-                  tax: true,
-                },
-              },
-              organizations: {
-                with: {
-                  organization: true,
-                },
+      const [
+        product,
+        recipe,
+        productVariationGroups,
+        variations,
+        productModifiers,
+        compoundComponents,
+      ] = await Promise.all([
+        fastify.db.query.productsDB.findFirst({
+          where(productTable, { eq }) {
+            return eq(productTable.id, id);
+          },
+          columns: {
+            unitId: false,
+            categoryId: false,
+            imageUploadId: false,
+          },
+          with: {
+            unit: true,
+            image: {
+              columns: {
+                id: true,
+                name: true,
+                path: true,
+                visibility: true,
+                mimeType: true,
               },
             },
-          }),
-          fastify.db.query.recipesDB.findFirst({
-            where(recipeTable, { eq }) {
-              return eq(recipeTable.productId, id);
-            },
-            columns: {
-              productId: false,
-            },
-            with: {
-              ingredients: {
-                columns: {
-                  recipeId: false,
-                  ingredientId: false,
-                },
-                with: {
-                  ingredient: {
-                    columns: {
-                      baseUnitId: false,
-                      categoryId: false,
-                    },
-                    with: {
-                      baseUnit: true,
-                      category: true,
-                    },
-                  },
-                },
+            category: {
+              columns: {
+                imageUploadId: false,
               },
-              supplies: {
-                columns: {
-                  recipeId: false,
-                  supplyId: false,
-                },
-                with: {
-                  supply: {
-                    columns: {
-                      baseUnitId: false,
-                      categoryId: false,
-                    },
-                    with: {
-                      baseUnit: true,
-                      category: true,
-                    },
+              with: {
+                image: {
+                  columns: {
+                    id: true,
+                    name: true,
+                    path: true,
+                    visibility: true,
+                    mimeType: true,
                   },
                 },
               },
             },
-          }),
-          fastify.db.query.productVariationGroupsDB.findMany({
-            where(table, { eq }) {
-              return eq(table.productId, id);
-            },
-            with: {
-              group: {
-                with: {
-                  options: {
-                    columns: {
-                      imageUploadId: false,
-                    },
-                    with: {
-                      image: {
-                        columns: {
-                          id: true,
-                          name: true,
-                          path: true,
-                          visibility: true,
-                          mimeType: true,
-                        },
+            categories: {
+              columns: {
+                productId: false,
+                categoryId: false,
+                createdAt: false,
+                updatedAt: false,
+              },
+              with: {
+                category: {
+                  columns: {
+                    imageUploadId: false,
+                  },
+                  with: {
+                    image: {
+                      columns: {
+                        id: true,
+                        name: true,
+                        path: true,
+                        visibility: true,
+                        mimeType: true,
                       },
                     },
                   },
                 },
               },
             },
-          }),
-          fastify.db.query.variationsDB.findMany({
-            where(table, { and, eq, isNull }) {
-              return and(eq(table.productId, id), isNull(table.deletedAt));
+            taxes: {
+              with: {
+                tax: true,
+              },
             },
-            columns: {
-              productId: false,
-              combinationKey: false,
+            organizations: {
+              with: {
+                organization: true,
+              },
             },
-            with: {
-              selections: {
-                columns: {
-                  variationId: false,
-                  variationGroupId: false,
-                  variationOptionId: false,
+          },
+        }),
+        fastify.db.query.recipesDB.findFirst({
+          where(recipeTable, { eq }) {
+            return eq(recipeTable.productId, id);
+          },
+          columns: {
+            productId: false,
+          },
+          with: {
+            ingredients: {
+              columns: {
+                recipeId: false,
+                ingredientId: false,
+              },
+              with: {
+                ingredient: {
+                  columns: {
+                    baseUnitId: false,
+                    categoryId: false,
+                  },
+                  with: {
+                    baseUnit: true,
+                    category: true,
+                  },
                 },
-                with: {
-                  group: true,
-                  option: {
-                    columns: {
-                      imageUploadId: false,
-                    },
-                    with: {
-                      image: {
-                        columns: {
-                          id: true,
-                          name: true,
-                          path: true,
-                          visibility: true,
-                          mimeType: true,
-                        },
+              },
+            },
+            supplies: {
+              columns: {
+                recipeId: false,
+                supplyId: false,
+              },
+              with: {
+                supply: {
+                  columns: {
+                    baseUnitId: false,
+                    categoryId: false,
+                  },
+                  with: {
+                    baseUnit: true,
+                    category: true,
+                  },
+                },
+              },
+            },
+          },
+        }),
+        fastify.db.query.productVariationGroupsDB.findMany({
+          where(table, { eq }) {
+            return eq(table.productId, id);
+          },
+          with: {
+            group: {
+              with: {
+                options: {
+                  columns: {
+                    imageUploadId: false,
+                  },
+                  with: {
+                    image: {
+                      columns: {
+                        id: true,
+                        name: true,
+                        path: true,
+                        visibility: true,
+                        mimeType: true,
                       },
                     },
                   },
                 },
               },
-              recipe: {
-                columns: {
-                  variationId: false,
-                },
-                with: {
-                  ingredients: {
-                    columns: {
-                      variationId: false,
-                      ingredientId: false,
-                    },
-                    with: {
-                      ingredient: {
-                        columns: {
-                          baseUnitId: false,
-                          categoryId: false,
-                        },
-                        with: {
-                          baseUnit: true,
-                          category: true,
-                        },
-                      },
-                    },
+            },
+          },
+        }),
+        fastify.db.query.variationsDB.findMany({
+          where(table, { and, eq, isNull }) {
+            return and(eq(table.productId, id), isNull(table.deletedAt));
+          },
+          columns: {
+            productId: false,
+            combinationKey: false,
+          },
+          with: {
+            selections: {
+              columns: {
+                variationId: false,
+                variationGroupId: false,
+                variationOptionId: false,
+              },
+              with: {
+                group: true,
+                option: {
+                  columns: {
+                    imageUploadId: false,
                   },
-                  supplies: {
-                    columns: {
-                      variationId: false,
-                      supplyId: false,
-                    },
-                    with: {
-                      supply: {
-                        columns: {
-                          baseUnitId: false,
-                          categoryId: false,
-                        },
-                        with: {
-                          baseUnit: true,
-                          category: true,
-                        },
+                  with: {
+                    image: {
+                      columns: {
+                        id: true,
+                        name: true,
+                        path: true,
+                        visibility: true,
+                        mimeType: true,
                       },
                     },
                   },
                 },
               },
             },
-          }),
-          fastify.db.query.productModifiersDB.findMany({
-            where(table, { eq }) {
-              return eq(table.productId, id);
-            },
-            with: {
-              allowedOptions: {
-                columns: {
-                  productId: false,
-                  modifierId: false,
-                  modifierOptionId: true,
-                  createdAt: false,
-                  updatedAt: false,
-                },
+            recipe: {
+              columns: {
+                variationId: false,
               },
-              visibilityRules: {
-                columns: {
-                  productId: false,
-                  modifierId: false,
-                  variationGroupId: true,
-                  variationOptionId: true,
-                  createdAt: false,
-                  updatedAt: false,
-                },
-              },
-              modifier: {
-                with: {
-                  options: {
-                    columns: {
-                      modifierId: false,
+              with: {
+                ingredients: {
+                  columns: {
+                    variationId: false,
+                    ingredientId: false,
+                  },
+                  with: {
+                    ingredient: {
+                      columns: {
+                        baseUnitId: false,
+                        categoryId: false,
+                      },
+                      with: {
+                        baseUnit: true,
+                        category: true,
+                      },
                     },
-                    with: {
-                      ingredients: {
-                        columns: {
-                          modifierOptionId: false,
-                          ingredientId: false,
-                        },
-                        with: {
-                          ingredient: {
-                            columns: {
-                              baseUnitId: false,
-                              categoryId: false,
-                            },
-                            with: {
-                              baseUnit: true,
-                              category: true,
-                            },
+                  },
+                },
+                supplies: {
+                  columns: {
+                    variationId: false,
+                    supplyId: false,
+                  },
+                  with: {
+                    supply: {
+                      columns: {
+                        baseUnitId: false,
+                        categoryId: false,
+                      },
+                      with: {
+                        baseUnit: true,
+                        category: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        }),
+        fastify.db.query.productModifiersDB.findMany({
+          where(table, { eq }) {
+            return eq(table.productId, id);
+          },
+          with: {
+            allowedOptions: {
+              columns: {
+                productId: false,
+                modifierId: false,
+                modifierOptionId: true,
+                createdAt: false,
+                updatedAt: false,
+              },
+            },
+            visibilityRules: {
+              columns: {
+                productId: false,
+                modifierId: false,
+                variationGroupId: true,
+                variationOptionId: true,
+                createdAt: false,
+                updatedAt: false,
+              },
+            },
+            modifier: {
+              with: {
+                options: {
+                  columns: {
+                    modifierId: false,
+                  },
+                  with: {
+                    ingredients: {
+                      columns: {
+                        modifierOptionId: false,
+                        ingredientId: false,
+                      },
+                      with: {
+                        ingredient: {
+                          columns: {
+                            baseUnitId: false,
+                            categoryId: false,
                           },
-                        },
-                      },
-                      supplies: {
-                        columns: {
-                          modifierOptionId: false,
-                          supplyId: false,
-                        },
-                        with: {
-                          supply: {
-                            columns: {
-                              baseUnitId: false,
-                              categoryId: false,
-                            },
-                            with: {
-                              baseUnit: true,
-                              category: true,
-                            },
+                          with: {
+                            baseUnit: true,
+                            category: true,
                           },
                         },
                       },
                     },
+                    supplies: {
+                      columns: {
+                        modifierOptionId: false,
+                        supplyId: false,
+                      },
+                      with: {
+                        supply: {
+                          columns: {
+                            baseUnitId: false,
+                            categoryId: false,
+                          },
+                          with: {
+                            baseUnit: true,
+                            category: true,
+                          },
+                        },
+                      },
+                    },
                   },
                 },
               },
             },
-          }),
-        ]);
+          },
+        }),
+        fastify.db.query.productCompoundComponentsDB.findMany({
+          where(table, { eq }) {
+            return eq(table.compoundProductId, id);
+          },
+          with: {
+            componentProduct: {
+              columns: {
+                id: true,
+                name: true,
+                kitchenName: true,
+                priceCents: true,
+                productType: true,
+                customerDescription: true,
+                imageUploadId: false,
+              },
+              with: {
+                image: {
+                  columns: {
+                    id: true,
+                    name: true,
+                    path: true,
+                    visibility: true,
+                    mimeType: true,
+                  },
+                },
+              },
+            },
+          },
+        }),
+      ]);
 
       if (!product && !safe) {
         throw notFound("product.notFound", "The product was not found");
@@ -398,6 +436,7 @@ export function adminProductsService(fastify: FastifyInstance): AdminProductsSer
         variationGroups: productVariationGroups,
         variations,
         modifiers: productModifiers,
+        compoundComponents,
       });
     },
 
@@ -477,6 +516,7 @@ export function adminProductsService(fastify: FastifyInstance): AdminProductsSer
         modifierConfigs,
         variationGroupIds,
         variations,
+        compoundComponents,
       } = normalizeProductInput(input);
 
       try {
@@ -524,12 +564,17 @@ export function adminProductsService(fastify: FastifyInstance): AdminProductsSer
           }
         }
 
-        const [validatedRecipe, validatedVariationConfig, validatedOrganizationIds] =
-          await Promise.all([
-            validateProductRecipe(fastify, productType, variations.length > 0, recipe),
-            validateProductVariations(fastify, productType, variationGroupIds, variations),
-            validateProductOrganizations(fastify, organizationIds),
-          ]);
+        const [
+          validatedRecipe,
+          validatedVariationConfig,
+          validatedOrganizationIds,
+          validatedCompoundComponents,
+        ] = await Promise.all([
+          validateProductRecipe(fastify, productType, variations.length > 0, recipe),
+          validateProductVariations(fastify, productType, variationGroupIds, variations),
+          validateProductOrganizations(fastify, organizationIds),
+          validateProductCompoundComponents(fastify, productType, compoundComponents),
+        ]);
         const validatedModifierConfigs = await validateProductModifierConfigs(
           fastify,
           modifierConfigs,
@@ -539,6 +584,18 @@ export function adminProductsService(fastify: FastifyInstance): AdminProductsSer
           priceCents,
           validatedVariationConfig.variations.length,
         );
+
+        if (
+          productType === "compound" &&
+          (validatedVariationConfig.variations.length > 0 ||
+            validatedVariationConfig.variationGroups.length > 0 ||
+            validatedModifierConfigs.length > 0)
+        ) {
+          throw badRequest(
+            "product.compoundParentConfigurationNotAllowed",
+            "Compound product parent cannot include variations or modifiers",
+          );
+        }
 
         const createdProductId = await fastify.db.transaction(async (tx) => {
           const [createdProduct] = await tx
@@ -578,6 +635,17 @@ export function adminProductsService(fastify: FastifyInstance): AdminProductsSer
                 taxId,
               })),
             );
+          }
+
+          if (validatedCompoundComponents.length > 0) {
+            await tx
+              .insert(productCompoundComponentsDB)
+              .values(
+                buildProductCompoundComponentInsertPayloads(
+                  createdProduct.id,
+                  validatedCompoundComponents,
+                ),
+              );
           }
 
           await tx.insert(organizationProductDB).values(

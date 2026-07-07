@@ -141,6 +141,27 @@
       "when": 1783011600000,
       "tag": "0020_product_modifier_visibility_rules",
       "breakpoints": false
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1783098000000,
+      "tag": "0021_compound_products",
+      "breakpoints": false
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1783101600000,
+      "tag": "0022_compound_slots",
+      "breakpoints": false
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1783510800000,
+      "tag": "0023_legacy_free_drink_entitlements",
+      "breakpoints": false
     }
   ]
 }

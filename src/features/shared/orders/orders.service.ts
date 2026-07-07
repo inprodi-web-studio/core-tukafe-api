@@ -6,6 +6,7 @@ import {
   customersDB,
   customerOrderPromotionStatesDB,
   orderPaymentAttemptsDB,
+  orderItemCompoundComponentsDB,
   orderItemModifiersDB,
   orderItemsDB,
   orderItemTaxesDB,
@@ -218,6 +219,39 @@ function buildWorkOrderRows({
     const unitCount = Number.isInteger(quantity) ? Math.max(1, Math.trunc(quantity)) : 1;
     const quantitySnapshot = Number.isInteger(quantity) ? 1 : quantity;
 
+    if (preparedOrderItem.compoundComponents.length > 0) {
+      return preparedOrderItem.compoundComponents.flatMap((component) => {
+        const componentUnitCount = Math.max(1, component.quantity ?? 1);
+
+        return Array.from({ length: unitCount * componentUnitCount }, (_, index) => ({
+          id: generateNanoId(),
+          organizationId,
+          orderId,
+          orderItemId: preparedOrderItem.item.id ?? "",
+          orderFolio,
+          customerDisplayName,
+          productName: component.productName,
+          productKitchenName: component.productKitchenName,
+          variationName: component.variationName ?? null,
+          variationSelectionsSnapshot: component.variationSelectionsSnapshot ?? [],
+          modifiersSnapshot: (component.modifiersSnapshot ?? []).map((modifier) => ({
+            modifierId: modifier.modifierId,
+            modifierName: modifier.modifierName,
+            modifierKitchenName: modifier.modifierKitchenName,
+            modifierOptionId: modifier.modifierOptionId,
+            modifierOptionName: modifier.modifierOptionName,
+            modifierOptionKitchenName: modifier.modifierOptionKitchenName,
+            quantity: modifier.quantity,
+          })),
+          orderComment,
+          itemComment: preparedOrderItem.item.comment ?? null,
+          unitIndex: index + 1,
+          quantitySnapshot,
+          status: "open",
+        }));
+      });
+    }
+
     return Array.from({ length: unitCount }, (_, index) => ({
       id: generateNanoId(),
       organizationId,
@@ -292,6 +326,7 @@ export async function loadOrder(
       paymentAttempts: true,
       items: {
         with: {
+          compoundComponents: true,
           modifiers: true,
           taxes: true,
         },
@@ -427,6 +462,8 @@ async function loadCustomerPromotionState(
     columns: {
       progressCount: true,
       candidateProductIds: true,
+      legacyFreeDrinkGrantedAt: true,
+      legacyFreeDrinkRedeemedAt: true,
     },
   });
 
@@ -437,6 +474,8 @@ async function loadCustomerPromotionState(
   return {
     progressCount: state.progressCount,
     candidateProductIds: state.candidateProductIds,
+    legacyFreeDrinkGrantedAt: state.legacyFreeDrinkGrantedAt,
+    legacyFreeDrinkRedeemedAt: state.legacyFreeDrinkRedeemedAt,
   };
 }
 
@@ -507,7 +546,9 @@ async function lockCustomerPromotionState(
     select
       customer_id as "customerId",
       progress_count as "progressCount",
-      candidate_product_ids as "candidateProductIds"
+      candidate_product_ids as "candidateProductIds",
+      legacy_free_drink_granted_at as "legacyFreeDrinkGrantedAt",
+      legacy_free_drink_redeemed_at as "legacyFreeDrinkRedeemedAt"
     from customer_order_promotion_state
     where customer_id = ${customerId}
     for update
@@ -524,6 +565,10 @@ async function lockCustomerPromotionState(
     candidateProductIds: Array.isArray(row.candidateProductIds)
       ? row.candidateProductIds.filter((value): value is string => typeof value === "string")
       : [],
+    legacyFreeDrinkGrantedAt:
+      row.legacyFreeDrinkGrantedAt instanceof Date ? row.legacyFreeDrinkGrantedAt : null,
+    legacyFreeDrinkRedeemedAt:
+      row.legacyFreeDrinkRedeemedAt instanceof Date ? row.legacyFreeDrinkRedeemedAt : null,
   };
 }
 
@@ -684,6 +729,37 @@ function mapPreparedPayloadItemsToResponse(
     sortOrder: preparedOrderItem.item.sortOrder ?? 0,
     sourceClientItemId: preparedOrderItem.sourceClientItemId,
     lineType: preparedOrderItem.lineType,
+    compoundComponents: [...preparedOrderItem.compoundComponents]
+      .sort((left, right) => {
+        const leftSortOrder = left.sortOrder ?? 0;
+        const rightSortOrder = right.sortOrder ?? 0;
+
+        if (leftSortOrder !== rightSortOrder) {
+          return leftSortOrder - rightSortOrder;
+        }
+
+        return left.id.localeCompare(right.id);
+      })
+      .map((component) => ({
+        id: component.id,
+        compoundProductId: component.compoundProductId,
+        slotId: component.slotId ?? null,
+        slotOptionId: component.slotOptionId ?? null,
+        slotLabel: component.slotLabel ?? null,
+        componentProductId: component.componentProductId,
+        variationId: component.variationId ?? null,
+        componentLabel: component.componentLabel ?? null,
+        productName: component.productName,
+        productKitchenName: component.productKitchenName ?? null,
+        variationName: component.variationName ?? null,
+        variationSelectionsSnapshot: component.variationSelectionsSnapshot ?? [],
+        modifiersSnapshot: component.modifiersSnapshot ?? [],
+        quantity: component.quantity ?? 1,
+        modifiersSubtotalCents: component.modifiersSubtotalCents ?? 0,
+        sortOrder: component.sortOrder ?? 0,
+        createdAt: component.createdAt ?? null,
+        updatedAt: component.updatedAt ?? null,
+      })),
     modifiers: [...preparedOrderItem.modifiers]
       .sort((left, right) => {
         const leftSortOrder = left.sortOrder ?? 0;
@@ -808,14 +884,19 @@ function buildPromotionStateSnapshot(state: OrderPromotionState): OrderPromotion
       return true;
     });
   const progressCount = Math.max(0, Math.min(state.progressCount, 4));
+  const legacyFreeDrinkPending = Boolean(
+    state.legacyFreeDrinkGrantedAt && !state.legacyFreeDrinkRedeemedAt,
+  );
 
   return {
     code: ORDER_PROMOTION_CODE,
     discountCents: 0,
     progress: {
-      progressCount,
-      candidateProductIds,
-      eligibleForFreeDrink: progressCount === 4,
+      progressCount: legacyFreeDrinkPending ? 0 : progressCount,
+      candidateProductIds: legacyFreeDrinkPending ? [] : candidateProductIds,
+      eligibleForFreeDrink: legacyFreeDrinkPending || progressCount === 4,
+      legacyFreeDrinkPending,
+      rewardMode: legacyFreeDrinkPending ? "legacy" : progressCount === 4 ? "standard" : null,
     },
     appliedItems: [],
   };
@@ -1080,10 +1161,12 @@ export async function previewOrder(
   }
 
   const promotionState = normalizedInput.customerId
-    ? ((await loadCustomerPromotionState(fastify, normalizedInput.customerId)) ?? {
-        progressCount: 0,
-        candidateProductIds: [],
-      })
+      ? ((await loadCustomerPromotionState(fastify, normalizedInput.customerId)) ?? {
+          progressCount: 0,
+          candidateProductIds: [],
+          legacyFreeDrinkGrantedAt: null,
+          legacyFreeDrinkRedeemedAt: null,
+        })
     : null;
   const cashbackAccount = normalizedInput.customerId
     ? await loadCustomerCashbackAccount(fastify, normalizedInput.customerId)
@@ -1386,6 +1469,8 @@ export async function createOrder(
           ? ((await lockCustomerPromotionState(tx, normalizedInput.customerId)) ?? {
               progressCount: 0,
               candidateProductIds: [],
+              legacyFreeDrinkGrantedAt: null,
+              legacyFreeDrinkRedeemedAt: null,
             })
           : null;
         const cashbackAccount = normalizedInput.customerId
@@ -1492,6 +1577,9 @@ export async function createOrder(
         const orderItemModifiersToInsert = calculatedOrder.payload.items.flatMap(
           (preparedOrderItem) => preparedOrderItem.modifiers,
         );
+        const orderItemCompoundComponentsToInsert = calculatedOrder.payload.items.flatMap(
+          (preparedOrderItem) => preparedOrderItem.compoundComponents,
+        );
         const orderItemTaxesToInsert = calculatedOrder.payload.items.flatMap(
           (preparedOrderItem) => preparedOrderItem.taxes,
         );
@@ -1502,6 +1590,12 @@ export async function createOrder(
 
         if (orderItemModifiersToInsert.length > 0) {
           await tx.insert(orderItemModifiersDB).values(orderItemModifiersToInsert);
+        }
+
+        if (orderItemCompoundComponentsToInsert.length > 0) {
+          await tx
+            .insert(orderItemCompoundComponentsDB)
+            .values(orderItemCompoundComponentsToInsert);
         }
 
         if (orderItemTaxesToInsert.length > 0) {
@@ -1532,6 +1626,10 @@ export async function createOrder(
               customerId: normalizedInput.customerId,
               progressCount: calculatedOrder.nextPromotionState.progressCount,
               candidateProductIds: calculatedOrder.nextPromotionState.candidateProductIds,
+              legacyFreeDrinkGrantedAt:
+                calculatedOrder.nextPromotionState.legacyFreeDrinkGrantedAt ?? null,
+              legacyFreeDrinkRedeemedAt:
+                calculatedOrder.nextPromotionState.legacyFreeDrinkRedeemedAt ?? null,
               version: 1,
             })
             .onConflictDoUpdate({
@@ -1539,6 +1637,10 @@ export async function createOrder(
               set: {
                 progressCount: calculatedOrder.nextPromotionState.progressCount,
                 candidateProductIds: calculatedOrder.nextPromotionState.candidateProductIds,
+                legacyFreeDrinkGrantedAt:
+                  calculatedOrder.nextPromotionState.legacyFreeDrinkGrantedAt ?? null,
+                legacyFreeDrinkRedeemedAt:
+                  calculatedOrder.nextPromotionState.legacyFreeDrinkRedeemedAt ?? null,
                 version: sql`${customerOrderPromotionStatesDB.version} + 1`,
                 updatedAt: sql`now()`,
               },

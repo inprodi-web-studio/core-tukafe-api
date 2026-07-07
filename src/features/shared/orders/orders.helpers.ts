@@ -62,6 +62,29 @@ export function normalizeCreateOrderInput({
         modifierOptionId: modifier.modifierOptionId,
         quantity: modifier.quantity ?? 1,
       })),
+      components: (item.components ?? []).map((component) => ({
+        componentId: normalizeString(component.componentId ?? component.slotId ?? "", {
+          trim: true,
+          collapseWhitespace: true,
+          maxLength: 160,
+        }),
+        slotId: normalizeString(component.slotId ?? component.componentId ?? "", {
+          trim: true,
+          collapseWhitespace: true,
+          maxLength: 160,
+        }),
+        slotOptionId: normalizeString(component.slotOptionId ?? "", {
+          trim: true,
+          collapseWhitespace: true,
+          maxLength: 160,
+        }) || null,
+        productId: component.productId,
+        variationId: component.variationId ?? null,
+        modifiers: (component.modifiers ?? []).map((modifier) => ({
+          modifierOptionId: modifier.modifierOptionId,
+          quantity: modifier.quantity ?? 1,
+        })),
+      })),
     };
   });
 
@@ -75,10 +98,7 @@ export function normalizeCreateOrderInput({
   }
 
   const normalizedCashbackRedeemCents = cashbackRedeemCents ?? 0;
-  if (
-    !Number.isInteger(normalizedCashbackRedeemCents) ||
-    normalizedCashbackRedeemCents < 0
-  ) {
+  if (!Number.isInteger(normalizedCashbackRedeemCents) || normalizedCashbackRedeemCents < 0) {
     throw validation(
       "cashback.redemption.invalidAmount",
       "cashbackRedeemCents must be a non-negative integer",

@@ -36,6 +36,7 @@ function splitAmountByQuantity({
 function normalizePromotionState(state?: OrderPromotionState | null): {
   progressCount: number;
   candidateProductIds: string[];
+  legacyFreeDrinkPending: boolean;
 } {
   const seen = new Set<string>();
   const candidateProductIds = [...(state?.candidateProductIds ?? [])]
@@ -50,10 +51,14 @@ function normalizePromotionState(state?: OrderPromotionState | null): {
     });
 
   const progressCount = clampProgress(state?.progressCount ?? 0);
+  const legacyFreeDrinkPending = Boolean(
+    state?.legacyFreeDrinkGrantedAt && !state.legacyFreeDrinkRedeemedAt,
+  );
 
   return {
-    progressCount,
-    candidateProductIds,
+    progressCount: legacyFreeDrinkPending ? 0 : progressCount,
+    candidateProductIds: legacyFreeDrinkPending ? [] : candidateProductIds,
+    legacyFreeDrinkPending,
   };
 }
 
@@ -243,6 +248,11 @@ export function applyBuy4Get1Promotion({
   let progressCount = normalizedState.progressCount;
   let promotionDiscountCents = 0;
   let remainingManualFreeUnits = manualRedemption ? MAX_FREE_UNITS_PER_ORDER_MANUAL_MODE : null;
+  const legacyFreeDrinkPending = normalizedState.legacyFreeDrinkPending;
+  const legacyRedemptionRequested =
+    legacyFreeDrinkPending &&
+    manualRedemption &&
+    itemCopies.some((item) => item.requestedRedeemFreeUnits > 0);
 
   const appliedItems: OrderPromotionResponse["appliedItems"] = [];
   const promotedItems: PreparedOrderItem[] = [];
@@ -261,6 +271,18 @@ export function applyBuy4Get1Promotion({
       : Number.POSITIVE_INFINITY;
 
     for (let currentUnit = 0; currentUnit < quantity; currentUnit += 1) {
+      if (legacyFreeDrinkPending) {
+        const shouldRedeemLegacyUnit =
+          requestedRedeemFreeUnits > 0 && (remainingManualFreeUnits ?? 0) > 0;
+
+        if (shouldRedeemLegacyUnit) {
+          freeUnits += 1;
+          requestedRedeemFreeUnits -= 1;
+          remainingManualFreeUnits = Math.max(0, (remainingManualFreeUnits ?? 0) - 1);
+        }
+        continue;
+      }
+
       if (progressCount < 4) {
         if (!candidateProductIdsSet.has(preparedOrderItem.item.productId)) {
           candidateProductIdsSet.add(preparedOrderItem.item.productId);
@@ -386,7 +408,9 @@ export function applyBuy4Get1Promotion({
     progress: {
       progressCount,
       candidateProductIds,
-      eligibleForFreeDrink: progressCount === 4,
+      eligibleForFreeDrink: legacyFreeDrinkPending || progressCount === 4,
+      legacyFreeDrinkPending,
+      rewardMode: legacyFreeDrinkPending ? "legacy" : progressCount === 4 ? "standard" : null,
     },
     appliedItems,
   };
@@ -400,8 +424,14 @@ export function applyBuy4Get1Promotion({
     },
     promotion,
     nextState: {
-      progressCount,
-      candidateProductIds,
+      progressCount: legacyRedemptionRequested && promotionDiscountCents > 0 ? 0 : progressCount,
+      candidateProductIds:
+        legacyRedemptionRequested && promotionDiscountCents > 0 ? [] : candidateProductIds,
+      legacyFreeDrinkGrantedAt: state?.legacyFreeDrinkGrantedAt ?? null,
+      legacyFreeDrinkRedeemedAt:
+        legacyRedemptionRequested && promotionDiscountCents > 0
+          ? new Date()
+          : (state?.legacyFreeDrinkRedeemedAt ?? null),
     },
   };
 }

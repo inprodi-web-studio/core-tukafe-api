@@ -1,4 +1,5 @@
 import { workOrdersDB } from "@core/db/schemas";
+import { attachWorkOrderDetails } from "@features/admin/workOrders/workOrders.service";
 import fastifyWebsocket, { type WebSocket } from "@fastify/websocket";
 import { eq } from "drizzle-orm";
 import type { FastifyPluginAsync } from "fastify";
@@ -76,9 +77,11 @@ const workOrderRealtimePlugin: FastifyPluginAsync = async (fastify) => {
       return;
     }
 
+    const [workOrderResponse] = await attachWorkOrderDetails(fastify, [workOrder]);
+
     const message = JSON.stringify({
       type: event.type,
-      data: workOrder,
+      data: workOrderResponse ?? workOrder,
     });
     let sentCount = 0;
 

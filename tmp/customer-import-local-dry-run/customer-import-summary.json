@@ -1,0 +1,29 @@
+{
+  "mode": "dry-run",
+  "generatedAt": "2026-07-07T16:33:08.289Z",
+  "stats": {
+    "customers": {
+      "read": 6927,
+      "created": 6927,
+      "updated": 0,
+      "unchanged": 0,
+      "groupsCreated": 1
+    },
+    "users": {
+      "read": 887,
+      "created": 887,
+      "updated": 0,
+      "linkedCustomers": 887,
+      "legacyPasswordsStored": 887,
+      "betterAuthPasswordsStored": 0,
+      "skippedExistingPasswords": 0
+    },
+    "cashback": {
+      "read": 336,
+      "created": 336,
+      "updated": 0,
+      "unchanged": 0,
+      "totalBalanceCents": 1147440
+    }
+  }
+}

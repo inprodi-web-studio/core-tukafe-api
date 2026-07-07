@@ -97,4 +97,10 @@ const productSchema = z.object({
 
 export const listResponseSchema = z.array(productSchema);
 
+export const listQuerySchema = z.object({
+  organizationId: z.string().nonempty().optional(),
+  categoryId: z.string().nonempty().optional(),
+});
+
+export type ListQuery = z.infer<typeof listQuerySchema>;
 export type ListResponse = z.infer<typeof listResponseSchema>;

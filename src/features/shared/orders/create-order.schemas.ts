@@ -16,6 +16,17 @@ export const orderModifierBodySchema = z
   })
   .strict();
 
+export const orderItemCompoundComponentBodySchema = z
+  .object({
+    componentId: z.string().trim().min(1).max(160).optional(),
+    slotId: z.string().trim().min(1).max(160).optional(),
+    slotOptionId: z.string().trim().min(1).max(160).optional(),
+    productId: z.nanoid(),
+    variationId: z.nanoid().nullish(),
+    modifiers: z.array(orderModifierBodySchema).optional(),
+  })
+  .strict();
+
 export const orderItemBodySchema = z
   .object({
     productId: z.nanoid(),
@@ -23,6 +34,7 @@ export const orderItemBodySchema = z
     quantity: orderItemQuantitySchema,
     comment: z.string().nullish(),
     modifiers: z.array(orderModifierBodySchema).optional(),
+    components: z.array(orderItemCompoundComponentBodySchema).optional(),
     clientItemId: z.string().trim().min(1).max(120).nullish(),
     redeemFreeUnits: z.number().int().nonnegative().nullish(),
   })

@@ -1,0 +1,29 @@
+{
+  "mode": "apply",
+  "generatedAt": "2026-07-07T17:00:24.329Z",
+  "stats": {
+    "customers": {
+      "read": 6927,
+      "created": 6927,
+      "updated": 0,
+      "unchanged": 0,
+      "groupsCreated": 1
+    },
+    "users": {
+      "read": 886,
+      "created": 886,
+      "updated": 0,
+      "linkedCustomers": 886,
+      "legacyPasswordsStored": 886,
+      "betterAuthPasswordsStored": 0,
+      "skippedExistingPasswords": 0
+    },
+    "cashback": {
+      "read": 336,
+      "created": 336,
+      "updated": 0,
+      "unchanged": 0,
+      "totalBalanceCents": 1147440
+    }
+  }
+}

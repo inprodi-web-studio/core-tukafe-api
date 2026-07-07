@@ -1,5 +1,11 @@
-import { variationsDB } from "@core/db/schemas";
+import {
+  productCompoundComponentsDB,
+  productCompoundSlotOptionsDB,
+  productCompoundSlotsDB,
+  variationsDB,
+} from "@core/db/schemas";
 import type {
+  orderItemCompoundComponentsDB,
   orderItemModifiersDB,
   orderItemsDB,
   orderItemTaxesDB,
@@ -24,6 +30,7 @@ import {
 import type { NormalizedCreateOrderItemParams } from "./orders.types";
 
 type OrderItemInsert = typeof orderItemsDB.$inferInsert;
+type OrderItemCompoundComponentInsert = typeof orderItemCompoundComponentsDB.$inferInsert;
 type OrderItemModifierInsert = typeof orderItemModifiersDB.$inferInsert;
 type OrderItemTaxInsert = typeof orderItemTaxesDB.$inferInsert;
 
@@ -57,6 +64,7 @@ interface ProductLookup {
   id: string;
   name: string;
   kitchenName: string | null;
+  productType: "simple" | "assembled" | "compound";
   priceCents: number | null;
   categoryId: string | null;
   category: {
@@ -85,6 +93,32 @@ interface ProductLookup {
   }>;
 }
 
+interface ProductCompoundComponentLookup {
+  componentId: string;
+  compoundProductId: string;
+  componentProductId: string;
+  quantity: number;
+  sortOrder: number;
+  label: string | null;
+}
+
+interface ProductCompoundSlotLookup {
+  slotId: string;
+  compoundProductId: string;
+  label: string;
+  quantity: number;
+  sortOrder: number;
+  options: ProductCompoundSlotOptionLookup[];
+}
+
+interface ProductCompoundSlotOptionLookup {
+  optionId: string;
+  slotId: string;
+  componentProductId: string;
+  label: string | null;
+  sortOrder: number;
+}
+
 interface SelectedVariationLookup {
   id: string;
   productId: string;
@@ -108,6 +142,8 @@ interface SelectedVariationLookup {
 
 interface OrderValidationContext {
   productsById: Map<string, ProductLookup>;
+  compoundComponentsByProductId: Map<string, ProductCompoundComponentLookup[]>;
+  compoundSlotsByProductId: Map<string, ProductCompoundSlotLookup[]>;
   selectedVariationsById: Map<string, SelectedVariationLookup>;
   variationIdsByProductId: Map<string, Set<string>>;
   productModifierConfigsByProductId: Map<string, ProductModifierConfig[]>;
@@ -116,6 +152,7 @@ interface OrderValidationContext {
 
 export interface PreparedOrderItem {
   item: Omit<OrderItemInsert, "orderId">;
+  compoundComponents: OrderItemCompoundComponentInsert[];
   modifiers: OrderItemModifierInsert[];
   taxes: OrderItemTaxInsert[];
   workOrderSnapshot: {
@@ -253,11 +290,20 @@ export async function buildOrderValidationContext(
   organizationId: string,
   items: NormalizedCreateOrderItemParams[],
 ): Promise<OrderValidationContext> {
-  const uniqueProductIds = [...new Set(items.map((item) => item.productId))];
+  const uniqueTopLevelProductIds = [...new Set(items.map((item) => item.productId))];
+  const explicitComponentProductIds = items.flatMap((item) =>
+    item.components.map((component) => component.productId),
+  );
+  const uniqueProductIds = [
+    ...new Set([...uniqueTopLevelProductIds, ...explicitComponentProductIds]),
+  ];
   const uniqueVariationIds = [
     ...new Set(
       items
-        .map((item) => item.variationId)
+        .flatMap((item) => [
+          item.variationId,
+          ...item.components.map((component) => component.variationId),
+        ])
         .filter((variationId): variationId is string => variationId !== null),
     ),
   ];
@@ -271,7 +317,7 @@ export async function buildOrderValidationContext(
       return and(
         eq(table.organizationId, organizationId),
         eq(table.isActive, true),
-        inArray(table.productId, uniqueProductIds),
+        inArray(table.productId, uniqueTopLevelProductIds),
       );
     },
     columns: {
@@ -279,7 +325,7 @@ export async function buildOrderValidationContext(
     },
   });
 
-  if (activeOrganizationProducts.length !== uniqueProductIds.length) {
+  if (activeOrganizationProducts.length !== uniqueTopLevelProductIds.length) {
     throw notFound(
       "product.notAvailableInOrganization",
       "One or more products are not available in this organization",
@@ -293,6 +339,8 @@ export async function buildOrderValidationContext(
     productModifierLinks,
     allowedModifierOptions,
     modifierVisibilityRules,
+    compoundComponents,
+    compoundSlots,
   ] = await Promise.all([
     fastify.db.query.productsDB.findMany({
       where(table, { and, inArray, isNull }) {
@@ -302,6 +350,7 @@ export async function buildOrderValidationContext(
         id: true,
         name: true,
         kitchenName: true,
+        productType: true,
         priceCents: true,
         categoryId: true,
       },
@@ -460,6 +509,38 @@ export async function buildOrderValidationContext(
           },
         })
       : Promise.resolve([]),
+    uniqueTopLevelProductIds.length > 0
+      ? fastify.db
+          .select({
+            compoundProductId: productCompoundComponentsDB.compoundProductId,
+            componentProductId: productCompoundComponentsDB.componentProductId,
+            quantity: productCompoundComponentsDB.quantity,
+            sortOrder: productCompoundComponentsDB.sortOrder,
+            label: productCompoundComponentsDB.label,
+          })
+          .from(productCompoundComponentsDB)
+          .where(inArray(productCompoundComponentsDB.compoundProductId, uniqueTopLevelProductIds))
+      : Promise.resolve([]),
+    uniqueTopLevelProductIds.length > 0
+      ? fastify.db
+          .select({
+            slotId: productCompoundSlotsDB.id,
+            compoundProductId: productCompoundSlotsDB.compoundProductId,
+            slotLabel: productCompoundSlotsDB.label,
+            quantity: productCompoundSlotsDB.quantity,
+            slotSortOrder: productCompoundSlotsDB.sortOrder,
+            optionId: productCompoundSlotOptionsDB.id,
+            componentProductId: productCompoundSlotOptionsDB.componentProductId,
+            optionLabel: productCompoundSlotOptionsDB.label,
+            optionSortOrder: productCompoundSlotOptionsDB.sortOrder,
+          })
+          .from(productCompoundSlotsDB)
+          .innerJoin(
+            productCompoundSlotOptionsDB,
+            sql`${productCompoundSlotOptionsDB.slotId} = ${productCompoundSlotsDB.id}`,
+          )
+          .where(inArray(productCompoundSlotsDB.compoundProductId, uniqueTopLevelProductIds))
+      : Promise.resolve([]),
   ]);
 
   if (products.length !== uniqueProductIds.length) {
@@ -494,6 +575,80 @@ export async function buildOrderValidationContext(
     const currentVariationIds = variationIdsByProductId.get(variation.productId) ?? new Set();
     currentVariationIds.add(variation.id);
     variationIdsByProductId.set(variation.productId, currentVariationIds);
+  }
+
+  const compoundComponentsByProductId = new Map<string, ProductCompoundComponentLookup[]>();
+  for (const component of compoundComponents) {
+    const componentId = `${component.compoundProductId}:${component.sortOrder}`;
+    const currentComponents = compoundComponentsByProductId.get(component.compoundProductId) ?? [];
+
+    currentComponents.push({
+      componentId,
+      compoundProductId: component.compoundProductId,
+      componentProductId: component.componentProductId,
+      quantity: component.quantity,
+      sortOrder: component.sortOrder,
+      label: component.label,
+    });
+    compoundComponentsByProductId.set(component.compoundProductId, currentComponents);
+  }
+
+  for (const components of compoundComponentsByProductId.values()) {
+    components.sort((left, right) => {
+      if (left.sortOrder !== right.sortOrder) {
+        return left.sortOrder - right.sortOrder;
+      }
+
+      return left.componentProductId.localeCompare(right.componentProductId);
+    });
+  }
+
+  const compoundSlotsByProductId = new Map<string, ProductCompoundSlotLookup[]>();
+  const compoundSlotsById = new Map<string, ProductCompoundSlotLookup>();
+  for (const row of compoundSlots) {
+    let slot = compoundSlotsById.get(row.slotId);
+    if (!slot) {
+      slot = {
+        slotId: row.slotId,
+        compoundProductId: row.compoundProductId,
+        label: row.slotLabel,
+        quantity: row.quantity,
+        sortOrder: row.slotSortOrder,
+        options: [],
+      };
+      compoundSlotsById.set(row.slotId, slot);
+      const currentSlots = compoundSlotsByProductId.get(row.compoundProductId) ?? [];
+      currentSlots.push(slot);
+      compoundSlotsByProductId.set(row.compoundProductId, currentSlots);
+    }
+
+    slot.options.push({
+      optionId: row.optionId,
+      slotId: row.slotId,
+      componentProductId: row.componentProductId,
+      label: row.optionLabel,
+      sortOrder: row.optionSortOrder,
+    });
+  }
+
+  for (const slots of compoundSlotsByProductId.values()) {
+    slots.sort((left, right) => {
+      if (left.sortOrder !== right.sortOrder) {
+        return left.sortOrder - right.sortOrder;
+      }
+
+      return left.slotId.localeCompare(right.slotId);
+    });
+
+    for (const slot of slots) {
+      slot.options.sort((left, right) => {
+        if (left.sortOrder !== right.sortOrder) {
+          return left.sortOrder - right.sortOrder;
+        }
+
+        return left.componentProductId.localeCompare(right.componentProductId);
+      });
+    }
   }
 
   const productModifierConfigsByProductId = new Map<string, ProductModifierConfig[]>();
@@ -579,6 +734,8 @@ export async function buildOrderValidationContext(
 
   return {
     productsById,
+    compoundComponentsByProductId,
+    compoundSlotsByProductId,
     selectedVariationsById,
     variationIdsByProductId,
     productModifierConfigsByProductId,
@@ -618,6 +775,387 @@ export function validateAndPrepareOrderPayload(
       throw validation(
         "orderItem.invalidQuantityPrecision",
         `Item #${itemPosition} quantity must have at most ${allowedDecimalPlaces} decimal places`,
+      );
+    }
+
+    if (product.productType === "compound") {
+      if (itemInput.variationId) {
+        throw validation(
+          "orderItem.compoundVariationNotAllowed",
+          `Item #${itemPosition} cannot include variation on combo "${product.name}"`,
+        );
+      }
+
+      if (itemInput.modifiers.length > 0) {
+        throw validation(
+          "orderItem.compoundModifiersNotAllowed",
+          `Item #${itemPosition} cannot include modifiers directly on combo "${product.name}"`,
+        );
+      }
+
+      const unitPriceCents = product.priceCents;
+      if (unitPriceCents === null) {
+        throw validation(
+          "orderItem.priceUnavailable",
+          `Item #${itemPosition} has no available price for combo "${product.name}"`,
+        );
+      }
+
+      const legacyCatalogComponents = context.compoundComponentsByProductId.get(product.id) ?? [];
+      const configuredSlots = context.compoundSlotsByProductId.get(product.id) ?? [];
+      const catalogSlots =
+        configuredSlots.length > 0
+          ? configuredSlots
+          : legacyCatalogComponents.map((component) => ({
+              slotId: component.componentId,
+              compoundProductId: component.compoundProductId,
+              label: component.label ?? `Componente ${component.sortOrder + 1}`,
+              quantity: component.quantity,
+              sortOrder: component.sortOrder,
+              options: [
+                {
+                  optionId: component.componentId,
+                  slotId: component.componentId,
+                  componentProductId: component.componentProductId,
+                  label: component.label,
+                  sortOrder: 0,
+                },
+              ],
+            }));
+
+      if (catalogSlots.length < 2) {
+        throw validation(
+          "orderItem.compoundComponentsUnavailable",
+          `Item #${itemPosition} combo "${product.name}" does not have enough configured components`,
+        );
+      }
+
+      if (itemInput.components.length !== catalogSlots.length) {
+        throw validation(
+          "orderItem.compoundComponentsRequired",
+          `Item #${itemPosition} combo "${product.name}" requires all configured components`,
+        );
+      }
+
+      assertUniqueValues(
+        itemInput.components.map((component) => component.slotId ?? component.componentId),
+        "orderItem.compoundDuplicateComponent",
+        `Item #${itemPosition} contains duplicated combo components`,
+      );
+
+      if (itemInput.redeemFreeUnits > 0) {
+        if (!Number.isInteger(itemInput.quantity)) {
+          throw validation(
+            "order.manualPromotion.invalidQuantity",
+            `Item #${itemPosition} must have integer quantity when redeemFreeUnits is provided`,
+          );
+        }
+
+        if (itemInput.redeemFreeUnits > itemInput.quantity) {
+          throw validation(
+            "order.manualPromotion.invalidRedeemFreeUnits",
+            `Item #${itemPosition} redeemFreeUnits cannot exceed quantity`,
+          );
+        }
+      }
+
+      const orderItemId = generateNanoId();
+      const componentsById = new Map(
+        itemInput.components.map((component) => [
+          component.slotId ?? component.componentId ?? "",
+          component,
+        ]),
+      );
+      const componentRows: OrderItemCompoundComponentInsert[] = [];
+      let modifiersSubtotalCents = 0;
+
+      for (const catalogSlot of catalogSlots) {
+        const componentInput = componentsById.get(catalogSlot.slotId);
+        if (!componentInput) {
+          throw validation(
+            "orderItem.compoundComponentMissing",
+            `Item #${itemPosition} combo "${product.name}" is missing a configured component`,
+          );
+        }
+
+        const selectedOption =
+          componentInput.slotOptionId && componentInput.slotOptionId.trim().length > 0
+            ? (catalogSlot.options.find((option) => option.optionId === componentInput.slotOptionId) ??
+              null)
+            : catalogSlot.options.length === 1
+              ? catalogSlot.options[0]
+              : (catalogSlot.options.find(
+                  (option) => option.componentProductId === componentInput.productId,
+                ) ?? null);
+
+        if (!selectedOption) {
+          throw validation(
+            "orderItem.compoundInvalidSlotOption",
+            `Item #${itemPosition} includes an invalid option for combo section "${catalogSlot.label}"`,
+          );
+        }
+
+        if (componentInput.productId !== selectedOption.componentProductId) {
+          throw validation(
+            "orderItem.compoundInvalidComponentProduct",
+            `Item #${itemPosition} includes a component product that does not belong to combo "${product.name}"`,
+          );
+        }
+
+        const componentProduct = context.productsById.get(selectedOption.componentProductId);
+        if (!componentProduct) {
+          throw notFound(
+            "product.notFound",
+            `Component product for item #${itemPosition} was not found`,
+          );
+        }
+
+        if (componentProduct.productType === "compound") {
+          throw validation(
+            "orderItem.nestedCompoundNotSupported",
+            `Item #${itemPosition} cannot include a combo inside combo "${product.name}"`,
+          );
+        }
+
+        const componentVariationIds =
+          context.variationIdsByProductId.get(componentProduct.id) ?? new Set<string>();
+        const componentHasVariations = componentVariationIds.size > 0;
+
+        if (componentHasVariations && !componentInput.variationId) {
+          throw validation(
+            "orderItem.variationRequired",
+            `Component "${componentProduct.name}" in item #${itemPosition} requires a variation`,
+          );
+        }
+
+        if (!componentHasVariations && componentInput.variationId) {
+          throw validation(
+            "orderItem.variationNotAllowed",
+            `Component "${componentProduct.name}" in item #${itemPosition} cannot include variation`,
+          );
+        }
+
+        const selectedVariation = componentInput.variationId
+          ? (context.selectedVariationsById.get(componentInput.variationId) ?? null)
+          : null;
+
+        if (componentInput.variationId && !selectedVariation) {
+          throw notFound(
+            "variation.notFound",
+            `Variation for component "${componentProduct.name}" in item #${itemPosition} was not found`,
+          );
+        }
+
+        if (selectedVariation && selectedVariation.productId !== componentProduct.id) {
+          throw validation(
+            "orderItem.invalidVariation",
+            `Component "${componentProduct.name}" in item #${itemPosition} includes a variation that does not belong to it`,
+          );
+        }
+
+        const productModifiers =
+          context.productModifierConfigsByProductId.get(componentProduct.id) ?? [];
+        const visibleProductModifiers = productModifiers.filter((productModifier) =>
+          isProductModifierVisibleForVariation(productModifier, selectedVariation),
+        );
+        const visibleProductModifierIds = new Set(
+          visibleProductModifiers.map((productModifier) => productModifier.id),
+        );
+
+        assertUniqueValues(
+          componentInput.modifiers.map((modifier) => modifier.modifierOptionId),
+          "orderItem.duplicateModifierOption",
+          `Component "${componentProduct.name}" in item #${itemPosition} contains duplicated modifier options`,
+        );
+
+        const modifierOptionLookup =
+          context.modifierOptionLookupByProductId.get(componentProduct.id) ?? new Map();
+        const selectedModifierOptionsByModifierId = new Map<string, ModifierOptionLookupValue[]>();
+        const componentModifierSnapshots: OrderItemCompoundComponentInsert["modifiersSnapshot"] =
+          [];
+        let componentModifiersSubtotalCents = 0;
+
+        for (const selectedModifier of componentInput.modifiers) {
+          const modifierOption = modifierOptionLookup.get(selectedModifier.modifierOptionId);
+
+          if (!modifierOption) {
+            throw validation(
+              "orderItem.invalidModifierOption",
+              `Component "${componentProduct.name}" in item #${itemPosition} contains an invalid modifier option`,
+            );
+          }
+
+          if (!visibleProductModifierIds.has(modifierOption.modifierId)) {
+            throw validation(
+              "orderItem.hiddenModifier",
+              `Component "${componentProduct.name}" in item #${itemPosition} contains a hidden modifier for the selected variation`,
+            );
+          }
+
+          const totalPriceCents = calculateExtendedPriceCents(
+            modifierOption.optionPriceCents,
+            selectedModifier.quantity * itemInput.quantity * catalogSlot.quantity,
+          );
+          componentModifiersSubtotalCents += totalPriceCents;
+
+          const currentSelectedModifiers =
+            selectedModifierOptionsByModifierId.get(modifierOption.modifierId) ?? [];
+          currentSelectedModifiers.push(modifierOption);
+          selectedModifierOptionsByModifierId.set(
+            modifierOption.modifierId,
+            currentSelectedModifiers,
+          );
+
+          componentModifierSnapshots.push({
+            modifierId: modifierOption.modifierId,
+            modifierName: modifierOption.modifierName,
+            modifierKitchenName: modifierOption.modifierKitchenName,
+            modifierOptionId: modifierOption.optionId,
+            modifierOptionName: modifierOption.optionName,
+            modifierOptionKitchenName: modifierOption.optionKitchenName,
+            quantity: selectedModifier.quantity,
+            unitPriceCents: modifierOption.optionPriceCents,
+            totalPriceCents,
+          });
+        }
+
+        for (const productModifier of visibleProductModifiers) {
+          const selectedModifierCount =
+            selectedModifierOptionsByModifierId.get(productModifier.id)?.length ?? 0;
+
+          if (enforceModifierMinSelect && selectedModifierCount < productModifier.minSelect) {
+            throw validation(
+              "orderItem.missingRequiredModifier",
+              `Component "${componentProduct.name}" in item #${itemPosition} requires at least ${productModifier.minSelect} selection(s) for modifier "${productModifier.name}"`,
+            );
+          }
+
+          if (
+            productModifier.maxSelect !== null &&
+            selectedModifierCount > productModifier.maxSelect
+          ) {
+            throw validation(
+              "orderItem.maxModifierSelectionsExceeded",
+              `Component "${componentProduct.name}" in item #${itemPosition} allows at most ${productModifier.maxSelect} selection(s) for modifier "${productModifier.name}"`,
+            );
+          }
+
+          if (!productModifier.multiSelect && selectedModifierCount > 1) {
+            throw validation(
+              "orderItem.singleSelectModifierExceeded",
+              `Component "${componentProduct.name}" in item #${itemPosition} allows only one selection for modifier "${productModifier.name}"`,
+            );
+          }
+        }
+
+        modifiersSubtotalCents += componentModifiersSubtotalCents;
+        componentRows.push({
+          id: generateNanoId(),
+          orderItemId,
+          compoundProductId: product.id,
+          slotId: catalogSlot.slotId,
+          slotOptionId: selectedOption.optionId,
+          slotLabel: catalogSlot.label,
+          componentProductId: componentProduct.id,
+          variationId: selectedVariation?.id ?? null,
+          componentLabel: selectedOption.label ?? catalogSlot.label,
+          productName: componentProduct.name,
+          productKitchenName: componentProduct.kitchenName,
+          variationName: selectedVariation ? resolveVariationName(selectedVariation) : null,
+          variationSelectionsSnapshot: buildWorkOrderVariationSelections(selectedVariation ?? null),
+          modifiersSnapshot: componentModifierSnapshots,
+          quantity: catalogSlot.quantity,
+          modifiersSubtotalCents: componentModifiersSubtotalCents,
+          sortOrder: catalogSlot.sortOrder,
+        });
+      }
+
+      const productGrossTotalCents = calculateExtendedPriceCents(
+        unitPriceCents,
+        itemInput.quantity,
+      );
+      const grossTotalCents = productGrossTotalCents + modifiersSubtotalCents;
+      const displayUnitPriceCents =
+        unitPriceCents +
+        (itemInput.quantity > 0 ? Math.round(modifiersSubtotalCents / itemInput.quantity) : 0);
+      const includedTaxBreakdown = calculateIncludedTaxBreakdown(
+        grossTotalCents,
+        product.taxes.map(({ tax }) => tax.rate),
+      );
+      const taxRows: OrderItemTaxInsert[] = product.taxes.map(({ tax }, taxIndex) => ({
+        orderItemId,
+        taxId: tax.id,
+        taxName: tax.name,
+        taxRate: tax.rate,
+        taxAmountCents: includedTaxBreakdown.taxAmountsCents[taxIndex] ?? 0,
+      }));
+      const taxesCents = taxRows.reduce(
+        (accumulator, taxRow) => accumulator + taxRow.taxAmountCents,
+        0,
+      );
+      const subtotalCents = grossTotalCents - taxesCents;
+      const productCategoryIds = [
+        ...new Set([
+          ...(product.categoryId ? [product.categoryId] : []),
+          ...product.categories.map((categoryLink) => categoryLink.categoryId),
+        ]),
+      ];
+      const allProductCategories = [
+        ...(product.category ? [product.category] : []),
+        ...product.categories.map((categoryLink) => categoryLink.category),
+      ];
+
+      preparedOrderItems.push({
+        item: {
+          id: orderItemId,
+          productId: product.id,
+          variationId: null,
+          unitId: product.unit.id,
+          productName: product.name,
+          variationName: null,
+          unitName: product.unit.name,
+          unitAbbreviation: product.unit.abbreviation,
+          unitPrecision: product.unit.precision,
+          quantity: itemInput.quantity,
+          comment: itemInput.comment,
+          unitPriceCents,
+          modifiersSubtotalCents,
+          freeUnits: 0,
+          promotionCode: null,
+          promotionDiscountCents: 0,
+          couponDiscountCents: 0,
+          subtotalCents,
+          taxesCents,
+          grandTotalCents: grossTotalCents,
+          sortOrder: itemIndex,
+        },
+        compoundComponents: componentRows,
+        modifiers: [],
+        taxes: taxRows,
+        workOrderSnapshot: {
+          productKitchenName: product.kitchenName,
+          variationSelections: [],
+          modifiers: [],
+        },
+        isPromotionEligible: allProductCategories.some(
+          (category) => category.isFourPlusOneEligible,
+        ),
+        isCashbackEligible: allProductCategories.some((category) => category.isCashbackEligible),
+        productCategoryId: product.categoryId,
+        productCategoryIds,
+        sourceClientItemId: hasManualPromotionMode ? itemInput.clientItemId : null,
+        requestedRedeemFreeUnits: hasManualPromotionMode ? itemInput.redeemFreeUnits : 0,
+        lineType: "paid",
+        displayUnitPriceCents,
+      });
+
+      continue;
+    }
+
+    if (itemInput.components.length > 0) {
+      throw validation(
+        "orderItem.componentsNotAllowed",
+        `Item #${itemPosition} cannot include combo components for product "${product.name}"`,
       );
     }
 
@@ -834,6 +1372,7 @@ export function validateAndPrepareOrderPayload(
         grandTotalCents: grossTotalCents,
         sortOrder: itemIndex,
       },
+      compoundComponents: [],
       modifiers: modifierRows,
       taxes: taxRows,
       workOrderSnapshot: {

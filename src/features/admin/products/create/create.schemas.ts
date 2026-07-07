@@ -18,6 +18,15 @@ const productModifierConfigSchema = z
   })
   .strict();
 
+const compoundComponentSchema = z
+  .object({
+    productId: z.nanoid(),
+    quantity: z.number().int().positive().optional(),
+    sortOrder: z.number().int().nonnegative().optional(),
+    label: z.string().trim().min(1).max(120).nullish(),
+  })
+  .strict();
+
 const createBaseBodySchema = z.object({
   name: z.string().nonempty(),
   kitchenName: z.string().nullish(),
@@ -36,6 +45,7 @@ const createBaseBodySchema = z.object({
   modifierConfigs: z.array(productModifierConfigSchema).min(1).optional(),
   variationGroupIds: z.array(z.nanoid()).min(1).optional(),
   variations: z.array(variationSchema).min(1).optional(),
+  compoundComponents: z.array(compoundComponentSchema).optional(),
 });
 
 export const createBodySchema = z
@@ -51,6 +61,8 @@ export const createBodySchema = z
     createBaseBodySchema.extend({
       productType: z.literal("compound"),
       recipe: z.never().optional(),
+      price: z.number().nonnegative(),
+      compoundComponents: z.array(compoundComponentSchema).min(2).optional(),
     }),
   ])
   .superRefine((body, context) => {
@@ -135,6 +147,14 @@ export const createBodySchema = z
             path: ["variations", index, "recipe"],
           });
         }
+      });
+    }
+
+    if (body.productType !== "compound" && body.compoundComponents !== undefined) {
+      context.addIssue({
+        code: "custom",
+        message: "Only compound products can include compoundComponents",
+        path: ["compoundComponents"],
       });
     }
   });

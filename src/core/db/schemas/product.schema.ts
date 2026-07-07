@@ -124,10 +124,103 @@ const organizationProduct = pgTable(
   ],
 );
 
+const productCompoundComponents = pgTable(
+  "product_compound_component",
+  {
+    compoundProductId: text("compound_product_id")
+      .notNull()
+      .references(() => productsDB.id, { onDelete: "cascade" }),
+    componentProductId: text("component_product_id")
+      .notNull()
+      .references(() => productsDB.id, { onDelete: "restrict" }),
+    quantity: integer("quantity").notNull().default(1),
+    sortOrder: integer("sort_order").notNull(),
+    label: text("label"),
+    ...generateTimestamps(),
+  },
+  (table) => [
+    primaryKey({
+      name: "product_compound_component_pk",
+      columns: [table.compoundProductId, table.sortOrder],
+    }),
+    uniqueIndex("product_compound_component_product_component_sort_unique").on(
+      table.compoundProductId,
+      table.componentProductId,
+      table.sortOrder,
+    ),
+    index("product_compound_component_compound_product_id_idx").on(table.compoundProductId),
+    index("product_compound_component_component_product_id_idx").on(table.componentProductId),
+    check("product_compound_component_quantity_positive_check", sql`${table.quantity} > 0`),
+    check("product_compound_component_sort_order_non_negative_check", sql`${table.sortOrder} >= 0`),
+    check(
+      "product_compound_component_no_self_reference_check",
+      sql`${table.compoundProductId} <> ${table.componentProductId}`,
+    ),
+  ],
+);
+
+const productCompoundSlots = pgTable(
+  "product_compound_slot",
+  {
+    id: text("id").primaryKey(),
+    compoundProductId: text("compound_product_id")
+      .notNull()
+      .references(() => productsDB.id, { onDelete: "cascade" }),
+    label: text("label").notNull(),
+    quantity: integer("quantity").notNull().default(1),
+    sortOrder: integer("sort_order").notNull(),
+    ...generateTimestamps(),
+  },
+  (table) => [
+    uniqueIndex("product_compound_slot_product_sort_unique").on(
+      table.compoundProductId,
+      table.sortOrder,
+    ),
+    index("product_compound_slot_compound_product_id_idx").on(table.compoundProductId),
+    check("product_compound_slot_quantity_positive_check", sql`${table.quantity} > 0`),
+    check("product_compound_slot_sort_order_non_negative_check", sql`${table.sortOrder} >= 0`),
+  ],
+);
+
+const productCompoundSlotOptions = pgTable(
+  "product_compound_slot_option",
+  {
+    id: text("id").primaryKey(),
+    slotId: text("slot_id")
+      .notNull()
+      .references(() => productCompoundSlots.id, { onDelete: "cascade" }),
+    componentProductId: text("component_product_id")
+      .notNull()
+      .references(() => productsDB.id, { onDelete: "restrict" }),
+    label: text("label"),
+    sortOrder: integer("sort_order").notNull(),
+    ...generateTimestamps(),
+  },
+  (table) => [
+    uniqueIndex("product_compound_slot_option_slot_sort_unique").on(
+      table.slotId,
+      table.sortOrder,
+    ),
+    uniqueIndex("product_compound_slot_option_slot_product_unique").on(
+      table.slotId,
+      table.componentProductId,
+    ),
+    index("product_compound_slot_option_slot_id_idx").on(table.slotId),
+    index("product_compound_slot_option_component_product_id_idx").on(table.componentProductId),
+    check(
+      "product_compound_slot_option_sort_order_non_negative_check",
+      sql`${table.sortOrder} >= 0`,
+    ),
+  ],
+);
+
 export const productsDB = products;
 export const productTaxDB = productTax;
 export const productCategoryLinksDB = productCategoryLink;
 export const organizationProductDB = organizationProduct;
+export const productCompoundComponentsDB = productCompoundComponents;
+export const productCompoundSlotsDB = productCompoundSlots;
+export const productCompoundSlotOptionsDB = productCompoundSlotOptions;
 export const productsRelations = relations(productsDB, ({ one, many }) => ({
   unit: one(unitsDB, {
     fields: [productsDB.unitId],
@@ -144,6 +237,18 @@ export const productsRelations = relations(productsDB, ({ one, many }) => ({
   taxes: many(productTaxDB),
   categories: many(productCategoryLinksDB),
   organizations: many(organizationProductDB),
+  compoundComponents: many(productCompoundComponentsDB, {
+    relationName: "compoundProductComponents",
+  }),
+  compoundParents: many(productCompoundComponentsDB, {
+    relationName: "componentProductParents",
+  }),
+  compoundSlots: many(productCompoundSlotsDB, {
+    relationName: "compoundProductSlots",
+  }),
+  compoundSlotOptions: many(productCompoundSlotOptionsDB, {
+    relationName: "compoundSlotOptionProducts",
+  }),
 }));
 export const productTaxRelations = relations(productTaxDB, ({ one }) => ({
   product: one(productsDB, {
@@ -175,9 +280,49 @@ export const organizationProductRelations = relations(organizationProductDB, ({ 
     references: [organizationDB.id],
   }),
 }));
+export const productCompoundComponentsRelations = relations(
+  productCompoundComponentsDB,
+  ({ one }) => ({
+    compoundProduct: one(productsDB, {
+      fields: [productCompoundComponentsDB.compoundProductId],
+      references: [productsDB.id],
+      relationName: "compoundProductComponents",
+    }),
+    componentProduct: one(productsDB, {
+      fields: [productCompoundComponentsDB.componentProductId],
+      references: [productsDB.id],
+      relationName: "componentProductParents",
+    }),
+  }),
+);
+export const productCompoundSlotsRelations = relations(productCompoundSlotsDB, ({ one, many }) => ({
+  compoundProduct: one(productsDB, {
+    fields: [productCompoundSlotsDB.compoundProductId],
+    references: [productsDB.id],
+    relationName: "compoundProductSlots",
+  }),
+  options: many(productCompoundSlotOptionsDB),
+}));
+export const productCompoundSlotOptionsRelations = relations(
+  productCompoundSlotOptionsDB,
+  ({ one }) => ({
+    slot: one(productCompoundSlotsDB, {
+      fields: [productCompoundSlotOptionsDB.slotId],
+      references: [productCompoundSlotsDB.id],
+    }),
+    componentProduct: one(productsDB, {
+      fields: [productCompoundSlotOptionsDB.componentProductId],
+      references: [productsDB.id],
+      relationName: "compoundSlotOptionProducts",
+    }),
+  }),
+);
 
 export type Product = typeof productsDB.$inferSelect;
 export type ProductTax = typeof productTaxDB.$inferSelect;
 export type ProductCategoryLink = typeof productCategoryLinksDB.$inferSelect;
 export type OrganizationProduct = typeof organizationProductDB.$inferSelect;
+export type ProductCompoundComponent = typeof productCompoundComponentsDB.$inferSelect;
+export type ProductCompoundSlot = typeof productCompoundSlotsDB.$inferSelect;
+export type ProductCompoundSlotOption = typeof productCompoundSlotOptionsDB.$inferSelect;
 export type ProductType = (typeof productTypeEnum.enumValues)[number];

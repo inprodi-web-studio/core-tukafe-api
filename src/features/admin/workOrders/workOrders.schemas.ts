@@ -48,6 +48,7 @@ export const workOrderResponseSchema = z.object({
   completedAt: z.date().nullable(),
   completedByUserId: z.string().nullable(),
   productImage: workOrderProductImageSchema.nullable().optional(),
+  comboName: z.string().nullable().optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });

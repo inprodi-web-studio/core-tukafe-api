@@ -121,8 +121,8 @@ const productModifierOptions = pgTable(
     }).onDelete("cascade"),
     foreignKey({
       name: "product_modifier_option_modifier_option_fk",
-      columns: [table.modifierId, table.modifierOptionId],
-      foreignColumns: [modifierOptions.modifierId, modifierOptions.id],
+      columns: [table.modifierOptionId],
+      foreignColumns: [modifierOptions.id],
     }).onDelete("cascade"),
     index("product_modifier_option_product_modifier_idx").on(table.productId, table.modifierId),
     index("product_modifier_option_modifier_option_id_idx").on(table.modifierOptionId),

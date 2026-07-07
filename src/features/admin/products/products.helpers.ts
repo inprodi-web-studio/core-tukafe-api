@@ -1,12 +1,15 @@
 import { generateNanoId, normalizeString, toBase100Integer } from "@core/utils";
 import type {
   CreateProductModifierParams,
+  CreateProductCompoundComponentParams,
   CreateProductRecipeParams,
   CreateProductServiceParams,
   CreateProductVariationParams,
   NormalizedProductModifierParams,
+  NormalizedProductCompoundComponentParams,
   NormalizedProductVariationParams,
   ValidatedProductModifierConfig,
+  ValidatedProductCompoundComponent,
   ValidatedProductVariation,
 } from "./products.types";
 
@@ -54,6 +57,24 @@ function normalizeProductModifierInput({
   };
 }
 
+function normalizeProductCompoundComponentInput(
+  component: CreateProductCompoundComponentParams,
+  index: number,
+): NormalizedProductCompoundComponentParams {
+  const label = normalizeString(component.label, {
+    trim: true,
+    collapseWhitespace: true,
+    maxLength: 120,
+  });
+
+  return {
+    productId: component.productId,
+    quantity: component.quantity ?? 1,
+    sortOrder: component.sortOrder ?? index,
+    label: label.length > 0 ? label : null,
+  };
+}
+
 export const normalizeProductInput = ({
   name,
   price,
@@ -69,6 +90,7 @@ export const normalizeProductInput = ({
   isFeatured,
   variationGroupIds,
   variations,
+  compoundComponents,
   ...rest
 }: CreateProductServiceParams) => {
   const normalizedName = normalizeString(name, {
@@ -106,6 +128,7 @@ export const normalizeProductInput = ({
     modifierConfigs: normalizedModifierConfigs,
     variationGroupIds: variationGroupIds ?? [],
     variations: (variations ?? []).map(normalizeProductVariationInput),
+    compoundComponents: (compoundComponents ?? []).map(normalizeProductCompoundComponentInput),
     ...rest,
   };
 };
@@ -211,4 +234,17 @@ export function buildProductModifierVisibilityRuleInsertPayloads(
       variationOptionId,
     })),
   );
+}
+
+export function buildProductCompoundComponentInsertPayloads(
+  compoundProductId: string,
+  components: ValidatedProductCompoundComponent[],
+) {
+  return components.map(({ componentProductId, quantity, sortOrder, label }) => ({
+    compoundProductId,
+    componentProductId,
+    quantity,
+    sortOrder,
+    label,
+  }));
 }

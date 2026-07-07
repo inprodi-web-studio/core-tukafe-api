@@ -171,6 +171,23 @@ const productModifierResponseSchema = modifierResponseSchema.extend({
   ),
 });
 
+const compoundComponentResponseSchema = z.object({
+  quantity: z.number().int().positive(),
+  sortOrder: z.number().int().nonnegative(),
+  label: z.string().nullable(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+  product: z.object({
+    id: z.string(),
+    name: z.string(),
+    kitchenName: z.string().nullable(),
+    priceCents: z.number().int().nonnegative().nullable(),
+    productType: z.enum(["simple", "assembled", "compound"]),
+    customerDescription: z.string().nullable(),
+    image: imageSchema.nullable(),
+  }),
+});
+
 export const productResponseSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -211,4 +228,5 @@ export const productResponseSchema = z.object({
   recipe: recipeResponseSchema.nullish(),
   variationGroups: z.array(variationGroupResponseSchema),
   variations: z.array(variationResponseSchema),
+  compoundComponents: z.array(compoundComponentResponseSchema),
 });

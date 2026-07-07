@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { randomBytes } from "node:crypto";
+import { spawnSync } from "node:child_process";
 import pg from "pg";
 
 type CsvRow = Record<string, string> & { __line: number };
@@ -320,7 +321,10 @@ const ORDERED_FILES = [
   "16_producto_modificadores.csv",
 ] as const;
 
-const OPTIONAL_FILES = ["17_producto_modificador_visibilidad.csv"] as const;
+const OPTIONAL_FILES = [
+  "17_producto_modificador_visibilidad.csv",
+  "18_producto_componentes_compound.csv",
+] as const;
 
 const CATALOG_ORGANIZATIONS = [
   {
@@ -332,11 +336,6 @@ const CATALOG_ORGANIZATIONS = [
     name: "Metropark",
     slug: "metropark",
     address: "Av. Ecónomos 6916, Rinconada del Parque, 45010 Zapopan, Jal.",
-  },
-  {
-    name: "Centro Joyero",
-    slug: "centro-joyero",
-    address: "P.º Hospicio 35A, Centro, 44360 Guadalajara, Jal.",
   },
 ] as const;
 
@@ -1731,7 +1730,7 @@ async function main() {
   console.log(`CSV DIR: ${config.csvDir}`);
   console.log(`IMAGES DIR: ${config.imagesDir ?? "(no configurado)"}`);
   console.log(`Admin: ${config.email}`);
-  console.log(`Orgs objetivo: Landmark, Metropark, Centro Joyero`);
+  console.log(`Orgs objetivo: Landmark, Metropark`);
   console.log(`Tax obligatorio: IVA`);
   console.log("------------------------------------------");
 
@@ -2955,6 +2954,34 @@ async function main() {
 
   console.log(`  OK productos procesados: ${productNames.length}.`);
 
+  const compoundComponentsTable = table("18_producto_componentes_compound.csv");
+  if (compoundComponentsTable.rows.length > 0) {
+    console.log("9/16 Sincronizando componentes compound...");
+    const result = spawnSync(
+      process.execPath,
+      [
+        "--import",
+        "tsx",
+        "scripts/sync-product-compound-components.ts",
+        "--csv-dir",
+        config.csvDir,
+      ],
+      {
+        cwd: process.cwd(),
+        env: process.env,
+        stdio: "inherit",
+      },
+    );
+
+    if (result.error) {
+      throw result.error;
+    }
+
+    if ((result.status ?? 1) !== 0) {
+      throw new Error("Falló la sincronización de componentes compound.");
+    }
+  }
+
   console.log("------------------------------------------");
   console.log("Importación completada.");
   console.log("Orden ejecutado:");
@@ -2968,6 +2995,9 @@ async function main() {
   console.log(
     "8) Productos + grupos + variaciones + selecciones + recetas + producto-modificadores",
   );
+  if (compoundComponentsTable.rows.length > 0) {
+    console.log("9) Componentes compound");
+  }
 }
 
 main().catch((error) => {

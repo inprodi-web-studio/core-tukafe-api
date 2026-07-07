@@ -110,13 +110,25 @@ async function seed() {
         throw new Error(`No se pudo crear o recuperar la organización ${organization.name}.`);
       }
 
-      await client.query(
-        `insert into "member" (id, user_id, organization_id, role, created_at, updated_at)
-         values ($1, $2, $3, 'owner', now(), now())
-         on conflict (organization_id, user_id)
-         do update set role = 'owner', updated_at = now();`,
-        [generateNanoId(), adminId, orgId],
+      const existingMembership = await client.query<{ id: string }>(
+        'select id from "member" where organization_id = $1 and user_id = $2 limit 1;',
+        [orgId, adminId],
       );
+
+      const membershipId = existingMembership.rows[0]?.id;
+
+      if (membershipId) {
+        await client.query('update "member" set role = $1, updated_at = now() where id = $2;', [
+          "owner",
+          membershipId,
+        ]);
+      } else {
+        await client.query(
+          `insert into "member" (id, user_id, organization_id, role, created_at, updated_at)
+           values ($1, $2, $3, 'owner', now(), now());`,
+          [generateNanoId(), adminId, orgId],
+        );
+      }
 
       console.log(
         `[seed] Organización ${orgStatus === "created" ? "creada" : "actualizada"}: ${organization.name}`,

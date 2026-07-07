@@ -20,6 +20,48 @@ export const orderItemTaxResponseSchema = z.object({
   taxAmountCents: z.number().int().nonnegative(),
 });
 
+export const orderItemCompoundComponentResponseSchema = z.object({
+  id: z.string(),
+  compoundProductId: z.string(),
+  slotId: z.string().nullable(),
+  slotOptionId: z.string().nullable(),
+  slotLabel: z.string().nullable(),
+  componentProductId: z.string(),
+  variationId: z.string().nullable(),
+  componentLabel: z.string().nullable(),
+  productName: z.string(),
+  productKitchenName: z.string().nullable(),
+  variationName: z.string().nullable(),
+  variationSelectionsSnapshot: z.array(
+    z.object({
+      groupId: z.string(),
+      groupName: z.string(),
+      groupCustomerLabel: z.string().nullable(),
+      optionId: z.string(),
+      optionName: z.string(),
+      optionKitchenName: z.string().nullable(),
+    }),
+  ),
+  modifiersSnapshot: z.array(
+    z.object({
+      modifierId: z.string(),
+      modifierName: z.string(),
+      modifierKitchenName: z.string().nullable(),
+      modifierOptionId: z.string(),
+      modifierOptionName: z.string(),
+      modifierOptionKitchenName: z.string().nullable(),
+      quantity: z.number().positive(),
+      unitPriceCents: z.number().int().nonnegative(),
+      totalPriceCents: z.number().int().nonnegative(),
+    }),
+  ),
+  quantity: z.number().positive(),
+  modifiersSubtotalCents: z.number().int().nonnegative(),
+  sortOrder: z.number().int().min(0),
+  createdAt: z.date().nullable(),
+  updatedAt: z.date().nullable(),
+});
+
 export const orderItemResponseSchema = z.object({
   id: z.string(),
   productId: z.string(),
@@ -45,6 +87,7 @@ export const orderItemResponseSchema = z.object({
   sortOrder: z.number().int().min(0),
   sourceClientItemId: z.string().nullable(),
   lineType: z.enum(["paid", "free"]),
+  compoundComponents: z.array(orderItemCompoundComponentResponseSchema),
   modifiers: z.array(orderItemModifierResponseSchema),
   taxes: z.array(orderItemTaxResponseSchema),
 });
@@ -53,6 +96,8 @@ export const orderPromotionProgressSchema = z.object({
   progressCount: z.number().int().min(0).max(4),
   candidateProductIds: z.array(z.string()),
   eligibleForFreeDrink: z.boolean(),
+  legacyFreeDrinkPending: z.boolean(),
+  rewardMode: z.enum(["legacy", "standard"]).nullable(),
 });
 
 export const orderPromotionAppliedItemSchema = z.object({

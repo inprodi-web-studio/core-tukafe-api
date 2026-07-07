@@ -1,4 +1,10 @@
-import { orderItemsDB, productsDB, uploadsDB, workOrdersDB } from "@core/db/schemas";
+import {
+  orderItemCompoundComponentsDB,
+  orderItemsDB,
+  productsDB,
+  uploadsDB,
+  workOrdersDB,
+} from "@core/db/schemas";
 import { buildFuzzySearch, conflict, notFound, paginate } from "@core/utils";
 import { and, asc, desc, eq, inArray, type SQL, sql } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
@@ -24,7 +30,7 @@ function getDefaultOrderBy(status: WorkOrderListStatus): [SQL, ...SQL[]] {
   return [asc(workOrdersDB.createdAt), asc(workOrdersDB.id)];
 }
 
-async function attachProductImages(
+export async function attachWorkOrderDetails(
   fastify: FastifyInstance,
   workOrders: (typeof workOrdersDB.$inferSelect)[],
 ): Promise<WorkOrderResponse[]> {
@@ -33,12 +39,16 @@ async function attachProductImages(
   if (orderItemIds.length === 0) {
     return workOrders.map((workOrder) => ({
       ...workOrder,
+      comboName: null,
       productImage: null,
     }));
   }
 
   const imageRows = await fastify.db
     .select({
+      comboName: orderItemsDB.productName,
+      componentProductKitchenName: orderItemCompoundComponentsDB.productKitchenName,
+      componentProductName: orderItemCompoundComponentsDB.productName,
       orderItemId: orderItemsDB.id,
       imageId: uploadsDB.id,
       imageName: uploadsDB.name,
@@ -47,16 +57,35 @@ async function attachProductImages(
       imageMimeType: uploadsDB.mimeType,
     })
     .from(orderItemsDB)
-    .innerJoin(productsDB, eq(orderItemsDB.productId, productsDB.id))
+    .leftJoin(
+      orderItemCompoundComponentsDB,
+      eq(orderItemsDB.id, orderItemCompoundComponentsDB.orderItemId),
+    )
+    .innerJoin(
+      productsDB,
+      eq(
+        sql`coalesce(${orderItemCompoundComponentsDB.componentProductId}, ${orderItemsDB.productId})`,
+        productsDB.id,
+      ),
+    )
     .leftJoin(uploadsDB, eq(productsDB.imageUploadId, uploadsDB.id))
     .where(inArray(orderItemsDB.id, orderItemIds));
 
-  const imagesByOrderItemId = new Map<string, WorkOrderResponse["productImage"]>();
+  const detailsByWorkOrderKey = new Map<
+    string,
+    {
+      comboName: string | null;
+      productImage: WorkOrderResponse["productImage"];
+    }
+  >();
 
   for (const row of imageRows) {
-    imagesByOrderItemId.set(
-      row.orderItemId,
-      row.imageId
+    const key = row.componentProductName
+      ? [row.orderItemId, row.componentProductName, row.componentProductKitchenName ?? ""].join(":")
+      : row.orderItemId;
+    detailsByWorkOrderKey.set(key, {
+      comboName: row.componentProductName ? row.comboName : null,
+      productImage: row.imageId
         ? {
             id: row.imageId,
             name: row.imageName ?? "",
@@ -65,13 +94,24 @@ async function attachProductImages(
             mimeType: row.imageMimeType ?? "",
           }
         : null,
-    );
+    });
   }
 
-  return workOrders.map((workOrder) => ({
-    ...workOrder,
-    productImage: imagesByOrderItemId.get(workOrder.orderItemId) ?? null,
-  }));
+  return workOrders.map((workOrder) => {
+    const componentKey = [
+      workOrder.orderItemId,
+      workOrder.productName,
+      workOrder.productKitchenName ?? "",
+    ].join(":");
+    const details =
+      detailsByWorkOrderKey.get(componentKey) ?? detailsByWorkOrderKey.get(workOrder.orderItemId);
+
+    return {
+      ...workOrder,
+      comboName: details?.comboName ?? null,
+      productImage: details?.productImage ?? null,
+    };
+  });
 }
 
 export function adminWorkOrdersService(fastify: FastifyInstance): AdminWorkOrdersService {
@@ -115,7 +155,7 @@ export function adminWorkOrdersService(fastify: FastifyInstance): AdminWorkOrder
 
       return {
         ...paginatedWorkOrders,
-        data: await attachProductImages(fastify, paginatedWorkOrders.data),
+        data: await attachWorkOrderDetails(fastify, paginatedWorkOrders.data),
       };
     },
 

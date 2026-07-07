@@ -1,0 +1,17 @@
+nombre_producto_compound,slot,nombre_producto_hijo,cantidad,orden_slot,orden_opcion,etiqueta
+Latte + Pan,Bebida,Latte Caliente,1,1,1,Latte Caliente
+Latte + Pan,Bebida,Latte Frío,1,1,2,Latte Frío
+Latte + Pan,Pan,Galleta Clásica (Choco y Nuez),1,2,1,Galleta Clásica (Choco y Nuez)
+Latte + Pan,Pan,Galleta Doble Chocolate,1,2,2,Galleta Doble Chocolate
+Latte + Pan,Pan,Galleta de Lotus,1,2,3,Galleta de Lotus
+Latte + Pan,Pan,Croissant de Chocolate,1,2,4,Croissant de Chocolate
+Latte + Croissant,Bebida,Latte Caliente,1,1,1,Latte Caliente
+Latte + Croissant,Bebida,Latte Frío,1,1,2,Latte Frío
+Latte + Croissant,Bocadillo,Croissant de Pavo y Queso,1,2,1,Croissant de Pavo y Queso
+Latte + Baguette,Bebida,Latte Caliente,1,1,1,Latte Caliente
+Latte + Baguette,Bebida,Latte Frío,1,1,2,Latte Frío
+Latte + Baguette,Bocadillo,Baguette de Pavo y Queso,1,2,1,Baguette de Pavo y Queso
+Latte + Baguette,Bocadillo,Baguette de Serrano y Queso,1,2,2,Baguette de Serrano y Queso
+Latte + Sandwich,Bebida,Latte Caliente,1,1,1,Latte Caliente
+Latte + Sandwich,Bebida,Latte Frío,1,1,2,Latte Frío
+Latte + Sandwich,Bocadillo,Sandwich de Pavo y Queso,1,2,1,Sandwich de Pavo y Queso

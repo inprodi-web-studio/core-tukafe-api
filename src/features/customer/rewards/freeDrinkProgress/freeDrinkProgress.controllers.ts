@@ -10,17 +10,26 @@ export async function getFreeDrinkProgress(request: FastifyRequest, reply: Fasti
     columns: {
       progressCount: true,
       candidateProductIds: true,
+      legacyFreeDrinkGrantedAt: true,
+      legacyFreeDrinkRedeemedAt: true,
     },
   });
 
-  const progressCount = Math.max(0, Math.min(state?.progressCount ?? 0, 4));
+  const legacyFreeDrinkPending = Boolean(
+    state?.legacyFreeDrinkGrantedAt && !state.legacyFreeDrinkRedeemedAt,
+  );
+  const progressCount = legacyFreeDrinkPending
+    ? 0
+    : Math.max(0, Math.min(state?.progressCount ?? 0, 4));
   const candidateProductIds = Array.isArray(state?.candidateProductIds)
     ? state.candidateProductIds.filter((value): value is string => typeof value === "string")
     : [];
 
   return reply.status(200).send({
     progressCount,
-    candidateProductIds,
-    eligibleForFreeDrink: progressCount === 4,
+    candidateProductIds: legacyFreeDrinkPending ? [] : candidateProductIds,
+    eligibleForFreeDrink: legacyFreeDrinkPending || progressCount === 4,
+    legacyFreeDrinkPending,
+    rewardMode: legacyFreeDrinkPending ? "legacy" : progressCount === 4 ? "standard" : null,
   });
 }

@@ -12,9 +12,11 @@ import type {
   CreateProductRecipeParams,
   CreateProductRecipeSupplyParams,
   CreateProductServiceParams,
+  NormalizedProductCompoundComponentParams,
   NormalizedProductModifierParams,
   NormalizedProductVariationParams,
   ProductVariationGroupResponse,
+  ValidatedProductCompoundComponent,
   ValidatedProductModifierConfig,
   ValidatedProductRecipe,
   ValidatedProductVariationConfig,
@@ -431,6 +433,99 @@ export function validateProductBasePrice(priceCents: number | null, variationsCo
   }
 
   return priceCents;
+}
+
+export async function validateProductCompoundComponents(
+  fastify: FastifyInstance,
+  productType: CreateProductServiceParams["productType"],
+  components: NormalizedProductCompoundComponentParams[],
+): Promise<ValidatedProductCompoundComponent[]> {
+  if (productType !== "compound") {
+    if (components.length > 0) {
+      throw validation(
+        "product.compoundComponentsNotAllowed",
+        "Only compound products can include compound components",
+      );
+    }
+
+    return [];
+  }
+
+  if (components.length === 0) {
+    return [];
+  }
+
+  if (components.length < 2) {
+    throw validation(
+      "product.compoundComponentsRequired",
+      "Compound products require at least two component products when compoundComponents is provided",
+    );
+  }
+
+  assertUniqueValues(
+    components.map((component) => component.sortOrder),
+    "productCompoundComponent.duplicateSortOrder",
+    "Compound product components cannot contain duplicated sort orders",
+  );
+
+  const componentProductIds = [...new Set(components.map((component) => component.productId))];
+  const matchedProducts = await fastify.db.query.productsDB.findMany({
+    where(table, { and, inArray, isNull }) {
+      return and(inArray(table.id, componentProductIds), isNull(table.deletedAt));
+    },
+    columns: {
+      id: true,
+      productType: true,
+    },
+  });
+
+  if (matchedProducts.length !== componentProductIds.length) {
+    throw notFound(
+      "productCompoundComponent.productNotFound",
+      "One or more component products were not found",
+    );
+  }
+
+  const matchedProductsById = new Map(matchedProducts.map((product) => [product.id, product]));
+
+  return components.map((component) => {
+    const matchedProduct = matchedProductsById.get(component.productId);
+
+    if (!matchedProduct) {
+      throw notFound(
+        "productCompoundComponent.productNotFound",
+        "One or more component products were not found",
+      );
+    }
+
+    if (matchedProduct.productType === "compound") {
+      throw validation(
+        "productCompoundComponent.nestedCompoundNotAllowed",
+        "Compound products cannot include compound products as components",
+      );
+    }
+
+    if (!Number.isInteger(component.quantity) || component.quantity <= 0) {
+      throw validation(
+        "productCompoundComponent.invalidQuantity",
+        "Compound component quantity must be a positive integer",
+      );
+    }
+
+    if (!Number.isInteger(component.sortOrder) || component.sortOrder < 0) {
+      throw validation(
+        "productCompoundComponent.invalidSortOrder",
+        "Compound component sortOrder must be a non-negative integer",
+      );
+    }
+
+    return {
+      componentProductId: component.productId,
+      quantity: component.quantity,
+      sortOrder: component.sortOrder,
+      label: component.label,
+    };
+  });
 }
 
 function buildVariationCombinationKey(

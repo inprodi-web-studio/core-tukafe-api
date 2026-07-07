@@ -17,6 +17,7 @@ export interface CompleteWorkOrderServiceParams {
 
 export type WorkOrderResponse = WorkOrder & {
   productImage?: Pick<Upload, "id" | "name" | "path" | "visibility" | "mimeType"> | null;
+  comboName?: string | null;
 };
 
 export interface AdminWorkOrdersService {

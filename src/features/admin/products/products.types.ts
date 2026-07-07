@@ -4,6 +4,7 @@ import type {
   Organization,
   OrganizationProduct,
   Product,
+  ProductCompoundComponent,
   ProductCategory,
   ProductModifier,
   ProductModifierOption,
@@ -56,11 +57,12 @@ export interface ProductResponse extends Omit<Product, "categoryId" | "unitId" |
   recipe: RecipeDetailsResponse | null;
   variationGroups: ProductVariationGroupResponse[];
   variations: ProductVariationResponse[];
+  compoundComponents: ProductCompoundComponentResponse[];
 }
 
 export interface ProductWithRelations extends Omit<
   ProductResponse,
-  "taxes" | "variationGroups" | "modifiers" | "organizations" | "categories"
+  "taxes" | "variationGroups" | "modifiers" | "organizations" | "categories" | "compoundComponents"
 > {
   taxes: Array<{
     tax: Tax;
@@ -69,6 +71,7 @@ export interface ProductWithRelations extends Omit<
   organizations: ProductOrganizationLinkWithRelations[];
   variationGroups: ProductVariationGroupLinkWithRelations[];
   modifiers: ProductModifierLinkWithRelations[];
+  compoundComponents: ProductCompoundComponentWithRelations[];
 }
 
 export interface CreateProductServiceParams {
@@ -91,6 +94,28 @@ export interface CreateProductServiceParams {
   recipe?: CreateProductRecipeParams;
   variationGroupIds?: string[] | null;
   variations?: CreateProductVariationParams[] | null;
+  compoundComponents?: CreateProductCompoundComponentParams[] | null;
+}
+
+export interface CreateProductCompoundComponentParams {
+  productId: string;
+  quantity?: number | null;
+  sortOrder?: number | null;
+  label?: string | null;
+}
+
+export interface NormalizedProductCompoundComponentParams {
+  productId: string;
+  quantity: number;
+  sortOrder: number;
+  label: string | null;
+}
+
+export interface ValidatedProductCompoundComponent {
+  componentProductId: string;
+  quantity: number;
+  sortOrder: number;
+  label: string | null;
 }
 
 export interface CreateProductModifierParams {
@@ -239,6 +264,22 @@ export interface ProductModifierLinkWithRelations extends ProductModifier {
   modifier: ModifierResponse;
   allowedOptions: Array<Pick<ProductModifierOption, "modifierOptionId">>;
   visibilityRules: ProductModifierVisibilityConditionParams[];
+}
+
+export interface ProductCompoundComponentWithRelations extends ProductCompoundComponent {
+  componentProduct: Pick<
+    Product,
+    "id" | "name" | "kitchenName" | "priceCents" | "productType" | "customerDescription"
+  > & {
+    image: ProductImageResponse | null;
+  };
+}
+
+export interface ProductCompoundComponentResponse extends Omit<
+  ProductCompoundComponent,
+  "compoundProductId" | "componentProductId"
+> {
+  product: ProductCompoundComponentWithRelations["componentProduct"];
 }
 
 export interface ProductOrganizationLinkWithRelations extends OrganizationProduct {

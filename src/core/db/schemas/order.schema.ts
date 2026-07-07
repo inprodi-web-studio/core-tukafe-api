@@ -8,6 +8,7 @@ import {
   pgTable,
   primaryKey,
   text,
+  timestamp,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
 
@@ -69,10 +70,7 @@ const orders = pgTable(
       "order_cashback_redemption_cents_non_negative_check",
       sql`${table.cashbackRedemptionCents} >= 0`,
     ),
-    check(
-      "order_cashback_earned_cents_non_negative_check",
-      sql`${table.cashbackEarnedCents} >= 0`,
-    ),
+    check("order_cashback_earned_cents_non_negative_check", sql`${table.cashbackEarnedCents} >= 0`),
     check(
       "order_cashback_eligible_paid_cents_non_negative_check",
       sql`${table.cashbackEligiblePaidCents} >= 0`,
@@ -232,6 +230,8 @@ const customerOrderPromotionStates = pgTable(
       .array()
       .notNull()
       .default(sql`'{}'::text[]`),
+    legacyFreeDrinkGrantedAt: timestamp("legacy_free_drink_granted_at", { mode: "date" }),
+    legacyFreeDrinkRedeemedAt: timestamp("legacy_free_drink_redeemed_at", { mode: "date" }),
     version: integer("version").notNull().default(0),
     ...generateTimestamps(),
   },
@@ -286,6 +286,84 @@ const orderItemModifiers = pgTable(
   ],
 );
 
+export interface OrderItemCompoundComponentSnapshot {
+  modifierId: string;
+  modifierName: string;
+  modifierKitchenName: string | null;
+  modifierOptionId: string;
+  modifierOptionName: string;
+  modifierOptionKitchenName: string | null;
+  quantity: number;
+  unitPriceCents: number;
+  totalPriceCents: number;
+}
+
+export interface OrderItemCompoundComponentVariationSelectionSnapshot {
+  groupId: string;
+  groupName: string;
+  groupCustomerLabel: string | null;
+  optionId: string;
+  optionName: string;
+  optionKitchenName?: string | null;
+}
+
+const orderItemCompoundComponents = pgTable(
+  "order_item_compound_component",
+  {
+    id: text("id").primaryKey(),
+    orderItemId: text("order_item_id")
+      .notNull()
+      .references(() => orderItems.id, { onDelete: "cascade" }),
+    compoundProductId: text("compound_product_id")
+      .notNull()
+      .references(() => productsDB.id, { onDelete: "restrict" }),
+    slotId: text("slot_id"),
+    slotOptionId: text("slot_option_id"),
+    slotLabel: text("slot_label"),
+    componentProductId: text("component_product_id")
+      .notNull()
+      .references(() => productsDB.id, { onDelete: "restrict" }),
+    variationId: text("variation_id").references(() => variationsDB.id, {
+      onDelete: "restrict",
+    }),
+    componentLabel: text("component_label"),
+    productName: text("product_name").notNull(),
+    productKitchenName: text("product_kitchen_name"),
+    variationName: text("variation_name"),
+    variationSelectionsSnapshot: jsonb("variation_selections_snapshot")
+      .$type<OrderItemCompoundComponentVariationSelectionSnapshot[]>()
+      .notNull()
+      .default(sql`'[]'::jsonb`),
+    modifiersSnapshot: jsonb("modifiers_snapshot")
+      .$type<OrderItemCompoundComponentSnapshot[]>()
+      .notNull()
+      .default(sql`'[]'::jsonb`),
+    quantity: integer("quantity").notNull().default(1),
+    modifiersSubtotalCents: integer("modifiers_subtotal_cents").notNull().default(0),
+    sortOrder: integer("sort_order").notNull().default(0),
+    ...generateTimestamps(),
+  },
+  (table) => [
+    uniqueIndex("order_item_compound_component_item_sort_order_unique").on(
+      table.orderItemId,
+      table.sortOrder,
+    ),
+    index("order_item_compound_component_order_item_id_idx").on(table.orderItemId),
+    index("order_item_compound_component_compound_product_id_idx").on(table.compoundProductId),
+    index("order_item_compound_component_component_product_id_idx").on(table.componentProductId),
+    index("order_item_compound_component_variation_id_idx").on(table.variationId),
+    check("order_item_compound_component_quantity_positive_check", sql`${table.quantity} > 0`),
+    check(
+      "order_item_compound_component_modifiers_subtotal_non_negative_check",
+      sql`${table.modifiersSubtotalCents} >= 0`,
+    ),
+    check(
+      "order_item_compound_component_sort_order_non_negative_check",
+      sql`${table.sortOrder} >= 0`,
+    ),
+  ],
+);
+
 const orderItemTaxes = pgTable(
   "order_item_tax",
   {
@@ -320,6 +398,7 @@ export const ordersDB = orders;
 export const orderPaymentAttemptsDB = orderPaymentAttempts;
 export const orderItemsDB = orderItems;
 export const orderItemModifiersDB = orderItemModifiers;
+export const orderItemCompoundComponentsDB = orderItemCompoundComponents;
 export const orderItemTaxesDB = orderItemTaxes;
 export const customerOrderPromotionStatesDB = customerOrderPromotionStates;
 
@@ -383,6 +462,7 @@ export const orderItemsRelations = relations(orderItemsDB, ({ one, many }) => ({
     references: [unitsDB.id],
   }),
   modifiers: many(orderItemModifiersDB),
+  compoundComponents: many(orderItemCompoundComponentsDB),
   taxes: many(orderItemTaxesDB),
 }));
 
@@ -401,6 +481,28 @@ export const orderItemModifiersRelations = relations(orderItemModifiersDB, ({ on
   }),
 }));
 
+export const orderItemCompoundComponentsRelations = relations(
+  orderItemCompoundComponentsDB,
+  ({ one }) => ({
+    orderItem: one(orderItemsDB, {
+      fields: [orderItemCompoundComponentsDB.orderItemId],
+      references: [orderItemsDB.id],
+    }),
+    compoundProduct: one(productsDB, {
+      fields: [orderItemCompoundComponentsDB.compoundProductId],
+      references: [productsDB.id],
+    }),
+    componentProduct: one(productsDB, {
+      fields: [orderItemCompoundComponentsDB.componentProductId],
+      references: [productsDB.id],
+    }),
+    variation: one(variationsDB, {
+      fields: [orderItemCompoundComponentsDB.variationId],
+      references: [variationsDB.id],
+    }),
+  }),
+);
+
 export const orderItemTaxesRelations = relations(orderItemTaxesDB, ({ one }) => ({
   orderItem: one(orderItemsDB, {
     fields: [orderItemTaxesDB.orderItemId],
@@ -416,5 +518,6 @@ export type Order = typeof ordersDB.$inferSelect;
 export type OrderPaymentAttempt = typeof orderPaymentAttemptsDB.$inferSelect;
 export type OrderItem = typeof orderItemsDB.$inferSelect;
 export type OrderItemModifier = typeof orderItemModifiersDB.$inferSelect;
+export type OrderItemCompoundComponent = typeof orderItemCompoundComponentsDB.$inferSelect;
 export type OrderItemTax = typeof orderItemTaxesDB.$inferSelect;
 export type CustomerOrderPromotionState = typeof customerOrderPromotionStatesDB.$inferSelect;

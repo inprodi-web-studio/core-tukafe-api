@@ -59,7 +59,33 @@ const modifierStepSchema = z.object({
   ),
 });
 
-export const configurationResponseSchema = z.object({
+const configurationProductSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  isFeatured: z.boolean(),
+  productType: z.enum(["simple", "assembled", "compound"]),
+  image: imageSchema.nullable(),
+});
+
+const configurationPricingSchema = z.object({
+  basePriceCents: z.number().int().nonnegative().nullable(),
+  usesVariationPricing: z.boolean(),
+});
+
+const configurationVariationSchema = z.object({
+  id: z.string(),
+  sortOrder: z.number().int().nonnegative(),
+  priceCents: z.number().int().nonnegative(),
+  customerDescription: z.string().nullable(),
+  selections: z.array(
+    z.object({
+      variationGroupId: z.string(),
+      variationOptionId: z.string(),
+    }),
+  ),
+});
+
+const configurationBaseSchema = z.object({
   product: z.object({
     id: z.string(),
     name: z.string(),
@@ -67,21 +93,35 @@ export const configurationResponseSchema = z.object({
     productType: z.enum(["simple", "assembled", "compound"]),
     image: imageSchema.nullable(),
   }),
-  pricing: z.object({
-    basePriceCents: z.number().int().nonnegative().nullable(),
-    usesVariationPricing: z.boolean(),
-  }),
+  pricing: configurationPricingSchema,
   steps: z.array(z.discriminatedUnion("type", [variationStepSchema, modifierStepSchema])),
-  variations: z.array(
-    z.object({
-      id: z.string(),
+  variations: z.array(configurationVariationSchema),
+});
+
+export const configurationResponseSchema = configurationBaseSchema.extend({
+  product: configurationProductSchema,
+  compoundComponents: z.array(
+    configurationBaseSchema.extend({
+      componentId: z.string(),
+      quantity: z.number().int().positive(),
       sortOrder: z.number().int().nonnegative(),
-      priceCents: z.number().int().nonnegative(),
-      customerDescription: z.string().nullable(),
-      selections: z.array(
-        z.object({
-          variationGroupId: z.string(),
-          variationOptionId: z.string(),
+      label: z.string().nullable(),
+      product: configurationProductSchema,
+    }),
+  ),
+  compoundSlots: z.array(
+    z.object({
+      slotId: z.string(),
+      label: z.string(),
+      quantity: z.number().int().positive(),
+      sortOrder: z.number().int().nonnegative(),
+      options: z.array(
+        configurationBaseSchema.extend({
+          optionId: z.string(),
+          productId: z.string(),
+          sortOrder: z.number().int().nonnegative(),
+          label: z.string().nullable(),
+          product: configurationProductSchema,
         }),
       ),
     }),

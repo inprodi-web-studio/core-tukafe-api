@@ -966,7 +966,7 @@ export function guestProductsService(fastify: FastifyInstance): GuestProductsSer
           };
         });
 
-      return {
+      const configuration = {
         product: {
           id: product.id,
           name: product.name,
@@ -1002,6 +1002,152 @@ export function guestProductsService(fastify: FastifyInstance): GuestProductsSer
                 variationOptionId: selection.variationOptionId,
               })),
           })),
+        ),
+      };
+
+      if (product.productType !== "compound") {
+        return {
+          ...configuration,
+          compoundComponents: [],
+          compoundSlots: [],
+        };
+      }
+
+      const [compoundSlots, compoundComponents] = await Promise.all([
+        fastify.db.query.productCompoundSlotsDB.findMany({
+          where(table, { eq }) {
+            return eq(table.compoundProductId, product.id);
+          },
+          columns: {
+            id: true,
+            compoundProductId: true,
+            label: true,
+            quantity: true,
+            sortOrder: true,
+            createdAt: false,
+            updatedAt: false,
+          },
+          with: {
+            options: {
+              columns: {
+                id: true,
+                slotId: true,
+                componentProductId: true,
+                label: true,
+                sortOrder: true,
+                createdAt: false,
+                updatedAt: false,
+              },
+              orderBy(table, { asc }) {
+                return [asc(table.sortOrder), asc(table.componentProductId)];
+              },
+            },
+          },
+          orderBy(table, { asc }) {
+            return [asc(table.sortOrder), asc(table.id)];
+          },
+        }),
+        fastify.db.query.productCompoundComponentsDB.findMany({
+        where(table, { eq }) {
+          return eq(table.compoundProductId, product.id);
+        },
+        columns: {
+          compoundProductId: true,
+          componentProductId: true,
+          quantity: true,
+          sortOrder: true,
+          label: true,
+          createdAt: false,
+          updatedAt: false,
+        },
+        orderBy(table, { asc }) {
+          return [asc(table.sortOrder), asc(table.componentProductId)];
+        },
+        }),
+      ]);
+
+      const resolvedCompoundSlots =
+        compoundSlots.length > 0
+          ? compoundSlots
+          : compoundComponents.map((component) => ({
+              id: `${component.compoundProductId}:${component.sortOrder}`,
+              compoundProductId: component.compoundProductId,
+              label: component.label ?? `Componente ${component.sortOrder + 1}`,
+              quantity: component.quantity,
+              sortOrder: component.sortOrder,
+              options: [
+                {
+                  id: `${component.compoundProductId}:${component.sortOrder}:0`,
+                  slotId: `${component.compoundProductId}:${component.sortOrder}`,
+                  componentProductId: component.componentProductId,
+                  label: component.label,
+                  sortOrder: 0,
+                },
+              ],
+            }));
+
+      const compoundSlotResponses = await Promise.all(
+        resolvedCompoundSlots.map(async (slot) => ({
+          slotId: slot.id,
+          label: slot.label,
+          quantity: slot.quantity,
+          sortOrder: slot.sortOrder,
+          options: await Promise.all(
+            slot.options.map(async (option) => {
+              const optionConfiguration = await service.getConfiguration(option.componentProductId);
+
+              return {
+                optionId: option.id,
+                productId: option.componentProductId,
+                sortOrder: option.sortOrder,
+                label: option.label,
+                product: optionConfiguration.product,
+                pricing: optionConfiguration.pricing,
+                steps: optionConfiguration.steps,
+                variations: optionConfiguration.variations,
+              };
+            }),
+          ),
+        })),
+      );
+
+      return {
+        ...configuration,
+        compoundSlots: compoundSlotResponses,
+        compoundComponents: await Promise.all(
+          resolvedCompoundSlots.flatMap((slot) => {
+            if (slot.options.length !== 1) {
+              return [];
+            }
+
+            const [option] = slot.options;
+            if (!option) {
+              return [];
+            }
+
+            return [
+              {
+                componentId: slot.id,
+                quantity: slot.quantity,
+                sortOrder: slot.sortOrder,
+                label: slot.label,
+                componentProductId: option.componentProductId,
+              },
+            ];
+          }).map(async (component) => {
+            const componentConfiguration = await service.getConfiguration(component.componentProductId);
+
+            return {
+              componentId: component.componentId,
+              quantity: component.quantity,
+              sortOrder: component.sortOrder,
+              label: component.label,
+              product: componentConfiguration.product,
+              pricing: componentConfiguration.pricing,
+              steps: componentConfiguration.steps,
+              variations: componentConfiguration.variations,
+            };
+          }),
         ),
       };
     },
