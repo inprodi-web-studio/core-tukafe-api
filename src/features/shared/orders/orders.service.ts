@@ -474,9 +474,22 @@ async function loadCustomerPromotionState(
   return {
     progressCount: state.progressCount,
     candidateProductIds: state.candidateProductIds,
-    legacyFreeDrinkGrantedAt: state.legacyFreeDrinkGrantedAt,
-    legacyFreeDrinkRedeemedAt: state.legacyFreeDrinkRedeemedAt,
+    legacyFreeDrinkGrantedAt: normalizeNullableDate(state.legacyFreeDrinkGrantedAt),
+    legacyFreeDrinkRedeemedAt: normalizeNullableDate(state.legacyFreeDrinkRedeemedAt),
   };
+}
+
+function normalizeNullableDate(value: unknown): Date | null {
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? null : value;
+  }
+
+  if (typeof value === "string" || typeof value === "number") {
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  return null;
 }
 
 async function loadCustomerCashbackAccount(
@@ -565,10 +578,8 @@ async function lockCustomerPromotionState(
     candidateProductIds: Array.isArray(row.candidateProductIds)
       ? row.candidateProductIds.filter((value): value is string => typeof value === "string")
       : [],
-    legacyFreeDrinkGrantedAt:
-      row.legacyFreeDrinkGrantedAt instanceof Date ? row.legacyFreeDrinkGrantedAt : null,
-    legacyFreeDrinkRedeemedAt:
-      row.legacyFreeDrinkRedeemedAt instanceof Date ? row.legacyFreeDrinkRedeemedAt : null,
+    legacyFreeDrinkGrantedAt: normalizeNullableDate(row.legacyFreeDrinkGrantedAt),
+    legacyFreeDrinkRedeemedAt: normalizeNullableDate(row.legacyFreeDrinkRedeemedAt),
   };
 }
 
@@ -1161,12 +1172,12 @@ export async function previewOrder(
   }
 
   const promotionState = normalizedInput.customerId
-      ? ((await loadCustomerPromotionState(fastify, normalizedInput.customerId)) ?? {
-          progressCount: 0,
-          candidateProductIds: [],
-          legacyFreeDrinkGrantedAt: null,
-          legacyFreeDrinkRedeemedAt: null,
-        })
+    ? ((await loadCustomerPromotionState(fastify, normalizedInput.customerId)) ?? {
+        progressCount: 0,
+        candidateProductIds: [],
+        legacyFreeDrinkGrantedAt: null,
+        legacyFreeDrinkRedeemedAt: null,
+      })
     : null;
   const cashbackAccount = normalizedInput.customerId
     ? await loadCustomerCashbackAccount(fastify, normalizedInput.customerId)

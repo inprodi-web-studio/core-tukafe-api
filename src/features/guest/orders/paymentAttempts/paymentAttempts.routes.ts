@@ -1,3 +1,4 @@
+import { apiKeyAuthHandler } from "@core/handlers";
 import type { FastifyInstance } from "fastify";
 import { createPaymentAttempt, recordPaymentAttemptResult } from "./paymentAttempts.controllers";
 import {
@@ -14,6 +15,7 @@ export async function paymentAttemptsRoutes(server: FastifyInstance) {
   server.post<{ Body: CreatePaymentAttemptBody }>(
     "/payment-attempts",
     {
+      preHandler: [apiKeyAuthHandler()],
       schema: {
         body: createPaymentAttemptBodySchema,
         response: {
@@ -30,6 +32,7 @@ export async function paymentAttemptsRoutes(server: FastifyInstance) {
   }>(
     "/payment-attempts/:paymentAttemptId/result",
     {
+      preHandler: [apiKeyAuthHandler()],
       schema: {
         params: recordPaymentAttemptResultParamsSchema,
         body: recordPaymentAttemptResultBodySchema,

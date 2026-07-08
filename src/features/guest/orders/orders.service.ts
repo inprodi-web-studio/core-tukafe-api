@@ -52,7 +52,9 @@ export function guestOrdersService(fastify: FastifyInstance): GuestOrdersService
         tip: input.tip,
         items: input.items,
       };
-      return createOrder(fastify, createOrderInput);
+      return createOrder(fastify, createOrderInput, {
+        requirePaymentForPositiveAmountDue: true,
+      });
     },
   };
 }
