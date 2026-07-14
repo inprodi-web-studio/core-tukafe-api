@@ -14,12 +14,6 @@ const BARISTA_USERS = [
     organizationSlug: "metropark",
   },
   {
-    email: "cj@tukafe.mx",
-    name: "Barista Centro Joyero",
-    middleName: "TuKafe",
-    organizationSlug: "centro-joyero",
-  },
-  {
     email: "landmark@tukafe.mx",
     name: "Barista Landmark",
     middleName: "TuKafe",
