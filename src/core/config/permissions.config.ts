@@ -87,4 +87,7 @@ export const ORGANIZATION_ROLES = {
     coupons: ["read"],
     uploads: ["read"],
   }),
+  barista: ORGANIZATION_AC.newRole({
+    orders: ["read", "update"],
+  }),
 };
