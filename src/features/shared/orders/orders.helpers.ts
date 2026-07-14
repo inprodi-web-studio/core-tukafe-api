@@ -38,6 +38,7 @@ function normalizeOrderTipInput(tip?: CreateOrderTipParams | null): NormalizedCr
 
 export function normalizeCreateOrderInput({
   comment,
+  customerName,
   items,
   customerId,
   couponCode,
@@ -108,6 +109,12 @@ export function normalizeCreateOrderInput({
   return {
     ...rest,
     customerId: customerId ?? null,
+    customerName:
+      normalizeString(customerName, {
+        trim: true,
+        collapseWhitespace: true,
+        maxLength: 120,
+      }) || null,
     couponCode:
       normalizeString(couponCode, {
         trim: true,

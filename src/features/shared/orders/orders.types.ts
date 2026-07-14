@@ -40,6 +40,7 @@ export interface NormalizedCreateOrderTipParams {
 export interface CreateOrderParams {
   organizationId: string;
   customerId?: string | null;
+  customerName?: string | null;
   paymentAttemptId?: string | null;
   couponCode?: string | null;
   cashbackRedeemCents?: number | null;
@@ -122,9 +123,10 @@ export type OrderItemLineType = "paid" | "free";
 
 export interface NormalizedCreateOrderParams extends Omit<
   CreateOrderParams,
-  "comment" | "items" | "tip"
+  "comment" | "customerName" | "items" | "tip"
 > {
   customerId: string | null;
+  customerName: string | null;
   couponCode: string | null;
   cashbackRedeemCents: number;
   comment: string | null;

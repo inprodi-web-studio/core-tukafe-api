@@ -1544,10 +1544,9 @@ export async function createOrder(
 
         const orderId = generateNanoId();
         const folio = formatOrderFolio(folioPrefix, nextSequence);
-        const customerDisplayName = await loadWorkOrderCustomerDisplayName(
-          tx,
-          normalizedInput.customerId,
-        );
+        const customerDisplayName =
+          normalizedInput.customerName ??
+          (await loadWorkOrderCustomerDisplayName(tx, normalizedInput.customerId));
 
         const [createdOrder] = await tx
           .insert(ordersDB)

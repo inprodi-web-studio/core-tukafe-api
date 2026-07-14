@@ -46,6 +46,7 @@ export function guestOrdersService(fastify: FastifyInstance): GuestOrdersService
       const createOrderInput = {
         organizationId: input.organizationId,
         customerId: input.customerId,
+        customerName: normalizedCustomerName || null,
         paymentAttemptId: input.paymentAttemptId,
         couponCode: input.couponCode,
         comment: input.comment,
