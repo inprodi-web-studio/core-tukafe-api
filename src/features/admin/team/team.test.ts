@@ -162,26 +162,46 @@ describe("admin team contract", () => {
         surnames: "Pérez Soto",
         email: "luis@tukafe.test",
         role: "barista",
+        existingUser: false,
+        credentialCreated: true,
       }),
     );
   });
 
-  it("rechaza case-insensitive un correo global existente sin insertar registros", async () => {
+  it("rechaza case-insensitive un correo que ya tiene acceso administrativo", async () => {
     const insert = vi.fn();
-    const transaction = vi.fn(async (callback: (tx: unknown) => unknown) =>
-      callback({
-        select: vi.fn(() => ({
-          from: vi.fn((table: unknown) => ({
+    let selectCall = 0;
+    const transaction = vi.fn(async (callback: (tx: unknown) => unknown) => {
+      const select = vi.fn(() => {
+        selectCall += 1;
+        const result =
+          selectCall === 1
+            ? [{ organizationId: "org-active" }]
+            : selectCall === 2
+              ? [
+                  {
+                    id: "user-existing",
+                    name: "Ana",
+                    middleName: "López",
+                    lastName: null,
+                    email: "Ana@Tukafe.test",
+                  },
+                ]
+              : [{ id: "member-admin" }];
+
+        return {
+          from: vi.fn(() => ({
             where: vi.fn(() =>
-              table === memberDB
-                ? Promise.resolve([{ organizationId: "org-active" }])
-                : { limit: vi.fn().mockResolvedValue([{ id: "user-existing" }]) },
+              selectCall === 1
+                ? Promise.resolve(result)
+                : { limit: vi.fn().mockResolvedValue(result) },
             ),
           })),
-        })),
-        insert,
-      }),
-    );
+        };
+      });
+
+      return callback({ select, insert });
+    });
     const service = adminTeamService({ db: { transaction } } as unknown as FastifyInstance);
     const input: CreateTeamMemberParams = {
       creatorUserId: "user-creator",
@@ -198,6 +218,75 @@ describe("admin team contract", () => {
       statusCode: 409,
     });
     expect(insert).not.toHaveBeenCalled();
+  });
+
+  it("reutiliza un cliente existente conservando su contraseña y sus datos", async () => {
+    const insertedTables: unknown[] = [];
+    let selectCall = 0;
+    const transaction = vi.fn(async (callback: (tx: unknown) => unknown) => {
+      const selectResults = [
+        [{ organizationId: "org-active" }],
+        [
+          {
+            id: "user-customer",
+            name: "Cliente",
+            middleName: "Existente",
+            lastName: "Tukafe",
+            email: "cliente@tukafe.test",
+          },
+        ],
+        [],
+        [{ id: "credential-existing" }],
+      ];
+      const select = vi.fn(() => {
+        const currentCall = selectCall;
+        const result = selectResults[selectCall++] ?? [];
+        return {
+          from: vi.fn(() => ({
+            where: vi.fn(() =>
+              currentCall === 0
+                ? Promise.resolve(result)
+                : { limit: vi.fn().mockResolvedValue(result) },
+            ),
+          })),
+        };
+      });
+      const insert = vi.fn((table: unknown) => {
+        insertedTables.push(table);
+        return {
+          values: vi.fn(() => ({
+            returning: vi
+              .fn()
+              .mockResolvedValue([{ id: "member-new", createdAt: new Date("2026-07-15") }]),
+          })),
+        };
+      });
+
+      return callback({ select, insert });
+    });
+    const service = adminTeamService({ db: { transaction } } as unknown as FastifyInstance);
+
+    const result = await service.create({
+      creatorUserId: "user-creator",
+      organizationIds: ["org-active"],
+      name: "Nombre capturado",
+      surnames: "Apellidos capturados",
+      email: "CLIENTE@TUKAFE.TEST",
+      password: "nueva-clave-que-no-debe-usarse",
+      role: "admin",
+    });
+
+    expect(insertedTables).toEqual([memberDB]);
+    expect(result).toEqual(
+      expect.objectContaining({
+        name: "Cliente",
+        surnames: "Existente Tukafe",
+        email: "cliente@tukafe.test",
+        role: "admin",
+        existingUser: true,
+        credentialCreated: false,
+      }),
+    );
   });
 
   it("rechaza sucursales donde el creador no tiene acceso administrativo", async () => {
@@ -239,6 +328,8 @@ describe("admin team contract", () => {
       email: "ana@tukafe.test",
       role: "admin",
       createdAt: new Date("2026-07-15"),
+      existingUser: false,
+      credentialCreated: true,
     });
     const request = {
       body: {

@@ -13,6 +13,11 @@ export interface TeamMemberListItem {
   createdAt: Date;
 }
 
+export interface CreateTeamMemberResult extends TeamMemberListItem {
+  existingUser: boolean;
+  credentialCreated: boolean;
+}
+
 export interface TeamListParams {
   organizationId: string;
   page: number;
@@ -35,5 +40,5 @@ export interface CreateTeamMemberParams {
 
 export interface AdminTeamService {
   list(input: TeamListParams): Promise<PaginatedResult<TeamMemberListItem>>;
-  create(input: CreateTeamMemberParams): Promise<TeamMemberListItem>;
+  create(input: CreateTeamMemberParams): Promise<CreateTeamMemberResult>;
 }

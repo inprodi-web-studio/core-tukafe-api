@@ -12,6 +12,11 @@ export const teamMemberSchema = z.object({
   createdAt: z.date(),
 });
 
+export const createdTeamMemberSchema = teamMemberSchema.extend({
+  existingUser: z.boolean(),
+  credentialCreated: z.boolean(),
+});
+
 export const listQuerySchema = z
   .object({
     page: z.coerce.number().int().min(1).default(1),

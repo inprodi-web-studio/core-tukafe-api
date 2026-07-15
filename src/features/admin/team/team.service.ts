@@ -122,7 +122,6 @@ export function adminTeamService(fastify: FastifyInstance): AdminTeamService {
 
     async create(rawInput) {
       const input = normalizeCreateInput(rawInput);
-      const passwordHash = await hashPassword(input.password);
 
       try {
         return await fastify.db.transaction(async (tx) => {
@@ -152,33 +151,76 @@ export function adminTeamService(fastify: FastifyInstance): AdminTeamService {
           }
 
           const existingUsers = await tx
-            .select({ id: userDB.id })
+            .select({
+              id: userDB.id,
+              name: userDB.name,
+              middleName: userDB.middleName,
+              lastName: userDB.lastName,
+              email: userDB.email,
+            })
             .from(userDB)
             .where(sql`lower(${userDB.email}) = ${input.email}`)
             .limit(1);
+          const existingUser = existingUsers[0];
+          const userId = existingUser?.id ?? generateNanoId();
+          let credentialCreated = false;
 
-          if (existingUsers[0]) {
-            throw conflict("team.emailAlreadyExists", "A user with this email already exists");
+          if (existingUser) {
+            const existingAdministrativeMemberships = await tx
+              .select({ id: memberDB.id })
+              .from(memberDB)
+              .where(
+                and(
+                  eq(memberDB.userId, existingUser.id),
+                  inArray(memberDB.role, ["owner", "admin", "barista"]),
+                ),
+              )
+              .limit(1);
+
+            if (existingAdministrativeMemberships[0]) {
+              throw conflict(
+                "team.emailAlreadyExists",
+                "A user with this email already has administrative access",
+              );
+            }
+
+            const existingCredentials = await tx
+              .select({ id: accountDB.id })
+              .from(accountDB)
+              .where(
+                and(eq(accountDB.userId, existingUser.id), eq(accountDB.providerId, "credential")),
+              )
+              .limit(1);
+
+            if (!existingCredentials[0]) {
+              await tx.insert(accountDB).values({
+                id: generateNanoId(),
+                userId,
+                accountId: userId,
+                providerId: "credential",
+                password: await hashPassword(input.password),
+              });
+              credentialCreated = true;
+            }
+          } else {
+            await tx.insert(userDB).values({
+              id: userId,
+              name: input.name,
+              middleName: input.surnames,
+              lastName: null,
+              email: input.email,
+              emailVerified: true,
+            });
+
+            await tx.insert(accountDB).values({
+              id: generateNanoId(),
+              userId,
+              accountId: userId,
+              providerId: "credential",
+              password: await hashPassword(input.password),
+            });
+            credentialCreated = true;
           }
-
-          const userId = generateNanoId();
-
-          await tx.insert(userDB).values({
-            id: userId,
-            name: input.name,
-            middleName: input.surnames,
-            lastName: null,
-            email: input.email,
-            emailVerified: true,
-          });
-
-          await tx.insert(accountDB).values({
-            id: generateNanoId(),
-            userId,
-            accountId: userId,
-            providerId: "credential",
-            password: passwordHash,
-          });
 
           const memberships = input.organizationIds.map((organizationId) => ({
             id: generateNanoId(),
@@ -197,11 +239,15 @@ export function adminTeamService(fastify: FastifyInstance): AdminTeamService {
 
           return {
             id: membership.id,
-            name: input.name,
-            surnames: input.surnames,
-            email: input.email,
+            name: existingUser?.name ?? input.name,
+            surnames: existingUser
+              ? [existingUser.middleName, existingUser.lastName].filter(Boolean).join(" ")
+              : input.surnames,
+            email: existingUser?.email ?? input.email,
             role: input.role,
             createdAt: membership.createdAt,
+            existingUser: Boolean(existingUser),
+            credentialCreated,
           };
         });
       } catch (error) {

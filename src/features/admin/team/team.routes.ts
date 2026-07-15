@@ -3,9 +3,9 @@ import type { FastifyInstance } from "fastify";
 import { createTeamMember, listTeam } from "./team.controllers";
 import {
   createBodySchema,
+  createdTeamMemberSchema,
   listQuerySchema,
   listResponseSchema,
-  teamMemberSchema,
   type CreateTeamMemberBody,
   type TeamListQuery,
 } from "./team.schemas";
@@ -34,7 +34,7 @@ export async function adminTeamRoutes(server: FastifyInstance) {
       ],
       schema: {
         body: createBodySchema,
-        response: { 201: teamMemberSchema },
+        response: { 201: createdTeamMemberSchema },
       },
     },
     createTeamMember,
