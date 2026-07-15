@@ -19,7 +19,7 @@ export async function createTeamMember(
 ) {
   const member = await request.server.admin.team.create({
     ...request.body,
-    organizationId: request.auth.member.organizationId,
+    creatorUserId: request.auth.user.id,
   });
 
   return reply.status(201).send(member);

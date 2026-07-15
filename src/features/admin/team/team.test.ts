@@ -31,6 +31,7 @@ describe("admin team contract", () => {
         email: "ANA@TUKAFE.TEST",
         password: "segura123",
         role: "admin",
+        organizationIds: ["org-one", "org-two", "org-one"],
       }),
     ).toEqual({
       name: "Ana",
@@ -38,6 +39,7 @@ describe("admin team contract", () => {
       email: "ana@tukafe.test",
       password: "segura123",
       role: "admin",
+      organizationIds: ["org-one", "org-two"],
     });
 
     expect(() =>
@@ -47,6 +49,7 @@ describe("admin team contract", () => {
         email: "ana@tukafe.test",
         password: "corta",
         role: "owner",
+        organizationIds: [],
       }),
     ).toThrow();
     expect(() => listQuerySchema.parse({ pageSize: 101 })).toThrow();
@@ -84,20 +87,29 @@ describe("admin team contract", () => {
   });
 
   it("crea el alta dentro de una transacción con contraseña hasheada y rol de membresía", async () => {
-    const inserted = new Map<unknown, Record<string, unknown>>();
+    const inserted = new Map<unknown, unknown>();
     const transaction = vi.fn(async (callback: (tx: unknown) => unknown) => {
       const tx = {
         select: vi.fn(() => ({
-          from: vi.fn(() => ({
-            where: vi.fn(() => ({ limit: vi.fn().mockResolvedValue([]) })),
+          from: vi.fn((table: unknown) => ({
+            where: vi.fn(() =>
+              table === memberDB
+                ? Promise.resolve([
+                    { organizationId: "org-active" },
+                    { organizationId: "org-secondary" },
+                  ])
+                : { limit: vi.fn().mockResolvedValue([]) },
+            ),
           })),
         })),
         insert: vi.fn((table: unknown) => ({
-          values: vi.fn((values: Record<string, unknown>) => {
+          values: vi.fn((values: unknown) => {
             inserted.set(table, values);
             if (table === memberDB) {
               return {
-                returning: vi.fn().mockResolvedValue([{ createdAt: new Date("2026-07-15") }]),
+                returning: vi
+                  .fn()
+                  .mockResolvedValue([{ id: "member-active", createdAt: new Date("2026-07-15") }]),
               };
             }
             return Promise.resolve();
@@ -110,7 +122,8 @@ describe("admin team contract", () => {
     const service = adminTeamService({ db: { transaction } } as unknown as FastifyInstance);
 
     const result = await service.create({
-      organizationId: "org-active",
+      creatorUserId: "user-creator",
+      organizationIds: ["org-active", "org-secondary"],
       name: "  Luis   Alberto ",
       surnames: " Pérez   Soto ",
       email: " LUIS@TUKAFE.TEST ",
@@ -119,7 +132,8 @@ describe("admin team contract", () => {
     });
 
     expect(transaction).toHaveBeenCalledOnce();
-    expect(inserted.get(userDB)).toEqual(
+    const insertedUser = inserted.get(userDB) as Record<string, unknown>;
+    expect(insertedUser).toEqual(
       expect.objectContaining({
         name: "Luis Alberto",
         middleName: "Pérez Soto",
@@ -127,15 +141,13 @@ describe("admin team contract", () => {
         emailVerified: true,
       }),
     );
-    expect(inserted.get(userDB)).not.toHaveProperty("role");
-    expect(inserted.get(memberDB)).toEqual(
-      expect.objectContaining({
-        organizationId: "org-active",
-        role: "barista",
-      }),
-    );
+    expect(insertedUser).not.toHaveProperty("role");
+    expect(inserted.get(memberDB)).toEqual([
+      expect.objectContaining({ organizationId: "org-active", role: "barista" }),
+      expect.objectContaining({ organizationId: "org-secondary", role: "barista" }),
+    ]);
 
-    const account = inserted.get(accountDB);
+    const account = inserted.get(accountDB) as Record<string, unknown>;
     expect(account).toEqual(expect.objectContaining({ providerId: "credential" }));
     expect(account?.password).not.toBe("segura123");
     expect(
@@ -159,10 +171,12 @@ describe("admin team contract", () => {
     const transaction = vi.fn(async (callback: (tx: unknown) => unknown) =>
       callback({
         select: vi.fn(() => ({
-          from: vi.fn(() => ({
-            where: vi.fn(() => ({
-              limit: vi.fn().mockResolvedValue([{ id: "user-existing" }]),
-            })),
+          from: vi.fn((table: unknown) => ({
+            where: vi.fn(() =>
+              table === memberDB
+                ? Promise.resolve([{ organizationId: "org-active" }])
+                : { limit: vi.fn().mockResolvedValue([{ id: "user-existing" }]) },
+            ),
           })),
         })),
         insert,
@@ -170,7 +184,8 @@ describe("admin team contract", () => {
     );
     const service = adminTeamService({ db: { transaction } } as unknown as FastifyInstance);
     const input: CreateTeamMemberParams = {
-      organizationId: "org-active",
+      creatorUserId: "user-creator",
+      organizationIds: ["org-active"],
       name: "Ana",
       surnames: "López",
       email: "ANA@TUKAFE.TEST",
@@ -185,7 +200,38 @@ describe("admin team contract", () => {
     expect(insert).not.toHaveBeenCalled();
   });
 
-  it("crea mediante el controlador en la sucursal activa", async () => {
+  it("rechaza sucursales donde el creador no tiene acceso administrativo", async () => {
+    const insert = vi.fn();
+    const transaction = vi.fn(async (callback: (tx: unknown) => unknown) =>
+      callback({
+        select: vi.fn(() => ({
+          from: vi.fn(() => ({
+            where: vi.fn().mockResolvedValue([{ organizationId: "org-active" }]),
+          })),
+        })),
+        insert,
+      }),
+    );
+    const service = adminTeamService({ db: { transaction } } as unknown as FastifyInstance);
+
+    await expect(
+      service.create({
+        creatorUserId: "user-creator",
+        organizationIds: ["org-active", "org-forbidden"],
+        name: "Ana",
+        surnames: "López",
+        email: "ana@tukafe.test",
+        password: "segura123",
+        role: "admin",
+      }),
+    ).rejects.toMatchObject({
+      code: "team.organizationAccessDenied",
+      statusCode: 403,
+    });
+    expect(insert).not.toHaveBeenCalled();
+  });
+
+  it("crea mediante el controlador para las sucursales solicitadas", async () => {
     const create = vi.fn().mockResolvedValue({
       id: "member-new",
       name: "Ana",
@@ -201,15 +247,24 @@ describe("admin team contract", () => {
         email: "ana@tukafe.test",
         password: "segura123",
         role: "admin",
+        organizationIds: ["org-active", "org-secondary"],
       },
-      auth: { member: { organizationId: "org-active" } },
+      auth: {
+        user: { id: "user-creator" },
+        member: { organizationId: "org-active" },
+      },
       server: { admin: { team: { create } } },
     } as unknown as FastifyRequest;
     const { reply, send } = createReply();
 
     await createTeamMember(request as never, reply);
 
-    expect(create).toHaveBeenCalledWith(expect.objectContaining({ organizationId: "org-active" }));
+    expect(create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        creatorUserId: "user-creator",
+        organizationIds: ["org-active", "org-secondary"],
+      }),
+    );
     expect(send).toHaveBeenCalledWith(expect.objectContaining({ id: "member-new" }));
   });
 });

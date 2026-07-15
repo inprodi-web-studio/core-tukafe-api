@@ -32,6 +32,11 @@ export const createBodySchema = z
     email: z.email().transform((value) => value.trim().toLowerCase()),
     password: z.string().min(8).max(128),
     role: teamRoleSchema,
+    organizationIds: z
+      .array(z.string().trim().min(1))
+      .min(1)
+      .max(100)
+      .transform((values) => [...new Set(values)]),
   })
   .strict();
 

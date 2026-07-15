@@ -24,7 +24,8 @@ export interface TeamListParams {
 }
 
 export interface CreateTeamMemberParams {
-  organizationId: string;
+  creatorUserId: string;
+  organizationIds: string[];
   name: string;
   surnames: string;
   email: string;

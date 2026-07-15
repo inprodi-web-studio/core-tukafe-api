@@ -1,6 +1,7 @@
 import { accountDB, memberDB, userDB } from "@core/db/schemas";
 import {
   conflict,
+  forbidden,
   generateNanoId,
   getPgError,
   isHttpError,
@@ -61,6 +62,7 @@ function normalizeCreateInput(input: CreateTeamMemberParams) {
     name: normalizeString(input.name, { trim: true, collapseWhitespace: true }),
     surnames: normalizeString(input.surnames, { trim: true, collapseWhitespace: true }),
     email: input.email.trim().toLowerCase(),
+    organizationIds: [...new Set(input.organizationIds)],
   };
 }
 
@@ -124,6 +126,31 @@ export function adminTeamService(fastify: FastifyInstance): AdminTeamService {
 
       try {
         return await fastify.db.transaction(async (tx) => {
+          const authorizedMemberships = await tx
+            .select({ organizationId: memberDB.organizationId })
+            .from(memberDB)
+            .where(
+              and(
+                eq(memberDB.userId, input.creatorUserId),
+                inArray(memberDB.organizationId, input.organizationIds),
+                inArray(memberDB.role, ["owner", "admin"]),
+              ),
+            );
+          const authorizedOrganizationIds = new Set(
+            authorizedMemberships.map((membership) => membership.organizationId),
+          );
+
+          if (
+            input.organizationIds.some(
+              (organizationId) => !authorizedOrganizationIds.has(organizationId),
+            )
+          ) {
+            throw forbidden(
+              "team.organizationAccessDenied",
+              "The user cannot assign access to one or more organizations",
+            );
+          }
+
           const existingUsers = await tx
             .select({ id: userDB.id })
             .from(userDB)
@@ -135,7 +162,6 @@ export function adminTeamService(fastify: FastifyInstance): AdminTeamService {
           }
 
           const userId = generateNanoId();
-          const memberId = generateNanoId();
 
           await tx.insert(userDB).values({
             id: userId,
@@ -154,22 +180,23 @@ export function adminTeamService(fastify: FastifyInstance): AdminTeamService {
             password: passwordHash,
           });
 
+          const memberships = input.organizationIds.map((organizationId) => ({
+            id: generateNanoId(),
+            userId,
+            organizationId,
+            role: input.role,
+          }));
           const [membership] = await tx
             .insert(memberDB)
-            .values({
-              id: memberId,
-              userId,
-              organizationId: input.organizationId,
-              role: input.role,
-            })
-            .returning({ createdAt: memberDB.createdAt });
+            .values(memberships)
+            .returning({ id: memberDB.id, createdAt: memberDB.createdAt });
 
           if (!membership?.createdAt) {
             throw new Error("Failed to create team membership");
           }
 
           return {
-            id: memberId,
+            id: membership.id,
             name: input.name,
             surnames: input.surnames,
             email: input.email,
