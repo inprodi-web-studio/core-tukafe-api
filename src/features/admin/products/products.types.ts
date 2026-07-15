@@ -21,16 +21,26 @@ import type {
   VariationGroupOption,
   VariationSelection,
 } from "@core/db/schemas";
-import type { GetServiceConfig, ListQueryParams } from "@core/types";
+import type { GetServiceConfig } from "@core/types";
 import type { PaginatedResult } from "@core/utils";
 import type { ModifierResponse } from "../modifiers/modifiers.types";
+import type { ListQuery } from "./list/list.schemas";
 
 export interface AdminProductsService {
   get(id: string, config?: GetServiceConfig): Promise<ProductResponse | null>;
-  list(input?: ListQueryParams): Promise<PaginatedResult<ProductResponse>>;
+  list(input: ListQuery & { organizationId: string }): Promise<PaginatedResult<ProductListItem>>;
   create(input: CreateProductServiceParams): Promise<ProductResponse>;
   assignOrganization(productId: string, organizationId: string): Promise<ProductResponse>;
   unassignOrganization(productId: string, organizationId: string): Promise<ProductResponse>;
+  updateOrganizationStatus(
+    productId: string,
+    organizationId: string,
+    isActive: boolean,
+  ): Promise<{ id: string; organizationStatus: "active" | "inactive" }>;
+  updateFeatured(
+    productId: string,
+    isFeatured: boolean,
+  ): Promise<{ id: string; isFeatured: boolean }>;
   createVariation(productId: string, input: CreateProductVariationParams): Promise<ProductResponse>;
   createModifier(productId: string, input: CreateProductModifierParams): Promise<ProductResponse>;
   updateModifierOptions(
@@ -38,6 +48,28 @@ export interface AdminProductsService {
     modifierId: string,
     input: UpdateProductModifierOptionsParams,
   ): Promise<ProductResponse>;
+}
+
+export type ProductOrganizationStatus = "active" | "inactive" | "unassigned";
+
+export interface ProductListCategory {
+  id: string;
+  name: string;
+  color: string;
+}
+
+export interface ProductListItem {
+  id: string;
+  name: string;
+  kitchenName: string | null;
+  productType: ProductType;
+  isFeatured: boolean;
+  updatedAt: Date;
+  image: ProductImageResponse | null;
+  categories: ProductListCategory[];
+  minPriceCents: number | null;
+  maxPriceCents: number | null;
+  organizationStatus: ProductOrganizationStatus;
 }
 
 export interface ProductCategoryResponse extends Omit<ProductCategory, "imageUploadId"> {

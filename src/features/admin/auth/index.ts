@@ -3,3 +3,4 @@ export { adminAuthRoutes } from "./auth.routes";
 export { adminAuthService } from "./auth.service";
 
 export * from "./login";
+export * from "./portal";

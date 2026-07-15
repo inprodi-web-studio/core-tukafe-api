@@ -27,6 +27,7 @@
     "scaffold:feature": "plop --plopfile scripts/scaffold/plopfile.mjs feature",
     "scaffold:action": "plop --plopfile scripts/scaffold/plopfile.mjs action",
     "lint": "eslint .",
+    "test": "vitest",
     "format": "prettier --write ."
   },
   "dependencies": {
@@ -68,7 +69,8 @@
     "plop": "^4.0.5",
     "prettier": "^3.8.1",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.56.1"
+    "typescript-eslint": "^8.56.1",
+    "vitest": "4.1.10"
   },
   "packageManager": "yarn@4.16.0"
 }

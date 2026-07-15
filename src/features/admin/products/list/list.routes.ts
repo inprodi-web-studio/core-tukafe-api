@@ -1,16 +1,20 @@
 import { adminAuthHandler } from "@core/handlers";
-import { listQueryParamsSchema } from "@core/utils";
 import type { FastifyInstance } from "fastify";
 import { list } from "./list.controllers";
-import { listResponseSchema } from "./list.schemas";
+import { listQuerySchema, listResponseSchema, type ListQuery } from "./list.schemas";
 
 export async function listRoutes(server: FastifyInstance) {
-  server.get(
+  server.get<{ Querystring: ListQuery }>(
     "/",
     {
-      preHandler: [adminAuthHandler({ permissions: { products: ["read"] } })],
+      preHandler: [
+        adminAuthHandler({
+          roles: ["owner", "admin"],
+          permissions: { products: ["read"] },
+        }),
+      ],
       schema: {
-        querystring: listQueryParamsSchema,
+        querystring: listQuerySchema,
         response: {
           200: listResponseSchema,
         },

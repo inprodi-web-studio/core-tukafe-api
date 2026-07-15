@@ -5,9 +5,7 @@ import type { AdminAuthService } from "./auth.types";
 
 declare module "@core/types/feature-namespaces" {
   interface AdminNamespace {
-    auth: {
-      loginWithEmail: AdminAuthService["loginWithEmail"];
-    };
+    auth: AdminAuthService;
   }
 }
 
@@ -16,6 +14,9 @@ const adminAuthServicesPlugin: FastifyPluginAsync = async (fastify) => {
 
   fastify.admin.auth = {
     loginWithEmail: authService.loginWithEmail,
+    loginToPortal: authService.loginToPortal,
+    getPortalSession: authService.getPortalSession,
+    setPortalActiveOrganization: authService.setPortalActiveOrganization,
   };
 };
 

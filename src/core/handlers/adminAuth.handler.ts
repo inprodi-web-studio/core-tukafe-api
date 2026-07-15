@@ -13,7 +13,10 @@ export interface AdminAuthSession {
 
 export interface AdminAuthHandlerParams {
   permissions?: OrganizationPermissions;
+  roles?: readonly AdminOrganizationRole[];
 }
+
+export type AdminOrganizationRole = "owner" | "admin" | "member" | "barista";
 
 declare module "fastify" {
   interface FastifyRequest {
@@ -21,7 +24,7 @@ declare module "fastify" {
   }
 }
 
-function adminAuthHandler({ permissions = {} }: AdminAuthHandlerParams = {}) {
+function adminAuthHandler({ permissions = {}, roles }: AdminAuthHandlerParams = {}) {
   return async function adminAuth(request: FastifyRequest, reply: FastifyReply) {
     const headers = fromNodeHeaders(request.headers);
 
@@ -52,6 +55,13 @@ function adminAuthHandler({ permissions = {} }: AdminAuthHandlerParams = {}) {
 
       if (!member) {
         throw unauthorized("auth.noMember", "User is not a member of the organization");
+      }
+
+      if (roles && !roles.includes(member.role as AdminOrganizationRole)) {
+        throw forbidden(
+          "auth.portalAccessDenied",
+          "The user does not have access to the admin portal",
+        );
       }
 
       if (Object.keys(permissions).length > 0) {

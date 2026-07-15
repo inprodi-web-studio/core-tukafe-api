@@ -1,5 +1,6 @@
 import {
   organizationProductDB,
+  productCategoriesDB,
   productCategoryLinksDB,
   productCompoundComponentsDB,
   productModifierOptionsDB,
@@ -16,6 +17,7 @@ import {
   variationRecipeSuppliesDB,
   variationsDB,
   variationSelectionsDB,
+  uploadsDB,
 } from "@core/db/schemas";
 import {
   badRequest,
@@ -26,7 +28,7 @@ import {
   notFound,
   paginate,
 } from "@core/utils";
-import { and, asc, eq, isNull, sql, type SQL } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull, or, sql, type SQL } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
 import {
   buildProductModifierInsertPayloads,
@@ -38,7 +40,11 @@ import {
   normalizeProductVariationsInput,
 } from "./products.helpers";
 import { mapProductResponse, sortVariationGroupResponse } from "./products.mappers";
-import type { AdminProductsService } from "./products.types";
+import type {
+  AdminProductsService,
+  ProductListCategory,
+  ProductOrganizationStatus,
+} from "./products.types";
 import {
   validateProductBasePrice,
   validateProductCompoundComponents,
@@ -78,6 +84,44 @@ async function getProductVariationGroupsForValidation(fastify: FastifyInstance, 
   });
 
   return variationGroupLinks.map(({ group }) => sortVariationGroupResponse(group));
+}
+
+export function collectCategoryAndDescendantIds(
+  categories: Array<{ id: string; parentId: string | null }>,
+  categoryId: string,
+): string[] {
+  const selectedIds = new Set([categoryId]);
+  let addedCategory = true;
+
+  while (addedCategory) {
+    addedCategory = false;
+
+    for (const category of categories) {
+      if (
+        category.parentId &&
+        selectedIds.has(category.parentId) &&
+        !selectedIds.has(category.id)
+      ) {
+        selectedIds.add(category.id);
+        addedCategory = true;
+      }
+    }
+  }
+
+  return [...selectedIds];
+}
+
+function addProductCategory(
+  categoriesByProduct: Map<string, ProductListCategory[]>,
+  productId: string,
+  category: ProductListCategory,
+) {
+  const categories = categoriesByProduct.get(productId) ?? [];
+
+  if (!categories.some((currentCategory) => currentCategory.id === category.id)) {
+    categories.push(category);
+    categoriesByProduct.set(productId, categories);
+  }
 }
 
 export function adminProductsService(fastify: FastifyInstance): AdminProductsService {
@@ -440,8 +484,17 @@ export function adminProductsService(fastify: FastifyInstance): AdminProductsSer
       });
     },
 
-    async list({ search, page, pageSize } = {}) {
-      const defaultOrderBy: [SQL, ...SQL[]] = [asc(productsDB.name), asc(productsDB.id)];
+    async list({
+      organizationId,
+      search,
+      page,
+      pageSize,
+      categoryId,
+      productType,
+      organizationStatus,
+      sortBy,
+      sortDirection,
+    }) {
       const fuzzySearch = buildFuzzySearch({
         query: search,
         values: [
@@ -450,8 +503,89 @@ export function adminProductsService(fastify: FastifyInstance): AdminProductsSer
           productsDB.customerDescription,
           productsDB.kitchenDescription,
         ],
-        tieBreakers: defaultOrderBy,
       });
+
+      const categoryIds = categoryId
+        ? collectCategoryAndDescendantIds(
+            await fastify.db
+              .select({ id: productCategoriesDB.id, parentId: productCategoriesDB.parentId })
+              .from(productCategoriesDB),
+            categoryId,
+          )
+        : null;
+      const variationPrices = fastify.db
+        .select({
+          productId: variationsDB.productId,
+          minPriceCents: sql<number | null>`cast(min(${variationsDB.priceCents}) as int)`.as(
+            "min_price_cents",
+          ),
+          maxPriceCents: sql<number | null>`cast(max(${variationsDB.priceCents}) as int)`.as(
+            "max_price_cents",
+          ),
+        })
+        .from(variationsDB)
+        .where(isNull(variationsDB.deletedAt))
+        .groupBy(variationsDB.productId)
+        .as("active_variation_prices");
+      const minPriceExpression = sql<number | null>`coalesce(
+        ${productsDB.priceCents},
+        ${variationPrices.minPriceCents}
+      )`;
+      const maxPriceExpression = sql<number | null>`coalesce(
+        ${productsDB.priceCents},
+        ${variationPrices.maxPriceCents}
+      )`;
+      const organizationStatusExpression = sql<ProductOrganizationStatus>`case
+        when ${organizationProductDB.productId} is null then 'unassigned'
+        when ${organizationProductDB.isActive} = true then 'active'
+        else 'inactive'
+      end`;
+      const whereConditions: SQL[] = [isNull(productsDB.deletedAt)];
+
+      if (fuzzySearch.where) {
+        whereConditions.push(fuzzySearch.where);
+      }
+
+      if (productType) {
+        whereConditions.push(eq(productsDB.productType, productType));
+      }
+
+      if (categoryIds) {
+        const categoryCondition = or(
+          inArray(productsDB.categoryId, categoryIds),
+          sql`exists (
+            select 1
+            from ${productCategoryLinksDB}
+            where ${productCategoryLinksDB.productId} = ${productsDB.id}
+              and ${inArray(productCategoryLinksDB.categoryId, categoryIds)}
+          )`,
+        );
+
+        if (categoryCondition) {
+          whereConditions.push(categoryCondition);
+        }
+      }
+
+      if (organizationStatus === "active") {
+        whereConditions.push(eq(organizationProductDB.isActive, true));
+      } else if (organizationStatus === "inactive") {
+        whereConditions.push(eq(organizationProductDB.isActive, false));
+      } else if (organizationStatus === "unassigned") {
+        whereConditions.push(isNull(organizationProductDB.productId));
+      }
+
+      const sortExpression =
+        sortBy === "price"
+          ? minPriceExpression
+          : sortBy === "productType"
+            ? sql`${productsDB.productType}`
+            : sortBy === "updatedAt"
+              ? sql`${productsDB.updatedAt}`
+              : sql`${productsDB.name}`;
+      const orderBy: [SQL, ...SQL[]] = [
+        sortDirection === "desc" ? desc(sortExpression) : asc(sortExpression),
+        asc(productsDB.id),
+      ];
 
       const paginatedProducts = await paginate({
         executor: fastify.db,
@@ -459,19 +593,38 @@ export function adminProductsService(fastify: FastifyInstance): AdminProductsSer
           const query = fastify.db
             .select({
               id: productsDB.id,
+              name: productsDB.name,
+              kitchenName: productsDB.kitchenName,
+              productType: productsDB.productType,
+              isFeatured: productsDB.isFeatured,
+              updatedAt: productsDB.updatedAt,
+              legacyCategoryId: productsDB.categoryId,
+              imageId: uploadsDB.id,
+              imageName: uploadsDB.name,
+              imagePath: uploadsDB.path,
+              imageVisibility: uploadsDB.visibility,
+              imageMimeType: uploadsDB.mimeType,
+              minPriceCents: minPriceExpression,
+              maxPriceCents: maxPriceExpression,
+              organizationStatus: organizationStatusExpression,
             })
             .from(productsDB)
+            .leftJoin(uploadsDB, eq(uploadsDB.id, productsDB.imageUploadId))
+            .leftJoin(
+              organizationProductDB,
+              and(
+                eq(organizationProductDB.productId, productsDB.id),
+                eq(organizationProductDB.organizationId, organizationId),
+              ),
+            )
+            .leftJoin(variationPrices, eq(variationPrices.productId, productsDB.id))
             .$dynamic();
 
-          query.where(
-            fuzzySearch.where
-              ? and(isNull(productsDB.deletedAt), fuzzySearch.where)
-              : isNull(productsDB.deletedAt),
-          );
+          query.where(and(...whereConditions));
 
           return query;
         },
-        orderBy: fuzzySearch.orderBy ?? defaultOrderBy,
+        orderBy,
         page,
         pageSize,
       });
@@ -483,16 +636,80 @@ export function adminProductsService(fastify: FastifyInstance): AdminProductsSer
         };
       }
 
-      const products = await Promise.all(
-        paginatedProducts.data.map((product) =>
-          fastify.admin.products.get(product.id, { safe: true }),
-        ),
+      const productIds = paginatedProducts.data.map((product) => product.id);
+      const legacyCategoryIds = paginatedProducts.data
+        .map((product) => product.legacyCategoryId)
+        .filter((id): id is string => Boolean(id));
+      const [linkedCategories, legacyCategories] = await Promise.all([
+        fastify.db
+          .select({
+            productId: productCategoryLinksDB.productId,
+            id: productCategoriesDB.id,
+            name: productCategoriesDB.name,
+            color: productCategoriesDB.color,
+          })
+          .from(productCategoryLinksDB)
+          .innerJoin(
+            productCategoriesDB,
+            eq(productCategoriesDB.id, productCategoryLinksDB.categoryId),
+          )
+          .where(inArray(productCategoryLinksDB.productId, productIds)),
+        legacyCategoryIds.length > 0
+          ? fastify.db
+              .select({
+                id: productCategoriesDB.id,
+                name: productCategoriesDB.name,
+                color: productCategoriesDB.color,
+              })
+              .from(productCategoriesDB)
+              .where(inArray(productCategoriesDB.id, legacyCategoryIds))
+          : Promise.resolve([]),
+      ]);
+      const categoriesByProduct = new Map<string, ProductListCategory[]>();
+      const legacyCategoriesById = new Map(
+        legacyCategories.map((category) => [category.id, category]),
       );
 
+      for (const category of linkedCategories) {
+        addProductCategory(categoriesByProduct, category.productId, category);
+      }
+
+      for (const product of paginatedProducts.data) {
+        if (!product.legacyCategoryId) {
+          continue;
+        }
+
+        const category = legacyCategoriesById.get(product.legacyCategoryId);
+
+        if (category) {
+          addProductCategory(categoriesByProduct, product.id, category);
+        }
+      }
+
       return {
-        data: products.filter(
-          (product): product is NonNullable<typeof product> => product !== null,
-        ),
+        data: paginatedProducts.data.map((product) => ({
+          id: product.id,
+          name: product.name,
+          kitchenName: product.kitchenName,
+          productType: product.productType,
+          isFeatured: product.isFeatured,
+          updatedAt: product.updatedAt!,
+          image: product.imageId
+            ? {
+                id: product.imageId,
+                name: product.imageName ?? "",
+                path: product.imagePath ?? "",
+                visibility: product.imageVisibility ?? "PUBLIC",
+                mimeType: product.imageMimeType ?? "application/octet-stream",
+              }
+            : null,
+          categories: (categoriesByProduct.get(product.id) ?? []).sort((left, right) =>
+            left.name.localeCompare(right.name),
+          ),
+          minPriceCents: product.minPriceCents,
+          maxPriceCents: product.maxPriceCents,
+          organizationStatus: product.organizationStatus,
+        })),
         pagination: paginatedProducts.pagination,
       };
     },
@@ -1168,6 +1385,46 @@ export function adminProductsService(fastify: FastifyInstance): AdminProductsSer
 
       if (!updatedProduct) {
         throw new Error("Failed to retrieve updated product");
+      }
+
+      return updatedProduct;
+    },
+
+    async updateOrganizationStatus(productId, organizationId, isActive) {
+      const product = await fastify.db.query.productsDB.findFirst({
+        where(table, { and, eq: eqOperator, isNull }) {
+          return and(eqOperator(table.id, productId), isNull(table.deletedAt));
+        },
+        columns: { id: true },
+      });
+
+      if (!product) {
+        throw notFound("product.notFound", "The product was not found");
+      }
+
+      await fastify.db
+        .insert(organizationProductDB)
+        .values({ productId, organizationId, isActive })
+        .onConflictDoUpdate({
+          target: [organizationProductDB.productId, organizationProductDB.organizationId],
+          set: { isActive, updatedAt: sql`now()` },
+        });
+
+      return {
+        id: productId,
+        organizationStatus: isActive ? "active" : "inactive",
+      };
+    },
+
+    async updateFeatured(productId, isFeatured) {
+      const [updatedProduct] = await fastify.db
+        .update(productsDB)
+        .set({ isFeatured, updatedAt: sql`now()` })
+        .where(and(eq(productsDB.id, productId), isNull(productsDB.deletedAt)))
+        .returning({ id: productsDB.id, isFeatured: productsDB.isFeatured });
+
+      if (!updatedProduct) {
+        throw notFound("product.notFound", "The product was not found");
       }
 
       return updatedProduct;
