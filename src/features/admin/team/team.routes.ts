@@ -1,13 +1,18 @@
 import { adminAuthHandler } from "@core/handlers";
 import type { FastifyInstance } from "fastify";
-import { createTeamMember, listTeam } from "./team.controllers";
+import { createTeamMember, listTeam, updateTeamMember } from "./team.controllers";
 import {
   createBodySchema,
   createdTeamMemberSchema,
   listQuerySchema,
   listResponseSchema,
+  teamMemberParamsSchema,
+  teamMemberSchema,
+  updateBodySchema,
   type CreateTeamMemberBody,
   type TeamListQuery,
+  type TeamMemberParams,
+  type UpdateTeamMemberBody,
 } from "./team.schemas";
 
 export async function adminTeamRoutes(server: FastifyInstance) {
@@ -38,5 +43,23 @@ export async function adminTeamRoutes(server: FastifyInstance) {
       },
     },
     createTeamMember,
+  );
+
+  server.put<{ Params: TeamMemberParams; Body: UpdateTeamMemberBody }>(
+    "/:memberId",
+    {
+      preHandler: [
+        adminAuthHandler({
+          roles: ["owner", "admin"],
+          permissions: { member: ["update"] },
+        }),
+      ],
+      schema: {
+        params: teamMemberParamsSchema,
+        body: updateBodySchema,
+        response: { 200: teamMemberSchema },
+      },
+    },
+    updateTeamMember,
   );
 }

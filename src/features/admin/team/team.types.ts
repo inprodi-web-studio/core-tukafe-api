@@ -10,6 +10,7 @@ export interface TeamMemberListItem {
   surnames: string;
   email: string;
   role: TeamRole;
+  organizationIds: string[];
   createdAt: Date;
 }
 
@@ -19,6 +20,7 @@ export interface CreateTeamMemberResult extends TeamMemberListItem {
 }
 
 export interface TeamListParams {
+  viewerUserId: string;
   organizationId: string;
   page: number;
   pageSize: number;
@@ -38,7 +40,18 @@ export interface CreateTeamMemberParams {
   role: TeamRole;
 }
 
+export interface UpdateTeamMemberParams {
+  editorUserId: string;
+  activeOrganizationId: string;
+  memberId: string;
+  organizationIds: string[];
+  name: string;
+  surnames: string;
+  role: TeamRole;
+}
+
 export interface AdminTeamService {
   list(input: TeamListParams): Promise<PaginatedResult<TeamMemberListItem>>;
   create(input: CreateTeamMemberParams): Promise<CreateTeamMemberResult>;
+  update(input: UpdateTeamMemberParams): Promise<TeamMemberListItem>;
 }

@@ -9,6 +9,7 @@ export const teamMemberSchema = z.object({
   surnames: z.string(),
   email: z.email(),
   role: teamRoleSchema,
+  organizationIds: z.array(z.string()),
   createdAt: z.date(),
 });
 
@@ -45,5 +46,26 @@ export const createBodySchema = z
   })
   .strict();
 
+export const teamMemberParamsSchema = z
+  .object({
+    memberId: z.string().trim().min(1),
+  })
+  .strict();
+
+export const updateBodySchema = z
+  .object({
+    name: z.string().trim().min(1).max(100),
+    surnames: z.string().trim().min(1).max(160),
+    role: teamRoleSchema,
+    organizationIds: z
+      .array(z.string().trim().min(1))
+      .min(1)
+      .max(100)
+      .transform((values) => [...new Set(values)]),
+  })
+  .strict();
+
 export type TeamListQuery = z.infer<typeof listQuerySchema>;
 export type CreateTeamMemberBody = z.infer<typeof createBodySchema>;
+export type TeamMemberParams = z.infer<typeof teamMemberParamsSchema>;
+export type UpdateTeamMemberBody = z.infer<typeof updateBodySchema>;

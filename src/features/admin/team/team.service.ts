@@ -5,6 +5,7 @@ import {
   generateNanoId,
   getPgError,
   isHttpError,
+  notFound,
   normalizeString,
   paginate,
 } from "@core/utils";
@@ -16,6 +17,7 @@ import type {
   CreateTeamMemberParams,
   TeamListParams,
   TeamMemberListItem,
+  UpdateTeamMemberParams,
 } from "./team.types";
 
 function mapTeamMember(row: {
@@ -25,6 +27,7 @@ function mapTeamMember(row: {
   lastName: string | null;
   email: string;
   role: "admin" | "barista";
+  organizationIds: string[];
   createdAt: Date | null;
 }): TeamMemberListItem {
   if (!row.createdAt) {
@@ -37,6 +40,7 @@ function mapTeamMember(row: {
     surnames: [row.middleName, row.lastName].filter(Boolean).join(" "),
     email: row.email,
     role: row.role,
+    organizationIds: row.organizationIds,
     createdAt: row.createdAt,
   };
 }
@@ -66,9 +70,27 @@ function normalizeCreateInput(input: CreateTeamMemberParams) {
   };
 }
 
+function normalizeUpdateInput(input: UpdateTeamMemberParams) {
+  return {
+    ...input,
+    name: normalizeString(input.name, { trim: true, collapseWhitespace: true }),
+    surnames: normalizeString(input.surnames, { trim: true, collapseWhitespace: true }),
+    organizationIds: [...new Set(input.organizationIds)],
+  };
+}
+
 export function adminTeamService(fastify: FastifyInstance): AdminTeamService {
   return {
-    async list({ organizationId, page, pageSize, search, role, sortBy, sortDirection }) {
+    async list({
+      viewerUserId,
+      organizationId,
+      page,
+      pageSize,
+      search,
+      role,
+      sortBy,
+      sortDirection,
+    }) {
       const normalizedSearch = search?.trim();
       const orderBy = resolveOrderBy({ sortBy, sortDirection });
 
@@ -102,6 +124,17 @@ export function adminTeamService(fastify: FastifyInstance): AdminTeamService {
               lastName: userDB.lastName,
               email: userDB.email,
               role: memberDB.role,
+              organizationIds: sql<string[]>`coalesce(array(
+                select editable_member.organization_id
+                from "member" editable_member
+                inner join "member" viewer_membership
+                  on viewer_membership.organization_id = editable_member.organization_id
+                where editable_member.user_id = ${userDB.id}
+                  and editable_member.role in ('admin', 'barista')
+                  and viewer_membership.user_id = ${viewerUserId}
+                  and viewer_membership.role in ('owner', 'admin')
+                order by editable_member.organization_id
+              ), array[]::text[])`,
               createdAt: memberDB.createdAt,
             })
             .from(memberDB)
@@ -116,6 +149,7 @@ export function adminTeamService(fastify: FastifyInstance): AdminTeamService {
           mapTeamMember({
             ...row,
             role: row.role as "admin" | "barista",
+            organizationIds: row.organizationIds,
           }),
       });
     },
@@ -245,6 +279,7 @@ export function adminTeamService(fastify: FastifyInstance): AdminTeamService {
               : input.surnames,
             email: existingUser?.email ?? input.email,
             role: input.role,
+            organizationIds: input.organizationIds,
             createdAt: membership.createdAt,
             existingUser: Boolean(existingUser),
             credentialCreated,
@@ -263,6 +298,139 @@ export function adminTeamService(fastify: FastifyInstance): AdminTeamService {
 
         throw error;
       }
+    },
+
+    async update(rawInput) {
+      const input = normalizeUpdateInput(rawInput);
+
+      return fastify.db.transaction(async (tx) => {
+        const authorizedMemberships = await tx
+          .select({ organizationId: memberDB.organizationId })
+          .from(memberDB)
+          .where(
+            and(
+              eq(memberDB.userId, input.editorUserId),
+              inArray(memberDB.role, ["owner", "admin"]),
+            ),
+          );
+        const authorizedOrganizationIds = new Set(
+          authorizedMemberships.map((membership) => membership.organizationId),
+        );
+
+        if (
+          input.organizationIds.some(
+            (organizationId) => !authorizedOrganizationIds.has(organizationId),
+          )
+        ) {
+          throw forbidden(
+            "team.organizationAccessDenied",
+            "The user cannot assign access to one or more organizations",
+          );
+        }
+
+        const [target] = await tx
+          .select({
+            id: memberDB.id,
+            userId: memberDB.userId,
+            organizationId: memberDB.organizationId,
+            role: memberDB.role,
+            createdAt: memberDB.createdAt,
+            email: userDB.email,
+          })
+          .from(memberDB)
+          .innerJoin(userDB, eq(memberDB.userId, userDB.id))
+          .where(
+            and(
+              eq(memberDB.id, input.memberId),
+              eq(memberDB.organizationId, input.activeOrganizationId),
+              inArray(memberDB.role, ["admin", "barista"]),
+            ),
+          )
+          .limit(1);
+
+        if (!target?.createdAt) {
+          throw notFound("team.memberNotFound", "The team member was not found");
+        }
+
+        const editableOrganizationIds = [...authorizedOrganizationIds];
+        const existingMemberships = await tx
+          .select({
+            id: memberDB.id,
+            organizationId: memberDB.organizationId,
+            role: memberDB.role,
+          })
+          .from(memberDB)
+          .where(
+            and(
+              eq(memberDB.userId, target.userId),
+              inArray(memberDB.organizationId, editableOrganizationIds),
+            ),
+          );
+        const membershipsByOrganization = new Map(
+          existingMemberships.map((membership) => [membership.organizationId, membership]),
+        );
+
+        if (
+          input.organizationIds.some(
+            (organizationId) => membershipsByOrganization.get(organizationId)?.role === "owner",
+          )
+        ) {
+          throw forbidden(
+            "team.ownerMembershipCannotBeModified",
+            "Owner memberships cannot be modified from the team module",
+          );
+        }
+
+        await tx
+          .update(userDB)
+          .set({ name: input.name, middleName: input.surnames, lastName: null })
+          .where(eq(userDB.id, target.userId));
+
+        const selectedOrganizationIds = new Set(input.organizationIds);
+        const membershipIdsToDelete = existingMemberships
+          .filter(
+            (membership) =>
+              !selectedOrganizationIds.has(membership.organizationId) &&
+              ["admin", "barista"].includes(membership.role),
+          )
+          .map((membership) => membership.id);
+        if (membershipIdsToDelete.length > 0) {
+          await tx.delete(memberDB).where(inArray(memberDB.id, membershipIdsToDelete));
+        }
+
+        const membershipIdsToUpdate = input.organizationIds
+          .map((organizationId) => membershipsByOrganization.get(organizationId))
+          .filter((membership) => membership !== undefined)
+          .map((membership) => membership.id);
+        if (membershipIdsToUpdate.length > 0) {
+          await tx
+            .update(memberDB)
+            .set({ role: input.role })
+            .where(inArray(memberDB.id, membershipIdsToUpdate));
+        }
+
+        const newMemberships = input.organizationIds
+          .filter((organizationId) => !membershipsByOrganization.has(organizationId))
+          .map((organizationId) => ({
+            id: generateNanoId(),
+            userId: target.userId,
+            organizationId,
+            role: input.role,
+          }));
+        if (newMemberships.length > 0) {
+          await tx.insert(memberDB).values(newMemberships);
+        }
+
+        return {
+          id: input.memberId,
+          name: input.name,
+          surnames: input.surnames,
+          email: target.email,
+          role: input.role,
+          organizationIds: input.organizationIds,
+          createdAt: target.createdAt,
+        };
+      });
     },
   };
 }

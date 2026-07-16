@@ -2,8 +2,8 @@ import { accountDB, memberDB, userDB } from "@core/db/schemas";
 import { verifyPassword } from "better-auth/crypto";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { describe, expect, it, vi } from "vitest";
-import { createTeamMember, listTeam } from "./team.controllers";
-import { createBodySchema, listQuerySchema } from "./team.schemas";
+import { createTeamMember, listTeam, updateTeamMember } from "./team.controllers";
+import { createBodySchema, listQuerySchema, updateBodySchema } from "./team.schemas";
 import { adminTeamService } from "./team.service";
 import type { CreateTeamMemberParams } from "./team.types";
 
@@ -54,6 +54,28 @@ describe("admin team contract", () => {
     ).toThrow();
     expect(() => listQuerySchema.parse({ pageSize: 101 })).toThrow();
     expect(() => listQuerySchema.parse({ organizationId: "org-client" })).toThrow();
+    expect(
+      updateBodySchema.parse({
+        name: " Ana ",
+        surnames: " López ",
+        role: "barista",
+        organizationIds: ["org-one", "org-two", "org-one"],
+      }),
+    ).toEqual({
+      name: "Ana",
+      surnames: "López",
+      role: "barista",
+      organizationIds: ["org-one", "org-two"],
+    });
+    expect(() =>
+      updateBodySchema.parse({
+        name: "Ana",
+        surnames: "López",
+        email: "nuevo@tukafe.test",
+        role: "admin",
+        organizationIds: ["org-one"],
+      }),
+    ).toThrow();
   });
 
   it("lista usando exclusivamente la organización autenticada", async () => {
@@ -70,7 +92,10 @@ describe("admin team contract", () => {
         sortBy: "name",
         sortDirection: "asc",
       },
-      auth: { member: { organizationId: "org-active" } },
+      auth: {
+        user: { id: "user-viewer" },
+        member: { organizationId: "org-active" },
+      },
       server: { admin: { team: { list } } },
     } as unknown as FastifyRequest;
     const { reply } = createReply();
@@ -80,6 +105,7 @@ describe("admin team contract", () => {
     expect(list).toHaveBeenCalledWith(
       expect.objectContaining({
         organizationId: "org-active",
+        viewerUserId: "user-viewer",
         search: "ana",
         role: "admin",
       }),
@@ -357,5 +383,156 @@ describe("admin team contract", () => {
       }),
     );
     expect(send).toHaveBeenCalledWith(expect.objectContaining({ id: "member-new" }));
+  });
+
+  it("actualiza mediante el controlador sin aceptar correo ni contraseña", async () => {
+    const update = vi.fn().mockResolvedValue({
+      id: "member-admin",
+      name: "Mariana",
+      surnames: "López",
+      email: "mariana@tukafe.test",
+      role: "barista",
+      organizationIds: ["org-active", "org-secondary"],
+      createdAt: new Date("2026-07-10"),
+    });
+    const request = {
+      params: { memberId: "member-admin" },
+      body: {
+        name: "Mariana",
+        surnames: "López",
+        role: "barista",
+        organizationIds: ["org-active", "org-secondary"],
+      },
+      auth: {
+        user: { id: "user-editor" },
+        member: { organizationId: "org-active" },
+      },
+      server: { admin: { team: { update } } },
+    } as unknown as FastifyRequest;
+    const { reply, send } = createReply();
+
+    await updateTeamMember(request as never, reply);
+
+    expect(update).toHaveBeenCalledWith({
+      memberId: "member-admin",
+      editorUserId: "user-editor",
+      activeOrganizationId: "org-active",
+      name: "Mariana",
+      surnames: "López",
+      role: "barista",
+      organizationIds: ["org-active", "org-secondary"],
+    });
+    expect(send).toHaveBeenCalledWith(expect.objectContaining({ role: "barista" }));
+  });
+
+  it("sincroniza nombre, rol y sucursales en una sola transacción", async () => {
+    const updated = new Map<unknown, unknown>();
+    const deletedMembershipIds: string[][] = [];
+    const insertedMemberships: unknown[] = [];
+    let selectCall = 0;
+    const transaction = vi.fn(async (callback: (tx: unknown) => unknown) => {
+      const tx = {
+        select: vi.fn(() => {
+          const currentCall = selectCall++;
+          return {
+            from: vi.fn(() => {
+              if (currentCall === 0) {
+                return {
+                  where: vi.fn().mockResolvedValue([
+                    { organizationId: "org-active" },
+                    { organizationId: "org-new" },
+                    { organizationId: "org-removed" },
+                  ]),
+                };
+              }
+
+              if (currentCall === 1) {
+                return {
+                  innerJoin: vi.fn(() => ({
+                    where: vi.fn(() => ({
+                      limit: vi.fn().mockResolvedValue([
+                        {
+                          id: "member-active",
+                          userId: "user-target",
+                          organizationId: "org-active",
+                          role: "admin",
+                          createdAt: new Date("2026-07-10"),
+                          email: "mariana@tukafe.test",
+                        },
+                      ]),
+                    })),
+                  })),
+                };
+              }
+
+              return {
+                where: vi.fn().mockResolvedValue([
+                  { id: "member-active", organizationId: "org-active", role: "admin" },
+                  { id: "member-removed", organizationId: "org-removed", role: "barista" },
+                ]),
+              };
+            }),
+          };
+        }),
+        update: vi.fn((table: unknown) => ({
+          set: vi.fn((values: unknown) => {
+            updated.set(table, values);
+            return { where: vi.fn().mockResolvedValue(undefined) };
+          }),
+        })),
+        delete: vi.fn(() => ({
+          where: vi.fn(() => {
+            deletedMembershipIds.push(["member-removed"]);
+            return Promise.resolve();
+          }),
+        })),
+        insert: vi.fn(() => ({
+          values: vi.fn((values: unknown) => {
+            insertedMemberships.push(values);
+            return Promise.resolve();
+          }),
+        })),
+      };
+
+      return callback(tx);
+    });
+    const service = adminTeamService({ db: { transaction } } as unknown as FastifyInstance);
+
+    const result = await service.update({
+      editorUserId: "user-editor",
+      activeOrganizationId: "org-active",
+      memberId: "member-active",
+      name: "  Mariana   Elena ",
+      surnames: " López   Rivera ",
+      role: "barista",
+      organizationIds: ["org-active", "org-new"],
+    });
+
+    expect(transaction).toHaveBeenCalledOnce();
+    expect(updated.get(userDB)).toEqual({
+      name: "Mariana Elena",
+      middleName: "López Rivera",
+      lastName: null,
+    });
+    expect(updated.get(memberDB)).toEqual({ role: "barista" });
+    expect(deletedMembershipIds).toHaveLength(1);
+    expect(insertedMemberships).toEqual([
+      [
+        expect.objectContaining({
+          userId: "user-target",
+          organizationId: "org-new",
+          role: "barista",
+        }),
+      ],
+    ]);
+    expect(result).toEqual(
+      expect.objectContaining({
+        name: "Mariana Elena",
+        surnames: "López Rivera",
+        email: "mariana@tukafe.test",
+        role: "barista",
+        organizationIds: ["org-active", "org-new"],
+      }),
+    );
   });
 });
