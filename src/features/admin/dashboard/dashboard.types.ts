@@ -1,5 +1,5 @@
-export type DashboardPeriod = "week" | "month" | "year";
-export type DashboardGranularity = "day" | "month";
+export type DashboardPeriod = "day" | "week" | "month" | "year";
+export type DashboardGranularity = "hour" | "day" | "month";
 
 export interface DashboardMetric {
   value: number;

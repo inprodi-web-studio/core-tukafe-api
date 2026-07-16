@@ -103,10 +103,10 @@ function aggregateTimeline(timeline: DashboardTimelineItem[]): DashboardTimeline
   );
 }
 
-function localBucketExpression(granularity: "day" | "month") {
-  const datePart = granularity === "month" ? "month" : "day";
+function localBucketExpression(granularity: "hour" | "day" | "month") {
+  const format = granularity === "hour" ? 'YYYY-MM-DD"T"HH24:00:00' : "YYYY-MM-DD";
   return sql.raw(
-    `to_char(date_trunc('${datePart}', (o.created_at at time zone 'UTC') at time zone '${DASHBOARD_TIMEZONE}'), 'YYYY-MM-DD')`,
+    `to_char(date_trunc('${granularity}', (o.created_at at time zone 'UTC') at time zone '${DASHBOARD_TIMEZONE}'), '${format}')`,
   );
 }
 
@@ -115,7 +115,7 @@ async function loadAggregate(
   organizationIds: string[],
   start: Date,
   end: Date,
-  granularity?: "day" | "month",
+  granularity?: "hour" | "day" | "month",
 ): Promise<AggregateRow[]> {
   const organizationList = sql.join(
     organizationIds.map((organizationId) => sql`${organizationId}`),
@@ -191,8 +191,18 @@ async function loadTopProducts(
   }));
 }
 
-function formatBucket(value: string | Date, granularity: "day" | "month"): string {
-  const formatted = value instanceof Date ? value.toISOString().slice(0, 10) : value.slice(0, 10);
+function formatBucket(
+  value: string | Date,
+  granularity: "hour" | "day" | "month",
+): string {
+  const formatted =
+    value instanceof Date
+      ? granularity === "hour"
+        ? value.toISOString().slice(0, 13) + ":00:00"
+        : value.toISOString().slice(0, 10)
+      : granularity === "hour"
+        ? value.slice(0, 19)
+        : value.slice(0, 10);
   return granularity === "month" ? `${formatted.slice(0, 7)}-01` : formatted;
 }
 

@@ -58,7 +58,7 @@ export function buildDashboardPeriodRange({
     : comparisonPeriodEnd;
 
   return {
-    granularity: period === "year" ? "month" : "day",
+    granularity: period === "day" ? "hour" : period === "year" ? "month" : "day",
     start,
     end,
     effectiveEnd,
@@ -68,8 +68,13 @@ export function buildDashboardPeriodRange({
 }
 
 export function listDashboardBuckets(range: DashboardPeriodRange): string[] {
-  const unit = range.granularity === "month" ? "month" : "day";
-  const format = range.granularity === "month" ? "YYYY-MM-01" : "YYYY-MM-DD";
+  const unit = range.granularity;
+  const format =
+    range.granularity === "hour"
+      ? "YYYY-MM-DDTHH:00:00"
+      : range.granularity === "month"
+        ? "YYYY-MM-01"
+        : "YYYY-MM-DD";
   const buckets: string[] = [];
 
   for (let cursor = range.start; cursor.isBefore(range.effectiveEnd); cursor = cursor.add(1, unit)) {

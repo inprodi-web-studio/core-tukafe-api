@@ -16,7 +16,13 @@ function createReply() {
   return { reply, send };
 }
 
-function createDashboardFastify({ memberships }: { memberships: Array<{ organizationId: string }> }) {
+function createDashboardFastify({
+  memberships,
+  bucket = "2026-07-01",
+}: {
+  memberships: Array<{ organizationId: string }>;
+  bucket?: string;
+}) {
   const orderBy = vi.fn().mockResolvedValue(memberships);
   const where = vi.fn().mockReturnValue({ orderBy });
   const innerJoin = vi.fn().mockReturnValue({ where });
@@ -27,7 +33,7 @@ function createDashboardFastify({ memberships }: { memberships: Array<{ organiza
     .mockResolvedValueOnce({
       rows: [
         {
-          bucket: "2026-07-01",
+          bucket,
           orders: 2,
           generatedSalesCents: 10_000,
           netCollectedCents: 8_000,
@@ -77,6 +83,9 @@ describe("admin dashboard", () => {
     expect(
       dashboardQuerySchema.parse({ anchorDate: "2026-07-16" }),
     ).toEqual({ period: "month", anchorDate: "2026-07-16" });
+    expect(
+      dashboardQuerySchema.parse({ period: "day", anchorDate: "2026-07-16" }),
+    ).toEqual({ period: "day", anchorDate: "2026-07-16" });
     expect(() =>
       dashboardQuerySchema.parse({
         anchorDate: "2026-07-16",
@@ -103,6 +112,43 @@ describe("admin dashboard", () => {
       "2026-07-15",
       "2026-07-16",
     ]);
+  });
+
+  it("construye el día por horas y compara contra el mismo avance del día anterior", () => {
+    const range = buildDashboardPeriodRange({
+      period: "day",
+      anchorDate: "2026-07-16",
+      now: new Date("2026-07-16T18:30:00.000Z"),
+    });
+
+    expect(range.granularity).toBe("hour");
+    expect(range.start.format("YYYY-MM-DD HH:mm")).toBe("2026-07-16 00:00");
+    expect(range.end.format("YYYY-MM-DD HH:mm")).toBe("2026-07-17 00:00");
+    expect(range.comparisonStart.format("YYYY-MM-DD HH:mm")).toBe("2026-07-15 00:00");
+    expect(range.comparisonEnd.format("YYYY-MM-DD HH:mm")).toBe("2026-07-15 12:30");
+    expect(listDashboardBuckets(range)).toHaveLength(13);
+    expect(listDashboardBuckets(range).at(0)).toBe("2026-07-16T00:00:00");
+    expect(listDashboardBuckets(range).at(-1)).toBe("2026-07-16T12:00:00");
+  });
+
+  it("agrupa la consulta diaria en buckets horarios", async () => {
+    const { fastify } = createDashboardFastify({
+      memberships: [{ organizationId: "org-one" }],
+      bucket: "2026-07-16T09:00:00",
+    });
+
+    const result = await adminDashboardService(fastify).get({
+      userId: "user-admin",
+      period: "day",
+      anchorDate: "2026-07-16",
+      now: new Date("2026-07-16T18:30:00.000Z"),
+    });
+
+    expect(result.scope.granularity).toBe("hour");
+    expect(result.timeline).toHaveLength(13);
+    expect(result.timeline[9]).toEqual(
+      expect.objectContaining({ bucket: "2026-07-16T09:00:00", orders: 2 }),
+    );
   });
 
   it("calcula métricas, comparación, ceros y ranking para el alcance permitido", async () => {

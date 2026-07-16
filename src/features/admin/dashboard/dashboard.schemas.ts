@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const dashboardPeriodSchema = z.enum(["week", "month", "year"]);
+export const dashboardPeriodSchema = z.enum(["day", "week", "month", "year"]);
 
 export const dashboardQuerySchema = z
   .object({
@@ -40,7 +40,7 @@ const dashboardTopProductSchema = z.object({
 export const dashboardResponseSchema = z.object({
   scope: z.object({
     period: dashboardPeriodSchema,
-    granularity: z.enum(["day", "month"]),
+    granularity: z.enum(["hour", "day", "month"]),
     timezone: z.literal("America/Mexico_City"),
     startAt: z.string().datetime(),
     endAt: z.string().datetime(),
