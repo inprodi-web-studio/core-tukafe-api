@@ -13,6 +13,7 @@ import cors from "@fastify/cors";
 import { adminApiKeysRoutes, adminApiKeysServicesPlugin } from "@features/admin/apiKeys";
 import { adminAuthRoutes, adminAuthServicesPlugin } from "@features/admin/auth";
 import { adminCouponsRoutes, adminCouponsServicesPlugin } from "@features/admin/coupons";
+import { adminDashboardRoutes, adminDashboardServicesPlugin } from "@features/admin/dashboard";
 import {
   adminIngredientCategoriesRoutes,
   adminIngredientCategoriesServicesPlugin,
@@ -126,6 +127,7 @@ await server.register(adminTaxesServicesPlugin);
 await server.register(adminUnitsServicesPlugin);
 await server.register(adminProductsServicesPlugin);
 await server.register(adminCouponsServicesPlugin);
+await server.register(adminDashboardServicesPlugin);
 await server.register(adminUploadsServicesPlugin);
 await server.register(adminOrdersServicesPlugin);
 await server.register(adminOrganizationsServicesPlugin);
@@ -157,6 +159,7 @@ await server.register(
         await adminApp.register(adminUnitsRoutes, { prefix: "/units" });
         await adminApp.register(adminProductsRoutes, { prefix: "/products" });
         await adminApp.register(adminCouponsRoutes, { prefix: "/coupons" });
+        await adminApp.register(adminDashboardRoutes, { prefix: "/dashboard" });
         await adminApp.register(adminUploadsRoutes, { prefix: "/uploads" });
         await adminApp.register(adminOrdersRoutes, { prefix: "/orders" });
         await adminApp.register(adminOrganizationsRoutes, { prefix: "/organizations" });

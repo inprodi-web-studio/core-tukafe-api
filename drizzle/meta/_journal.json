@@ -162,6 +162,13 @@
       "when": 1783510800000,
       "tag": "0023_legacy_free_drink_entitlements",
       "breakpoints": false
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1784206800000,
+      "tag": "0024_dashboard_order_index",
+      "breakpoints": false
     }
   ]
 }

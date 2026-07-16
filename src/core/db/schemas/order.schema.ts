@@ -53,6 +53,7 @@ const orders = pgTable(
   (table) => [
     uniqueIndex("order_organization_folio_unique").on(table.organizationId, table.folio),
     index("order_organization_id_idx").on(table.organizationId),
+    index("order_organization_id_created_at_idx").on(table.organizationId, table.createdAt),
     index("order_customer_id_idx").on(table.customerId),
     index("order_coupon_id_idx").on(table.couponId),
     index("order_customer_id_created_at_idx").on(table.customerId, table.createdAt),
