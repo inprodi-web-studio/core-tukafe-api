@@ -1,8 +1,10 @@
 import { accountDB, memberDB, userDB } from "@core/db/schemas";
+import featureNamespacesPlugin from "@core/plugins/featureNamespaces.plugin";
 import { verifyPassword } from "better-auth/crypto";
-import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
+import Fastify, { type FastifyInstance, type FastifyReply, type FastifyRequest } from "fastify";
 import { describe, expect, it, vi } from "vitest";
 import { createTeamMember, listTeam, updateTeamMember } from "./team.controllers";
+import adminTeamServicesPlugin from "./team.plugin";
 import { createBodySchema, listQuerySchema, updateBodySchema } from "./team.schemas";
 import { adminTeamService } from "./team.service";
 import type { CreateTeamMemberParams } from "./team.types";
@@ -17,6 +19,21 @@ function createReply() {
 }
 
 describe("admin team contract", () => {
+  it("registra todas las operaciones del servicio en el namespace de Fastify", async () => {
+    const server = Fastify();
+    await server.register(featureNamespacesPlugin);
+    await server.register(adminTeamServicesPlugin);
+    await server.ready();
+
+    expect(server.admin.team).toEqual({
+      list: expect.any(Function),
+      create: expect.any(Function),
+      update: expect.any(Function),
+    });
+
+    await server.close();
+  });
+
   it("aplica defaults y restringe roles, contraseña y campos adicionales", () => {
     expect(listQuerySchema.parse({})).toEqual({
       page: 1,

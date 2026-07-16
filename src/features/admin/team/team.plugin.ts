@@ -12,10 +12,7 @@ declare module "@core/types/feature-namespaces" {
 const adminTeamServicesPlugin: FastifyPluginAsync = async (fastify) => {
   const teamService = adminTeamService(fastify);
 
-  fastify.admin.team = {
-    list: teamService.list,
-    create: teamService.create,
-  };
+  fastify.admin.team = teamService;
 };
 
 export default fp(adminTeamServicesPlugin, {
