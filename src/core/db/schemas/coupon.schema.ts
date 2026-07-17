@@ -39,7 +39,7 @@ const coupons = pgTable(
     allowWithLoyaltyFreeDrink: boolean("allow_with_loyalty_free_drink").notNull().default(false),
     periodLimitType: text("period_limit_type", { enum: COUPON_PERIOD_LIMIT_TYPES }),
     periodLimitCount: integer("period_limit_count"),
-    maxRedemptionsPerCustomer: integer("max_redemptions_per_customer").notNull().default(1),
+    maxRedemptionsPerCustomer: integer("max_redemptions_per_customer").default(1),
     minEligibleSubtotalCents: integer("min_eligible_subtotal_cents"),
     maxDiscountCents: integer("max_discount_cents"),
     ...generateTimestamps(),
@@ -51,10 +51,7 @@ const coupons = pgTable(
     index("coupon_starts_at_idx").on(table.startsAt),
     index("coupon_ends_at_idx").on(table.endsAt),
     check("coupon_code_non_empty_check", sql`btrim(${table.code}) <> ''`),
-    check(
-      "coupon_normalized_code_non_empty_check",
-      sql`btrim(${table.normalizedCode}) <> ''`,
-    ),
+    check("coupon_normalized_code_non_empty_check", sql`btrim(${table.normalizedCode}) <> ''`),
     check("coupon_discount_value_positive_check", sql`${table.discountValue} > 0`),
     check(
       "coupon_discount_type_check",
@@ -74,7 +71,7 @@ const coupons = pgTable(
     ),
     check(
       "coupon_max_redemptions_per_customer_positive_check",
-      sql`${table.maxRedemptionsPerCustomer} > 0`,
+      sql`${table.maxRedemptionsPerCustomer} is null or ${table.maxRedemptionsPerCustomer} > 0`,
     ),
     check(
       "coupon_min_eligible_subtotal_non_negative_check",

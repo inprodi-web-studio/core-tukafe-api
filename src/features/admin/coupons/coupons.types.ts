@@ -4,8 +4,18 @@ import type {
   CouponPeriodLimitType,
   CouponRuleMode,
 } from "@core/db/schemas";
-import type { ListQueryParams } from "@core/types";
 import type { PaginatedResult } from "@core/utils";
+
+export type CouponEffectiveStatus = "active" | "scheduled" | "expired" | "inactive";
+export type CouponSortField =
+  | "code"
+  | "startsAt"
+  | "endsAt"
+  | "redemptions"
+  | "discountAmount"
+  | "updatedAt";
+export type CouponSortDirection = "asc" | "desc";
+export type CouponRuleResource = "product" | "category";
 
 export interface CouponRuleSetInput {
   includeProductIds?: string[] | null;
@@ -15,7 +25,8 @@ export interface CouponRuleSetInput {
 }
 
 export interface CreateCouponServiceParams {
-  organizationId: string;
+  creatorUserId: string;
+  organizationIds: string[];
   code: string;
   isActive?: boolean | null;
   startsAt: string;
@@ -32,7 +43,9 @@ export interface CreateCouponServiceParams {
 }
 
 export interface UpdateCouponServiceParams {
+  organizationId: string;
   code?: string | null;
+  isActive?: boolean | null;
   startsAt?: string | null;
   endsAt?: string | null;
   discountType?: CouponDiscountType | null;
@@ -70,19 +83,55 @@ export interface CouponListItemResponse {
   endsAt: Date | null;
   discountType: CouponDiscountType;
   discountValue: number;
+  effectiveStatus: CouponEffectiveStatus;
+  allowWithLoyaltyFreeDrink: boolean;
   periodLimitType: CouponPeriodLimitType | null;
   periodLimitCount: number | null;
-  maxRedemptionsPerCustomer: number;
+  maxRedemptionsPerCustomer: number | null;
+  minEligibleSubtotalCents: number | null;
+  maxDiscountCents: number | null;
+  redemptionCount: number;
+  totalDiscountCents: number;
   createdAt: Date;
   updatedAt: Date;
 }
 
+export interface CouponListParams {
+  organizationId: string;
+  page: number;
+  pageSize: number;
+  search?: string | null;
+  status?: CouponEffectiveStatus;
+  discountType?: CouponDiscountType;
+  sortBy: CouponSortField;
+  sortDirection: CouponSortDirection;
+}
+
+export interface CouponRuleOption {
+  id: string;
+  label: string;
+  description: string | null;
+}
+
+export interface CouponRuleOptionsParams {
+  resource: CouponRuleResource;
+  page: number;
+  pageSize: number;
+  search?: string | null;
+  ids?: string[];
+}
+
 export interface AdminCouponsService {
-  list(input?: ListQueryParams): Promise<PaginatedResult<CouponListItemResponse>>;
-  create(input: CreateCouponServiceParams): Promise<CouponResponse>;
-  getById(couponId: string): Promise<CouponResponse>;
+  list(input: CouponListParams): Promise<PaginatedResult<CouponListItemResponse>>;
+  create(input: CreateCouponServiceParams): Promise<{ data: CouponResponse[] }>;
+  getById(couponId: string, organizationId: string): Promise<CouponResponse>;
   update(couponId: string, input: UpdateCouponServiceParams): Promise<CouponResponse>;
-  updateStatus(couponId: string, input: UpdateCouponStatusServiceParams): Promise<CouponResponse>;
+  updateStatus(
+    couponId: string,
+    organizationId: string,
+    input: UpdateCouponStatusServiceParams,
+  ): Promise<CouponResponse>;
+  listRuleOptions(input: CouponRuleOptionsParams): Promise<PaginatedResult<CouponRuleOption>>;
 }
 
 export type CouponRuleModeMapping = {

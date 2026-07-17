@@ -13,6 +13,7 @@ export const COUPON_TIMEZONE = "America/Mexico_City";
 export interface CouponWithRules extends Coupon {
   productRules: CouponProductRule[];
   categoryRules: CouponCategoryRule[];
+  resolvedCategoryRules?: Array<{ categoryId: string; mode: "include" | "exclude" }>;
 }
 
 export interface EvaluatedCouponResult {
@@ -94,15 +95,12 @@ function getCouponRuleSets(coupon: CouponWithRules): {
   const excludeProductIds = normalizeAndUniqueIds(
     coupon.productRules.filter((rule) => rule.mode === "exclude").map((rule) => rule.productId),
   );
+  const categoryRules = coupon.resolvedCategoryRules ?? coupon.categoryRules;
   const includeCategoryIds = normalizeAndUniqueIds(
-    coupon.categoryRules
-      .filter((rule) => rule.mode === "include")
-      .map((rule) => rule.categoryId),
+    categoryRules.filter((rule) => rule.mode === "include").map((rule) => rule.categoryId),
   );
   const excludeCategoryIds = normalizeAndUniqueIds(
-    coupon.categoryRules
-      .filter((rule) => rule.mode === "exclude")
-      .map((rule) => rule.categoryId),
+    categoryRules.filter((rule) => rule.mode === "exclude").map((rule) => rule.categoryId),
   );
 
   return {
@@ -252,7 +250,10 @@ export function applyCouponToPreparedOrder({
     const originalSubtotalCents = preparedOrderItem.item.subtotalCents;
     const originalTaxesCents = preparedOrderItem.item.taxesCents;
 
-    const safeSubtotalDiscountCents = Math.max(0, Math.min(subtotalDiscountCents, originalSubtotalCents));
+    const safeSubtotalDiscountCents = Math.max(
+      0,
+      Math.min(subtotalDiscountCents, originalSubtotalCents),
+    );
     const taxDiscountCents =
       originalSubtotalCents > 0
         ? Math.max(
@@ -308,7 +309,10 @@ export function applyCouponToPreparedOrder({
   };
 }
 
-function getDatePartsInTimezone(date: Date, timeZone: string): { year: number; month: number; day: number } {
+function getDatePartsInTimezone(
+  date: Date,
+  timeZone: string,
+): { year: number; month: number; day: number } {
   const formatter = new Intl.DateTimeFormat("en-US", {
     timeZone,
     year: "numeric",

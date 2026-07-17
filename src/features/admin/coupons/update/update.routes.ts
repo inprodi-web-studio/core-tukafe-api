@@ -13,7 +13,9 @@ export async function updateRoutes(server: FastifyInstance) {
   server.patch<{ Params: Params; Body: UpdateBody }>(
     "/:couponId",
     {
-      preHandler: [adminAuthHandler({ permissions: { coupons: ["update"] } })],
+      preHandler: [
+        adminAuthHandler({ roles: ["owner", "admin"], permissions: { coupons: ["update"] } }),
+      ],
       schema: {
         params: paramsSchema,
         body: updateBodySchema,

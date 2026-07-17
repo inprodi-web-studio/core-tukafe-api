@@ -7,7 +7,9 @@ export async function listRoutes(server: FastifyInstance) {
   server.get<{ Querystring: QueryParams }>(
     "/",
     {
-      preHandler: [adminAuthHandler({ permissions: { coupons: ["read"] } })],
+      preHandler: [
+        adminAuthHandler({ roles: ["owner", "admin"], permissions: { coupons: ["read"] } }),
+      ],
       schema: {
         querystring: querySchema,
         response: {

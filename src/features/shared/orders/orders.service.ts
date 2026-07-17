@@ -299,7 +299,27 @@ async function loadCouponByCode({
     throw validation("coupon.notFound", "Coupon code was not found");
   }
 
-  return coupon;
+  const resolvedCategoryRules = await fastify.db.execute<{
+    categoryId: string;
+    mode: "include" | "exclude";
+  }>(sql`
+    with recursive category_descendants as (
+      select rule.category_id as "categoryId", rule.mode
+      from coupon_category_rule rule
+      where rule.coupon_id = ${coupon.id}
+
+      union
+
+      select child.id as "categoryId", descendants.mode
+      from product_category child
+      inner join category_descendants descendants
+        on child.parent_id = descendants."categoryId"
+    )
+    select "categoryId", mode
+    from category_descendants
+  `);
+
+  return { ...coupon, resolvedCategoryRules: resolvedCategoryRules.rows };
 }
 
 export async function loadOrder(
@@ -949,7 +969,7 @@ async function validateCouponLimitsForPreview({
   periodType: "day" | "week" | "month" | null;
   periodStartDate: string | null;
 }) {
-  if (coupon.maxRedemptionsPerCustomer > 0) {
+  if (coupon.maxRedemptionsPerCustomer !== null && coupon.maxRedemptionsPerCustomer > 0) {
     if (!customerId) {
       throw validation(
         "coupon.customerRequired",
@@ -1004,7 +1024,7 @@ async function validateCouponLimitsForCreate({
   periodType: "day" | "week" | "month" | null;
   periodStartDate: string | null;
 }) {
-  if (coupon.maxRedemptionsPerCustomer > 0) {
+  if (coupon.maxRedemptionsPerCustomer !== null && coupon.maxRedemptionsPerCustomer > 0) {
     if (!customerId) {
       throw validation(
         "coupon.customerRequired",

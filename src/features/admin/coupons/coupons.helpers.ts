@@ -8,7 +8,6 @@ import {
 } from "@core/db/schemas";
 import { normalizeString, validation } from "@core/utils";
 import type {
-  CouponResponse,
   CouponRuleSetInput,
   CouponRuleSetResponse,
   CreateCouponServiceParams,
@@ -49,7 +48,10 @@ export function normalizeCouponCode(value: string): string {
   });
 }
 
-function validatePeriodLimitPair(periodLimitType: CouponPeriodLimitType | null, periodLimitCount: number | null) {
+function validatePeriodLimitPair(
+  periodLimitType: CouponPeriodLimitType | null,
+  periodLimitCount: number | null,
+) {
   const hasPeriodType = periodLimitType !== null;
   const hasPeriodCount = periodLimitCount !== null;
 
@@ -74,15 +76,30 @@ function assertValidPeriodType(value: string): asserts value is CouponPeriodLimi
 }
 
 export function normalizeCouponRules(input?: CouponRuleSetInput | null): CouponRuleSetResponse {
-  return {
+  const rules = {
     includeProductIds: normalizeIdArray(input?.includeProductIds),
     excludeProductIds: normalizeIdArray(input?.excludeProductIds),
     includeCategoryIds: normalizeIdArray(input?.includeCategoryIds),
     excludeCategoryIds: normalizeIdArray(input?.excludeCategoryIds),
   };
+
+  if (rules.includeProductIds.some((id) => rules.excludeProductIds.includes(id))) {
+    throw validation(
+      "coupon.rules.productOverlap",
+      "A product cannot be included and excluded at the same time",
+    );
+  }
+  if (rules.includeCategoryIds.some((id) => rules.excludeCategoryIds.includes(id))) {
+    throw validation(
+      "coupon.rules.categoryOverlap",
+      "A category cannot be included and excluded at the same time",
+    );
+  }
+
+  return rules;
 }
 
-export function normalizeCreateCouponInput(input: CreateCouponServiceParams): Omit<CouponResponse, "id" | "createdAt" | "updatedAt" | "rules"> & { rules: CouponRuleSetResponse } {
+export function normalizeCreateCouponInput(input: CreateCouponServiceParams) {
   const code = normalizeString(input.code, {
     trim: true,
     collapseWhitespace: true,
@@ -138,16 +155,18 @@ export function normalizeCreateCouponInput(input: CreateCouponServiceParams): Om
       : Math.trunc(input.periodLimitCount);
 
   if (periodLimitCount !== null && periodLimitCount <= 0) {
-    throw validation(
-      "coupon.periodLimitCount.invalid",
-      "periodLimitCount must be greater than 0",
-    );
+    throw validation("coupon.periodLimitCount.invalid", "periodLimitCount must be greater than 0");
   }
 
   validatePeriodLimitPair(periodLimitType, periodLimitCount);
 
-  const maxRedemptionsPerCustomer = Math.trunc(input.maxRedemptionsPerCustomer ?? 1);
-  if (maxRedemptionsPerCustomer <= 0) {
+  const maxRedemptionsPerCustomer =
+    input.maxRedemptionsPerCustomer === undefined
+      ? 1
+      : input.maxRedemptionsPerCustomer === null
+        ? null
+        : Math.trunc(input.maxRedemptionsPerCustomer);
+  if (maxRedemptionsPerCustomer !== null && maxRedemptionsPerCustomer <= 0) {
     throw validation(
       "coupon.maxRedemptionsPerCustomer.invalid",
       "maxRedemptionsPerCustomer must be greater than 0",
@@ -174,7 +193,7 @@ export function normalizeCreateCouponInput(input: CreateCouponServiceParams): Om
   }
 
   return {
-    organizationId: input.organizationId,
+    organizationIds: [...new Set(input.organizationIds)],
     code,
     normalizedCode,
     isActive: input.isActive ?? true,
@@ -192,12 +211,11 @@ export function normalizeCreateCouponInput(input: CreateCouponServiceParams): Om
   };
 }
 
-export function normalizeUpdateCouponInput(
-  input: UpdateCouponServiceParams,
-): {
+export function normalizeUpdateCouponInput(input: UpdateCouponServiceParams): {
   updates: {
     code?: string;
     normalizedCode?: string;
+    isActive?: boolean;
     startsAt?: Date;
     endsAt?: Date | null;
     discountType?: CouponDiscountType;
@@ -205,7 +223,7 @@ export function normalizeUpdateCouponInput(
     allowWithLoyaltyFreeDrink?: boolean;
     periodLimitType?: CouponPeriodLimitType | null;
     periodLimitCount?: number | null;
-    maxRedemptionsPerCustomer?: number;
+    maxRedemptionsPerCustomer?: number | null;
     minEligibleSubtotalCents?: number | null;
     maxDiscountCents?: number | null;
   };
@@ -214,6 +232,7 @@ export function normalizeUpdateCouponInput(
   const updates: {
     code?: string;
     normalizedCode?: string;
+    isActive?: boolean;
     startsAt?: Date;
     endsAt?: Date | null;
     discountType?: CouponDiscountType;
@@ -221,7 +240,7 @@ export function normalizeUpdateCouponInput(
     allowWithLoyaltyFreeDrink?: boolean;
     periodLimitType?: CouponPeriodLimitType | null;
     periodLimitCount?: number | null;
-    maxRedemptionsPerCustomer?: number;
+    maxRedemptionsPerCustomer?: number | null;
     minEligibleSubtotalCents?: number | null;
     maxDiscountCents?: number | null;
   } = {};
@@ -243,6 +262,10 @@ export function normalizeUpdateCouponInput(
 
     updates.code = code;
     updates.normalizedCode = normalizedCode;
+  }
+
+  if (input.isActive !== undefined && input.isActive !== null) {
+    updates.isActive = input.isActive;
   }
 
   if (input.startsAt !== undefined && input.startsAt !== null) {
@@ -304,15 +327,19 @@ export function normalizeUpdateCouponInput(
     }
   }
 
-  if (input.maxRedemptionsPerCustomer !== undefined && input.maxRedemptionsPerCustomer !== null) {
-    const maxRedemptionsPerCustomer = Math.trunc(input.maxRedemptionsPerCustomer);
-    if (maxRedemptionsPerCustomer <= 0) {
-      throw validation(
-        "coupon.maxRedemptionsPerCustomer.invalid",
-        "maxRedemptionsPerCustomer must be greater than 0",
-      );
+  if (input.maxRedemptionsPerCustomer !== undefined) {
+    if (input.maxRedemptionsPerCustomer === null) {
+      updates.maxRedemptionsPerCustomer = null;
+    } else {
+      const maxRedemptionsPerCustomer = Math.trunc(input.maxRedemptionsPerCustomer);
+      if (maxRedemptionsPerCustomer <= 0) {
+        throw validation(
+          "coupon.maxRedemptionsPerCustomer.invalid",
+          "maxRedemptionsPerCustomer must be greater than 0",
+        );
+      }
+      updates.maxRedemptionsPerCustomer = maxRedemptionsPerCustomer;
     }
-    updates.maxRedemptionsPerCustomer = maxRedemptionsPerCustomer;
   }
 
   if (input.minEligibleSubtotalCents !== undefined) {

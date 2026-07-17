@@ -169,6 +169,13 @@
       "when": 1784206800000,
       "tag": "0024_dashboard_order_index",
       "breakpoints": false
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1784314775000,
+      "tag": "0025_coupon_unlimited_customer_redemptions",
+      "breakpoints": false
     }
   ]
 }

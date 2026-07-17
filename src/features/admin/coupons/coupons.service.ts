@@ -1,7 +1,9 @@
 import {
   couponCategoryRulesDB,
   couponProductRulesDB,
+  couponRedemptionsDB,
   couponsDB,
+  memberDB,
   productCategoriesDB,
   productsDB,
   type Coupon,
@@ -10,15 +12,16 @@ import {
   type CouponRuleMode,
 } from "@core/db/schemas";
 import {
-  buildFuzzySearch,
   conflict,
+  forbidden,
   generateNanoId,
   getPgError,
   notFound,
   paginate,
   validation,
 } from "@core/utils";
-import { asc, eq, inArray, type SQL } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, inArray, isNull, or, sql, type SQL } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import type { FastifyInstance } from "fastify";
 import {
   mapCouponRulesResponse,
@@ -27,42 +30,32 @@ import {
 } from "./coupons.helpers";
 import type {
   AdminCouponsService,
+  CouponEffectiveStatus,
+  CouponListParams,
   CouponListItemResponse,
   CouponResponse,
   CouponRuleSetResponse,
 } from "./coupons.types";
 
 const COUPON_ORG_CODE_UNIQUE_CONSTRAINT = "coupon_org_normalized_code_unique";
+const parentCategory = alias(productCategoriesDB, "coupon_rule_parent_category");
 type TransactionDb = Parameters<Parameters<FastifyInstance["db"]["transaction"]>[0]>[0];
-
-async function assertOrganizationExists(fastify: FastifyInstance, organizationId: string) {
-  const organization = await fastify.db.query.organizationDB.findFirst({
-    where(table, { and, eq, isNull }) {
-      return and(eq(table.id, organizationId), isNull(table.deletedAt));
-    },
-    columns: {
-      id: true,
-    },
-  });
-
-  if (!organization) {
-    throw notFound("organization.notFound", "The organization was not found");
-  }
-}
 
 async function assertRuleReferencesExist(
   fastify: FastifyInstance,
   rules: CouponRuleSetResponse,
 ): Promise<void> {
   const uniqueProductIds = [...new Set([...rules.includeProductIds, ...rules.excludeProductIds])];
-  const uniqueCategoryIds = [...new Set([...rules.includeCategoryIds, ...rules.excludeCategoryIds])];
+  const uniqueCategoryIds = [
+    ...new Set([...rules.includeCategoryIds, ...rules.excludeCategoryIds]),
+  ];
 
   const [products, categories] = await Promise.all([
     uniqueProductIds.length > 0
       ? fastify.db
           .select({ id: productsDB.id })
           .from(productsDB)
-          .where(inArray(productsDB.id, uniqueProductIds))
+          .where(and(inArray(productsDB.id, uniqueProductIds), isNull(productsDB.deletedAt)))
       : Promise.resolve([]),
     uniqueCategoryIds.length > 0
       ? fastify.db
@@ -84,10 +77,16 @@ async function assertRuleReferencesExist(
 async function loadCouponWithRules(
   fastify: FastifyInstance,
   couponId: string,
+  organizationId?: string,
 ): Promise<CouponResponse | null> {
   const coupon = await fastify.db.query.couponsDB.findFirst({
-    where(table, { eq: eqOperator }) {
-      return eqOperator(table.id, couponId);
+    where(table, { and: andOperator, eq: eqOperator }) {
+      return organizationId
+        ? andOperator(
+            eqOperator(table.id, couponId),
+            eqOperator(table.organizationId, organizationId),
+          )
+        : eqOperator(table.id, couponId);
     },
     with: {
       productRules: true,
@@ -206,20 +205,57 @@ function validateResolvedPeriodLimit({
   }
 }
 
+function effectiveStatusExpression(now: Date) {
+  return sql<CouponEffectiveStatus>`case
+    when not ${couponsDB.isActive} then 'inactive'
+    when ${couponsDB.startsAt} > ${now} then 'scheduled'
+    when ${couponsDB.endsAt} is not null and ${couponsDB.endsAt} < ${now} then 'expired'
+    else 'active'
+  end`;
+}
+
+function resolveListOrderBy(
+  input: Pick<CouponListParams, "sortBy" | "sortDirection">,
+  redemptionCount: SQL<number>,
+  totalDiscountCents: SQL<number>,
+): [SQL, ...SQL[]] {
+  const order = input.sortDirection === "asc" ? asc : desc;
+  const column = {
+    code: couponsDB.code,
+    startsAt: couponsDB.startsAt,
+    endsAt: couponsDB.endsAt,
+    redemptions: redemptionCount,
+    discountAmount: totalDiscountCents,
+    updatedAt: couponsDB.updatedAt,
+  }[input.sortBy];
+
+  return [order(column), asc(couponsDB.id)];
+}
+
 export function adminCouponsService(fastify: FastifyInstance): AdminCouponsService {
   return {
-    async list({ search, page, pageSize } = {}) {
-      const defaultOrderBy: [SQL, ...SQL[]] = [asc(couponsDB.code), asc(couponsDB.id)];
-      const fuzzySearch = buildFuzzySearch({
-        query: search,
-        values: [couponsDB.code],
-        tieBreakers: defaultOrderBy,
-        threshold: 0.5,
-      });
+    async list(input) {
+      const now = new Date();
+      const normalizedSearch = input.search?.trim();
+      const effectiveStatus = effectiveStatusExpression(now);
+      const redemptionCount = sql<number>`coalesce(count(${couponRedemptionsDB.id}), 0)::int`;
+      const totalDiscountCents = sql<number>`coalesce(sum(${couponRedemptionsDB.discountCents}), 0)::bigint`;
+      const orderBy = resolveListOrderBy(input, redemptionCount, totalDiscountCents);
 
       const paginatedCoupons = await paginate({
         executor: fastify.db,
         createQuery: () => {
+          const filters: SQL[] = [eq(couponsDB.organizationId, input.organizationId)];
+          if (normalizedSearch) {
+            filters.push(ilike(couponsDB.code, `%${normalizedSearch}%`));
+          }
+          if (input.discountType) {
+            filters.push(eq(couponsDB.discountType, input.discountType));
+          }
+          if (input.status) {
+            filters.push(sql`${effectiveStatus} = ${input.status}`);
+          }
+
           const query = fastify.db
             .select({
               id: couponsDB.id,
@@ -230,72 +266,119 @@ export function adminCouponsService(fastify: FastifyInstance): AdminCouponsServi
               endsAt: couponsDB.endsAt,
               discountType: couponsDB.discountType,
               discountValue: couponsDB.discountValue,
+              effectiveStatus,
+              allowWithLoyaltyFreeDrink: couponsDB.allowWithLoyaltyFreeDrink,
               periodLimitType: couponsDB.periodLimitType,
               periodLimitCount: couponsDB.periodLimitCount,
               maxRedemptionsPerCustomer: couponsDB.maxRedemptionsPerCustomer,
+              minEligibleSubtotalCents: couponsDB.minEligibleSubtotalCents,
+              maxDiscountCents: couponsDB.maxDiscountCents,
+              redemptionCount,
+              totalDiscountCents,
               createdAt: couponsDB.createdAt,
               updatedAt: couponsDB.updatedAt,
             })
             .from(couponsDB)
+            .leftJoin(couponRedemptionsDB, eq(couponRedemptionsDB.couponId, couponsDB.id))
+            .where(and(...filters))
+            .groupBy(couponsDB.id)
             .$dynamic();
-
-          if (fuzzySearch.where) {
-            query.where(fuzzySearch.where);
-          }
 
           return query;
         },
-        orderBy: fuzzySearch.orderBy ?? defaultOrderBy,
-        page,
-        pageSize,
+        orderBy,
+        page: input.page,
+        pageSize: input.pageSize,
       });
 
       return {
-        data: paginatedCoupons.data as CouponListItemResponse[],
+        data: paginatedCoupons.data.map((coupon) => ({
+          ...coupon,
+          redemptionCount: Number(coupon.redemptionCount),
+          totalDiscountCents: Number(coupon.totalDiscountCents),
+        })) as CouponListItemResponse[],
         pagination: paginatedCoupons.pagination,
       };
     },
 
     async create(input) {
       const normalizedInput = normalizeCreateCouponInput(input);
-      await assertOrganizationExists(fastify, normalizedInput.organizationId);
       await assertRuleReferencesExist(fastify, normalizedInput.rules);
 
       try {
-        const couponId = generateNanoId();
+        const couponIds = normalizedInput.organizationIds.map(() => generateNanoId());
 
         await fastify.db.transaction(async (tx) => {
-          await tx.insert(couponsDB).values({
-            id: couponId,
-            organizationId: normalizedInput.organizationId,
-            code: normalizedInput.code,
-            normalizedCode: normalizedInput.normalizedCode,
-            isActive: normalizedInput.isActive,
-            startsAt: normalizedInput.startsAt,
-            endsAt: normalizedInput.endsAt,
-            discountType: normalizedInput.discountType,
-            discountValue: normalizedInput.discountValue,
-            allowWithLoyaltyFreeDrink: normalizedInput.allowWithLoyaltyFreeDrink,
-            periodLimitType: normalizedInput.periodLimitType,
-            periodLimitCount: normalizedInput.periodLimitCount,
-            maxRedemptionsPerCustomer: normalizedInput.maxRedemptionsPerCustomer,
-            minEligibleSubtotalCents: normalizedInput.minEligibleSubtotalCents,
-            maxDiscountCents: normalizedInput.maxDiscountCents,
-          });
+          const memberships = await tx
+            .select({ organizationId: memberDB.organizationId })
+            .from(memberDB)
+            .where(
+              and(
+                eq(memberDB.userId, input.creatorUserId),
+                inArray(memberDB.organizationId, normalizedInput.organizationIds),
+                inArray(memberDB.role, ["owner", "admin"]),
+              ),
+            );
+          const authorizedIds = new Set(memberships.map((membership) => membership.organizationId));
+          if (
+            normalizedInput.organizationIds.some(
+              (organizationId) => !authorizedIds.has(organizationId),
+            )
+          ) {
+            throw forbidden(
+              "coupon.organizationAccessDenied",
+              "The user cannot create coupons for one or more organizations",
+            );
+          }
 
-          await replaceCouponRules({
-            tx,
-            couponId,
-            rules: normalizedInput.rules,
-          });
+          const conflicts = await tx
+            .select({ organizationId: couponsDB.organizationId })
+            .from(couponsDB)
+            .where(
+              and(
+                inArray(couponsDB.organizationId, normalizedInput.organizationIds),
+                eq(couponsDB.normalizedCode, normalizedInput.normalizedCode),
+              ),
+            );
+          if (conflicts.length > 0) {
+            throw conflict("coupon.duplicateCode", "A coupon with this code already exists", {
+              organizationIds: conflicts.map((item) => item.organizationId),
+            });
+          }
+
+          await tx.insert(couponsDB).values(
+            normalizedInput.organizationIds.map((organizationId, index) => ({
+              id: couponIds[index]!,
+              organizationId,
+              code: normalizedInput.code,
+              normalizedCode: normalizedInput.normalizedCode,
+              isActive: normalizedInput.isActive,
+              startsAt: normalizedInput.startsAt,
+              endsAt: normalizedInput.endsAt,
+              discountType: normalizedInput.discountType,
+              discountValue: normalizedInput.discountValue,
+              allowWithLoyaltyFreeDrink: normalizedInput.allowWithLoyaltyFreeDrink,
+              periodLimitType: normalizedInput.periodLimitType,
+              periodLimitCount: normalizedInput.periodLimitCount,
+              maxRedemptionsPerCustomer: normalizedInput.maxRedemptionsPerCustomer,
+              minEligibleSubtotalCents: normalizedInput.minEligibleSubtotalCents,
+              maxDiscountCents: normalizedInput.maxDiscountCents,
+            })),
+          );
+
+          for (const couponId of couponIds) {
+            await replaceCouponRules({ tx, couponId, rules: normalizedInput.rules });
+          }
         });
 
-        const createdCoupon = await loadCouponWithRules(fastify, couponId);
-        if (!createdCoupon) {
+        const createdCoupons = await Promise.all(
+          couponIds.map((couponId) => loadCouponWithRules(fastify, couponId)),
+        );
+        if (createdCoupons.some((coupon) => !coupon)) {
           throw new Error("Failed to load created coupon");
         }
 
-        return createdCoupon;
+        return { data: createdCoupons as CouponResponse[] };
       } catch (error) {
         const pgError = getPgError(error);
 
@@ -307,8 +390,8 @@ export function adminCouponsService(fastify: FastifyInstance): AdminCouponsServi
       }
     },
 
-    async getById(couponId) {
-      const coupon = await loadCouponWithRules(fastify, couponId);
+    async getById(couponId, organizationId) {
+      const coupon = await loadCouponWithRules(fastify, couponId, organizationId);
 
       if (!coupon) {
         throw notFound("coupon.notFound", "The coupon was not found");
@@ -318,15 +401,15 @@ export function adminCouponsService(fastify: FastifyInstance): AdminCouponsServi
     },
 
     async update(couponId, input) {
-      const existingCoupon = await loadCouponWithRules(fastify, couponId);
+      const existingCoupon = await loadCouponWithRules(fastify, couponId, input.organizationId);
       if (!existingCoupon) {
         throw notFound("coupon.notFound", "The coupon was not found");
       }
 
       const { updates, rules } = normalizeUpdateCouponInput(input);
 
-      const resolvedDiscountType =
-        (updates.discountType ?? existingCoupon.discountType) as CouponDiscountType;
+      const resolvedDiscountType = (updates.discountType ??
+        existingCoupon.discountType) as CouponDiscountType;
       const resolvedDiscountValue = updates.discountValue ?? existingCoupon.discountValue;
       validateResolvedDiscountRange({
         discountType: resolvedDiscountType,
@@ -348,8 +431,7 @@ export function adminCouponsService(fastify: FastifyInstance): AdminCouponsServi
       });
 
       const resolvedStartsAt = updates.startsAt ?? existingCoupon.startsAt;
-      const resolvedEndsAt =
-        updates.endsAt === undefined ? existingCoupon.endsAt : updates.endsAt;
+      const resolvedEndsAt = updates.endsAt === undefined ? existingCoupon.endsAt : updates.endsAt;
       if (resolvedEndsAt && resolvedEndsAt.getTime() < resolvedStartsAt.getTime()) {
         throw validation("coupon.validityRange.invalid", "endsAt cannot be before startsAt");
       }
@@ -366,7 +448,12 @@ export function adminCouponsService(fastify: FastifyInstance): AdminCouponsServi
       try {
         await fastify.db.transaction(async (tx) => {
           if (Object.keys(valuesToUpdate).length > 1) {
-            await tx.update(couponsDB).set(valuesToUpdate).where(eq(couponsDB.id, couponId));
+            await tx
+              .update(couponsDB)
+              .set(valuesToUpdate)
+              .where(
+                and(eq(couponsDB.id, couponId), eq(couponsDB.organizationId, input.organizationId)),
+              );
           }
 
           if (rules) {
@@ -383,7 +470,7 @@ export function adminCouponsService(fastify: FastifyInstance): AdminCouponsServi
         throw error;
       }
 
-      const updatedCoupon = await loadCouponWithRules(fastify, couponId);
+      const updatedCoupon = await loadCouponWithRules(fastify, couponId, input.organizationId);
       if (!updatedCoupon) {
         throw new Error("Failed to load updated coupon");
       }
@@ -391,10 +478,13 @@ export function adminCouponsService(fastify: FastifyInstance): AdminCouponsServi
       return updatedCoupon;
     },
 
-    async updateStatus(couponId, input) {
+    async updateStatus(couponId, organizationId, input) {
       const existingCoupon = await fastify.db.query.couponsDB.findFirst({
-        where(table, { eq: eqOperator }) {
-          return eqOperator(table.id, couponId);
+        where(table, { and: andOperator, eq: eqOperator }) {
+          return andOperator(
+            eqOperator(table.id, couponId),
+            eqOperator(table.organizationId, organizationId),
+          );
         },
         columns: {
           id: true,
@@ -411,14 +501,75 @@ export function adminCouponsService(fastify: FastifyInstance): AdminCouponsServi
           isActive: input.isActive,
           updatedAt: new Date(),
         })
-        .where(eq(couponsDB.id, couponId));
+        .where(and(eq(couponsDB.id, couponId), eq(couponsDB.organizationId, organizationId)));
 
-      const updatedCoupon = await loadCouponWithRules(fastify, couponId);
+      const updatedCoupon = await loadCouponWithRules(fastify, couponId, organizationId);
       if (!updatedCoupon) {
         throw new Error("Failed to load updated coupon");
       }
 
       return updatedCoupon;
+    },
+
+    async listRuleOptions({ resource, page, pageSize, search, ids }) {
+      const normalizedSearch = search?.trim();
+
+      if (resource === "product") {
+        return paginate({
+          executor: fastify.db,
+          createQuery: () => {
+            const filters: SQL[] = [isNull(productsDB.deletedAt)];
+            if (ids?.length) filters.push(inArray(productsDB.id, ids));
+            if (normalizedSearch) {
+              const pattern = `%${normalizedSearch}%`;
+              const filter = or(
+                ilike(productsDB.name, pattern),
+                ilike(productsDB.kitchenName, pattern),
+              );
+              if (filter) filters.push(filter);
+            }
+
+            return fastify.db
+              .select({
+                id: productsDB.id,
+                label: productsDB.name,
+                description: productsDB.kitchenName,
+              })
+              .from(productsDB)
+              .where(and(...filters))
+              .$dynamic();
+          },
+          orderBy: [asc(productsDB.name), asc(productsDB.id)],
+          page,
+          pageSize,
+        });
+      }
+
+      return paginate({
+        executor: fastify.db,
+        createQuery: () => {
+          const filters: SQL[] = [];
+          if (ids?.length) filters.push(inArray(productCategoriesDB.id, ids));
+          if (normalizedSearch) {
+            filters.push(ilike(productCategoriesDB.name, `%${normalizedSearch}%`));
+          }
+
+          const query = fastify.db
+            .select({
+              id: productCategoriesDB.id,
+              label: productCategoriesDB.name,
+              description: parentCategory.name,
+            })
+            .from(productCategoriesDB)
+            .leftJoin(parentCategory, eq(productCategoriesDB.parentId, parentCategory.id))
+            .$dynamic();
+          if (filters.length > 0) query.where(and(...filters));
+          return query;
+        },
+        orderBy: [asc(productCategoriesDB.name), asc(productCategoriesDB.id)],
+        page,
+        pageSize,
+      });
     },
   };
 }

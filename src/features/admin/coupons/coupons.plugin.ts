@@ -12,13 +12,7 @@ declare module "@core/types/feature-namespaces" {
 const adminCouponsServicesPlugin: FastifyPluginAsync = async (fastify) => {
   const couponsService = adminCouponsService(fastify);
 
-  fastify.admin.coupons = {
-    list: couponsService.list,
-    create: couponsService.create,
-    getById: couponsService.getById,
-    update: couponsService.update,
-    updateStatus: couponsService.updateStatus,
-  };
+  fastify.admin.coupons = couponsService;
 };
 
 export default fp(adminCouponsServicesPlugin, {

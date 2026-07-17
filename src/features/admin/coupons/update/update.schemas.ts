@@ -17,6 +17,7 @@ export type Params = z.infer<typeof paramsSchema>;
 export const updateBodySchema = z
   .object({
     code: z.string().trim().min(1).max(64).nullish(),
+    isActive: z.boolean().nullish(),
     startsAt: z.string().datetime({ offset: true }).nullish(),
     endsAt: z.string().datetime({ offset: true }).nullish(),
     discountType: couponDiscountTypeSchema.nullish(),

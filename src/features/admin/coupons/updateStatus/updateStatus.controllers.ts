@@ -7,6 +7,7 @@ export async function updateStatus(
 ) {
   const updatedCoupon = await request.server.admin.coupons.updateStatus(
     request.params.couponId,
+    request.auth.member.organizationId,
     request.body,
   );
 

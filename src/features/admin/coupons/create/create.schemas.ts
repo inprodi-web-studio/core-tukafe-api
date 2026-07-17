@@ -8,7 +8,11 @@ import {
 
 export const createBodySchema = z
   .object({
-    organizationId: z.nanoid(),
+    organizationIds: z
+      .array(z.nanoid())
+      .min(1)
+      .max(100)
+      .transform((values) => [...new Set(values)]),
     code: z.string().trim().min(1).max(64),
     isActive: z.boolean().optional(),
     startsAt: z.string().datetime({ offset: true }),
@@ -27,6 +31,6 @@ export const createBodySchema = z
 
 export type CreateBody = z.infer<typeof createBodySchema>;
 
-export const createResponseSchema = couponResponseSchema;
+export const createResponseSchema = z.object({ data: z.array(couponResponseSchema).min(1) });
 
 export type CreateResponse = z.infer<typeof createResponseSchema>;

@@ -5,10 +5,10 @@ export async function update(
   request: FastifyRequest<{ Params: Params; Body: UpdateBody }>,
   reply: FastifyReply,
 ) {
-  const updatedCoupon = await request.server.admin.coupons.update(
-    request.params.couponId,
-    request.body,
-  );
+  const updatedCoupon = await request.server.admin.coupons.update(request.params.couponId, {
+    ...request.body,
+    organizationId: request.auth.member.organizationId,
+  });
 
   return reply.status(200).send(updatedCoupon);
 }

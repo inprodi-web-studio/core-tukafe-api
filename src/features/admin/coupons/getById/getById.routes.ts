@@ -7,7 +7,9 @@ export async function getByIdRoutes(server: FastifyInstance) {
   server.get<{ Params: Params }>(
     "/:couponId",
     {
-      preHandler: [adminAuthHandler({ permissions: { coupons: ["read"] } })],
+      preHandler: [
+        adminAuthHandler({ roles: ["owner", "admin"], permissions: { coupons: ["read"] } }),
+      ],
       schema: {
         params: paramsSchema,
         response: {
