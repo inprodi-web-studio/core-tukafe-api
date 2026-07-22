@@ -15,8 +15,43 @@ export interface DashboardTimelineItem {
   tipsCents: number;
   freeDrinkRedemptions: number;
   freeDrinkUnits: number;
+  freeDrinkRetailValueCents: number;
+  freeDrinkBeverageValueCents: number;
+  freeDrinkModifierValueCents: number;
   cashbackRedemptions: number;
   cashbackRedeemedCents: number;
+}
+
+export interface DashboardModifierOption {
+  modifierOptionId: string;
+  name: string;
+  selectionUnits: number;
+  paidSelectionUnits: number;
+  configuredExtraCents: number;
+}
+
+export interface DashboardModifierGroup {
+  modifierId: string;
+  name: string;
+  selectionUnits: number;
+  paidSelectionUnits: number;
+  configuredExtraCents: number;
+  options: DashboardModifierOption[];
+}
+
+export interface DashboardVariationOption {
+  variationOptionId: string;
+  name: string;
+  selectionUnits: number;
+  associatedSalesCents: number;
+}
+
+export interface DashboardVariationGroup {
+  variationGroupId: string;
+  name: string;
+  selectionUnits: number;
+  associatedSalesCents: number;
+  options: DashboardVariationOption[];
 }
 
 export interface DashboardTopProduct {
@@ -48,6 +83,8 @@ export interface DashboardResponse {
   };
   timeline: DashboardTimelineItem[];
   topProducts: DashboardTopProduct[];
+  topModifierGroups: DashboardModifierGroup[];
+  topVariationGroups: DashboardVariationGroup[];
 }
 
 export interface DashboardParams {

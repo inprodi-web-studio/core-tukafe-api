@@ -24,6 +24,9 @@ const dashboardTimelineItemSchema = z.object({
   tipsCents: z.number().int().nonnegative(),
   freeDrinkRedemptions: z.number().int().nonnegative(),
   freeDrinkUnits: z.number().int().nonnegative(),
+  freeDrinkRetailValueCents: z.number().int().nonnegative(),
+  freeDrinkBeverageValueCents: z.number().int().nonnegative(),
+  freeDrinkModifierValueCents: z.number().int().nonnegative(),
   cashbackRedemptions: z.number().int().nonnegative(),
   cashbackRedeemedCents: z.number().int().nonnegative(),
 });
@@ -35,6 +38,38 @@ const dashboardTopProductSchema = z.object({
   paidUnits: z.number().nonnegative(),
   freeUnits: z.number().nonnegative(),
   generatedSalesCents: z.number().int().nonnegative(),
+});
+
+const dashboardModifierOptionSchema = z.object({
+  modifierOptionId: z.string(),
+  name: z.string(),
+  selectionUnits: z.number().nonnegative(),
+  paidSelectionUnits: z.number().nonnegative(),
+  configuredExtraCents: z.number().int().nonnegative(),
+});
+
+const dashboardModifierGroupSchema = z.object({
+  modifierId: z.string(),
+  name: z.string(),
+  selectionUnits: z.number().nonnegative(),
+  paidSelectionUnits: z.number().nonnegative(),
+  configuredExtraCents: z.number().int().nonnegative(),
+  options: z.array(dashboardModifierOptionSchema).max(8),
+});
+
+const dashboardVariationOptionSchema = z.object({
+  variationOptionId: z.string(),
+  name: z.string(),
+  selectionUnits: z.number().nonnegative(),
+  associatedSalesCents: z.number().int().nonnegative(),
+});
+
+const dashboardVariationGroupSchema = z.object({
+  variationGroupId: z.string(),
+  name: z.string(),
+  selectionUnits: z.number().nonnegative(),
+  associatedSalesCents: z.number().int().nonnegative(),
+  options: z.array(dashboardVariationOptionSchema).max(8),
 });
 
 export const dashboardResponseSchema = z.object({
@@ -57,6 +92,8 @@ export const dashboardResponseSchema = z.object({
   }),
   timeline: z.array(dashboardTimelineItemSchema),
   topProducts: z.array(dashboardTopProductSchema).max(5),
+  topModifierGroups: z.array(dashboardModifierGroupSchema).max(8),
+  topVariationGroups: z.array(dashboardVariationGroupSchema).max(8),
 });
 
 export type DashboardQuery = z.infer<typeof dashboardQuerySchema>;

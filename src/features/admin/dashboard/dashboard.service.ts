@@ -10,10 +10,12 @@ import {
 import type {
   AdminDashboardService,
   DashboardMetric,
+  DashboardModifierGroup,
   DashboardParams,
   DashboardResponse,
   DashboardTimelineItem,
   DashboardTopProduct,
+  DashboardVariationGroup,
 } from "./dashboard.types";
 
 interface AggregateRow extends Record<string, unknown> {
@@ -24,8 +26,35 @@ interface AggregateRow extends Record<string, unknown> {
   tipsCents?: string | number;
   freeDrinkRedemptions?: string | number;
   freeDrinkUnits?: string | number;
+  freeDrinkRetailValueCents?: string | number;
+  freeDrinkBeverageValueCents?: string | number;
+  freeDrinkModifierValueCents?: string | number;
   cashbackRedemptions?: string | number;
   cashbackRedeemedCents?: string | number;
+}
+
+interface ModifierRankingRow extends Record<string, unknown> {
+  modifierId: string;
+  modifierName: string;
+  modifierOptionId: string;
+  modifierOptionName: string;
+  groupSelectionUnits: string | number;
+  groupPaidSelectionUnits: string | number;
+  groupConfiguredExtraCents: string | number;
+  optionSelectionUnits: string | number;
+  optionPaidSelectionUnits: string | number;
+  optionConfiguredExtraCents: string | number;
+}
+
+interface VariationRankingRow extends Record<string, unknown> {
+  variationGroupId: string;
+  variationGroupName: string;
+  variationOptionId: string;
+  variationOptionName: string;
+  groupSelectionUnits: string | number;
+  groupAssociatedSalesCents: string | number;
+  optionSelectionUnits: string | number;
+  optionAssociatedSalesCents: string | number;
 }
 
 interface TopProductRow extends Record<string, unknown> {
@@ -67,6 +96,9 @@ function emptyTimelineItem(bucket: string): DashboardTimelineItem {
     tipsCents: 0,
     freeDrinkRedemptions: 0,
     freeDrinkUnits: 0,
+    freeDrinkRetailValueCents: 0,
+    freeDrinkBeverageValueCents: 0,
+    freeDrinkModifierValueCents: 0,
     cashbackRedemptions: 0,
     cashbackRedeemedCents: 0,
   };
@@ -81,6 +113,9 @@ function normalizeAggregate(row: AggregateRow, bucket: string): DashboardTimelin
     tipsCents: toInteger(row.tipsCents),
     freeDrinkRedemptions: toInteger(row.freeDrinkRedemptions),
     freeDrinkUnits: toInteger(row.freeDrinkUnits),
+    freeDrinkRetailValueCents: toInteger(row.freeDrinkRetailValueCents),
+    freeDrinkBeverageValueCents: toInteger(row.freeDrinkBeverageValueCents),
+    freeDrinkModifierValueCents: toInteger(row.freeDrinkModifierValueCents),
     cashbackRedemptions: toInteger(row.cashbackRedemptions),
     cashbackRedeemedCents: toInteger(row.cashbackRedeemedCents),
   };
@@ -96,6 +131,12 @@ function aggregateTimeline(timeline: DashboardTimelineItem[]): DashboardTimeline
       tipsCents: total.tipsCents + item.tipsCents,
       freeDrinkRedemptions: total.freeDrinkRedemptions + item.freeDrinkRedemptions,
       freeDrinkUnits: total.freeDrinkUnits + item.freeDrinkUnits,
+      freeDrinkRetailValueCents:
+        total.freeDrinkRetailValueCents + item.freeDrinkRetailValueCents,
+      freeDrinkBeverageValueCents:
+        total.freeDrinkBeverageValueCents + item.freeDrinkBeverageValueCents,
+      freeDrinkModifierValueCents:
+        total.freeDrinkModifierValueCents + item.freeDrinkModifierValueCents,
       cashbackRedemptions: total.cashbackRedemptions + item.cashbackRedemptions,
       cashbackRedeemedCents: total.cashbackRedeemedCents + item.cashbackRedeemedCents,
     }),
@@ -125,12 +166,50 @@ async function loadAggregate(
   const groupBy = granularity ? sql`group by 1 order by 1` : sql``;
 
   const result = await fastify.db.execute<AggregateRow>(sql`
-    with order_free_units as (
+    with regular_free_modifier_values as (
       select
-        order_id,
-        coalesce(sum(free_units), 0)::integer as free_units
-      from order_item
-      group by order_id
+        oi.id as order_item_id,
+        coalesce(
+          sum(round(oim.unit_price_cents::numeric * oim.quantity * oi.free_units)),
+          0
+        )::bigint as modifier_value_cents
+      from order_item oi
+      inner join order_item_modifier oim on oim.order_item_id = oi.id
+      where oi.free_units > 0
+      group by oi.id
+    ),
+    compound_free_modifier_values as (
+      select
+        oi.id as order_item_id,
+        coalesce(
+          sum(round(
+            coalesce(nullif(modifier.value ->> 'unitPriceCents', '')::numeric, 0)
+            * coalesce(nullif(modifier.value ->> 'quantity', '')::numeric, 1)
+            * component.quantity
+            * oi.free_units
+          )),
+          0
+        )::bigint as modifier_value_cents
+      from order_item oi
+      inner join order_item_compound_component component on component.order_item_id = oi.id
+      cross join lateral jsonb_array_elements(component.modifiers_snapshot) modifier(value)
+      where oi.free_units > 0
+      group by oi.id
+    ),
+    order_free_values as (
+      select
+        oi.order_id,
+        coalesce(sum(oi.free_units), 0)::integer as free_units,
+        coalesce(sum(oi.promotion_discount_cents), 0)::bigint as retail_value_cents,
+        coalesce(sum(least(
+          oi.promotion_discount_cents,
+          coalesce(regular.modifier_value_cents, 0)
+            + coalesce(compound.modifier_value_cents, 0)
+        )), 0)::bigint as modifier_value_cents
+      from order_item oi
+      left join regular_free_modifier_values regular on regular.order_item_id = oi.id
+      left join compound_free_modifier_values compound on compound.order_item_id = oi.id
+      group by oi.order_id
     )
     select
       ${bucket} as bucket,
@@ -140,10 +219,13 @@ async function loadAggregate(
       coalesce(sum(o.tip_cents), 0)::bigint as "tipsCents",
       count(*) filter (where coalesce(f.free_units, 0) > 0)::integer as "freeDrinkRedemptions",
       coalesce(sum(f.free_units), 0)::bigint as "freeDrinkUnits",
+      coalesce(sum(f.retail_value_cents), 0)::bigint as "freeDrinkRetailValueCents",
+      coalesce(sum(f.retail_value_cents - f.modifier_value_cents), 0)::bigint as "freeDrinkBeverageValueCents",
+      coalesce(sum(f.modifier_value_cents), 0)::bigint as "freeDrinkModifierValueCents",
       count(*) filter (where o.cashback_redemption_cents > 0)::integer as "cashbackRedemptions",
       coalesce(sum(o.cashback_redemption_cents), 0)::bigint as "cashbackRedeemedCents"
     from "order" o
-    left join order_free_units f on f.order_id = o.id
+    left join order_free_values f on f.order_id = o.id
     where o.organization_id in (${organizationList})
       and o.created_at >= ${start}
       and o.created_at < ${end}
@@ -189,6 +271,281 @@ async function loadTopProducts(
     freeUnits: toNumber(row.freeUnits),
     generatedSalesCents: toInteger(row.generatedSalesCents),
   }));
+}
+
+async function loadTopModifierGroups(
+  fastify: FastifyInstance,
+  organizationIds: string[],
+  start: Date,
+  end: Date,
+): Promise<DashboardModifierGroup[]> {
+  const organizationList = sql.join(
+    organizationIds.map((organizationId) => sql`${organizationId}`),
+    sql`, `,
+  );
+  const result = await fastify.db.execute<ModifierRankingRow>(sql`
+    with modifier_source as (
+      select
+        oim.modifier_id as modifier_id,
+        oim.modifier_name as modifier_name,
+        oim.modifier_option_id as modifier_option_id,
+        oim.modifier_option_name as modifier_option_name,
+        (oim.quantity * oi.quantity)::numeric as selection_units,
+        (oim.quantity * greatest(oi.quantity - oi.free_units, 0))::numeric as paid_selection_units,
+        round(
+          oim.unit_price_cents::numeric
+          * oim.quantity
+          * greatest(oi.quantity - oi.free_units, 0)
+        )::bigint as configured_extra_cents,
+        o.created_at as order_created_at
+      from order_item_modifier oim
+      inner join order_item oi on oi.id = oim.order_item_id
+      inner join "order" o on o.id = oi.order_id
+      where o.organization_id in (${organizationList})
+        and o.created_at >= ${start}
+        and o.created_at < ${end}
+
+      union all
+
+      select
+        modifier.value ->> 'modifierId' as modifier_id,
+        modifier.value ->> 'modifierName' as modifier_name,
+        modifier.value ->> 'modifierOptionId' as modifier_option_id,
+        modifier.value ->> 'modifierOptionName' as modifier_option_name,
+        (
+          coalesce(nullif(modifier.value ->> 'quantity', '')::numeric, 1)
+          * component.quantity
+          * oi.quantity
+        )::numeric as selection_units,
+        (
+          coalesce(nullif(modifier.value ->> 'quantity', '')::numeric, 1)
+          * component.quantity
+          * greatest(oi.quantity - oi.free_units, 0)
+        )::numeric as paid_selection_units,
+        round(
+          coalesce(nullif(modifier.value ->> 'unitPriceCents', '')::numeric, 0)
+          * coalesce(nullif(modifier.value ->> 'quantity', '')::numeric, 1)
+          * component.quantity
+          * greatest(oi.quantity - oi.free_units, 0)
+        )::bigint as configured_extra_cents,
+        o.created_at as order_created_at
+      from order_item_compound_component component
+      inner join order_item oi on oi.id = component.order_item_id
+      inner join "order" o on o.id = oi.order_id
+      cross join lateral jsonb_array_elements(component.modifiers_snapshot) modifier(value)
+      where o.organization_id in (${organizationList})
+        and o.created_at >= ${start}
+        and o.created_at < ${end}
+    ),
+    option_stats as (
+      select
+        modifier_id,
+        (array_agg(modifier_name order by order_created_at desc))[1] as modifier_name,
+        modifier_option_id,
+        (array_agg(modifier_option_name order by order_created_at desc))[1] as modifier_option_name,
+        sum(selection_units)::double precision as option_selection_units,
+        sum(paid_selection_units)::double precision as option_paid_selection_units,
+        sum(configured_extra_cents)::bigint as option_configured_extra_cents
+      from modifier_source
+      where modifier_id is not null
+        and modifier_option_id is not null
+      group by modifier_id, modifier_option_id
+    ),
+    group_stats as (
+      select
+        modifier_id,
+        max(modifier_name) as modifier_name,
+        sum(option_selection_units)::double precision as group_selection_units,
+        sum(option_paid_selection_units)::double precision as group_paid_selection_units,
+        sum(option_configured_extra_cents)::bigint as group_configured_extra_cents
+      from option_stats
+      group by modifier_id
+    ),
+    ranked_groups as (
+      select *, row_number() over (
+        order by group_selection_units desc, group_configured_extra_cents desc, modifier_name asc
+      ) as group_rank
+      from group_stats
+    ),
+    ranked_options as (
+      select *, row_number() over (
+        partition by modifier_id
+        order by option_selection_units desc, option_configured_extra_cents desc, modifier_option_name asc
+      ) as option_rank
+      from option_stats
+    )
+    select
+      groups.modifier_id as "modifierId",
+      groups.modifier_name as "modifierName",
+      options.modifier_option_id as "modifierOptionId",
+      options.modifier_option_name as "modifierOptionName",
+      groups.group_selection_units as "groupSelectionUnits",
+      groups.group_paid_selection_units as "groupPaidSelectionUnits",
+      groups.group_configured_extra_cents as "groupConfiguredExtraCents",
+      options.option_selection_units as "optionSelectionUnits",
+      options.option_paid_selection_units as "optionPaidSelectionUnits",
+      options.option_configured_extra_cents as "optionConfiguredExtraCents"
+    from ranked_groups groups
+    inner join ranked_options options on options.modifier_id = groups.modifier_id
+    where groups.group_rank <= 8
+      and options.option_rank <= 8
+    order by groups.group_rank, options.option_rank
+  `);
+
+  const groups = new Map<string, DashboardModifierGroup>();
+  for (const row of result.rows) {
+    const group = groups.get(row.modifierId) ?? {
+      modifierId: row.modifierId,
+      name: row.modifierName,
+      selectionUnits: toNumber(row.groupSelectionUnits),
+      paidSelectionUnits: toNumber(row.groupPaidSelectionUnits),
+      configuredExtraCents: toInteger(row.groupConfiguredExtraCents),
+      options: [],
+    };
+    group.options.push({
+      modifierOptionId: row.modifierOptionId,
+      name: row.modifierOptionName,
+      selectionUnits: toNumber(row.optionSelectionUnits),
+      paidSelectionUnits: toNumber(row.optionPaidSelectionUnits),
+      configuredExtraCents: toInteger(row.optionConfiguredExtraCents),
+    });
+    groups.set(row.modifierId, group);
+  }
+
+  return [...groups.values()];
+}
+
+async function loadTopVariationGroups(
+  fastify: FastifyInstance,
+  organizationIds: string[],
+  start: Date,
+  end: Date,
+): Promise<DashboardVariationGroup[]> {
+  const organizationList = sql.join(
+    organizationIds.map((organizationId) => sql`${organizationId}`),
+    sql`, `,
+  );
+  const result = await fastify.db.execute<VariationRankingRow>(sql`
+    with snapshot_source as (
+      select
+        selection.value ->> 'groupId' as variation_group_id,
+        selection.value ->> 'groupName' as variation_group_name,
+        selection.value ->> 'optionId' as variation_option_id,
+        selection.value ->> 'optionName' as variation_option_name,
+        w.quantity_snapshot::numeric as selection_units,
+        (
+          oi.grand_total_cents::numeric
+          * w.quantity_snapshot
+          / nullif(oi.quantity, 0)
+        )::numeric as associated_sales_cents,
+        o.created_at as order_created_at
+      from work_order w
+      inner join "order" o on o.id = w.order_id
+      inner join order_item oi on oi.id = w.order_item_id
+      cross join lateral jsonb_array_elements(w.variation_selections_snapshot) selection(value)
+      where o.organization_id in (${organizationList})
+        and o.created_at >= ${start}
+        and o.created_at < ${end}
+    ),
+    fallback_source as (
+      select
+        selected.variation_group_id,
+        variation_group.name as variation_group_name,
+        selected.variation_option_id,
+        variation_option.name as variation_option_name,
+        oi.quantity::numeric as selection_units,
+        oi.grand_total_cents::numeric as associated_sales_cents,
+        o.created_at as order_created_at
+      from order_item oi
+      inner join "order" o on o.id = oi.order_id
+      inner join variation_selection selected on selected.variation_id = oi.variation_id
+      inner join variation_group on variation_group.id = selected.variation_group_id
+      inner join variation_group_option variation_option on variation_option.id = selected.variation_option_id
+      where o.organization_id in (${organizationList})
+        and o.created_at >= ${start}
+        and o.created_at < ${end}
+        and not exists (
+          select 1
+          from work_order snapshot
+          where snapshot.order_item_id = oi.id
+            and jsonb_array_length(snapshot.variation_selections_snapshot) > 0
+        )
+    ),
+    variation_source as (
+      select * from snapshot_source
+      union all
+      select * from fallback_source
+    ),
+    option_stats as (
+      select
+        variation_group_id,
+        (array_agg(variation_group_name order by order_created_at desc))[1] as variation_group_name,
+        variation_option_id,
+        (array_agg(variation_option_name order by order_created_at desc))[1] as variation_option_name,
+        sum(selection_units)::double precision as option_selection_units,
+        round(sum(associated_sales_cents))::bigint as option_associated_sales_cents
+      from variation_source
+      where variation_group_id is not null
+        and variation_option_id is not null
+      group by variation_group_id, variation_option_id
+    ),
+    group_stats as (
+      select
+        variation_group_id,
+        max(variation_group_name) as variation_group_name,
+        sum(option_selection_units)::double precision as group_selection_units,
+        sum(option_associated_sales_cents)::bigint as group_associated_sales_cents
+      from option_stats
+      group by variation_group_id
+    ),
+    ranked_groups as (
+      select *, row_number() over (
+        order by group_selection_units desc, group_associated_sales_cents desc, variation_group_name asc
+      ) as group_rank
+      from group_stats
+    ),
+    ranked_options as (
+      select *, row_number() over (
+        partition by variation_group_id
+        order by option_selection_units desc, option_associated_sales_cents desc, variation_option_name asc
+      ) as option_rank
+      from option_stats
+    )
+    select
+      groups.variation_group_id as "variationGroupId",
+      groups.variation_group_name as "variationGroupName",
+      options.variation_option_id as "variationOptionId",
+      options.variation_option_name as "variationOptionName",
+      groups.group_selection_units as "groupSelectionUnits",
+      groups.group_associated_sales_cents as "groupAssociatedSalesCents",
+      options.option_selection_units as "optionSelectionUnits",
+      options.option_associated_sales_cents as "optionAssociatedSalesCents"
+    from ranked_groups groups
+    inner join ranked_options options on options.variation_group_id = groups.variation_group_id
+    where groups.group_rank <= 8
+      and options.option_rank <= 8
+    order by groups.group_rank, options.option_rank
+  `);
+
+  const groups = new Map<string, DashboardVariationGroup>();
+  for (const row of result.rows) {
+    const group = groups.get(row.variationGroupId) ?? {
+      variationGroupId: row.variationGroupId,
+      name: row.variationGroupName,
+      selectionUnits: toNumber(row.groupSelectionUnits),
+      associatedSalesCents: toInteger(row.groupAssociatedSalesCents),
+      options: [],
+    };
+    group.options.push({
+      variationOptionId: row.variationOptionId,
+      name: row.variationOptionName,
+      selectionUnits: toNumber(row.optionSelectionUnits),
+      associatedSalesCents: toInteger(row.optionAssociatedSalesCents),
+    });
+    groups.set(row.variationGroupId, group);
+  }
+
+  return [...groups.values()];
 }
 
 function formatBucket(
@@ -254,7 +611,13 @@ export function adminDashboardService(fastify: FastifyInstance): AdminDashboardS
         );
       }
 
-      const [aggregateRows, previousRows, topProducts] = await Promise.all([
+      const [
+        aggregateRows,
+        previousRows,
+        topProducts,
+        topModifierGroups,
+        topVariationGroups,
+      ] = await Promise.all([
         loadAggregate(
           fastify,
           organizationIds,
@@ -269,6 +632,18 @@ export function adminDashboardService(fastify: FastifyInstance): AdminDashboardS
           range.comparisonEnd.toDate(),
         ),
         loadTopProducts(
+          fastify,
+          organizationIds,
+          range.start.toDate(),
+          range.effectiveEnd.toDate(),
+        ),
+        loadTopModifierGroups(
+          fastify,
+          organizationIds,
+          range.start.toDate(),
+          range.effectiveEnd.toDate(),
+        ),
+        loadTopVariationGroups(
           fastify,
           organizationIds,
           range.start.toDate(),
@@ -314,6 +689,8 @@ export function adminDashboardService(fastify: FastifyInstance): AdminDashboardS
         },
         timeline,
         topProducts,
+        topModifierGroups,
+        topVariationGroups,
       };
     },
   };

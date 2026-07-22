@@ -40,6 +40,9 @@ function createDashboardFastify({
           tipsCents: 1_000,
           freeDrinkRedemptions: 1,
           freeDrinkUnits: 2,
+          freeDrinkRetailValueCents: 1_800,
+          freeDrinkBeverageValueCents: 1_500,
+          freeDrinkModifierValueCents: 300,
           cashbackRedemptions: 1,
           cashbackRedeemedCents: 2_000,
         },
@@ -54,6 +57,9 @@ function createDashboardFastify({
           tipsCents: 500,
           freeDrinkRedemptions: 0,
           freeDrinkUnits: 0,
+          freeDrinkRetailValueCents: 0,
+          freeDrinkBeverageValueCents: 0,
+          freeDrinkModifierValueCents: 0,
           cashbackRedemptions: 0,
           cashbackRedeemedCents: 0,
         },
@@ -68,6 +74,36 @@ function createDashboardFastify({
           paidUnits: 6,
           freeUnits: 2,
           generatedSalesCents: 7_000,
+        },
+      ],
+    })
+    .mockResolvedValueOnce({
+      rows: [
+        {
+          modifierId: "modifier-milk",
+          modifierName: "Leche",
+          modifierOptionId: "modifier-option-oat",
+          modifierOptionName: "Avena",
+          groupSelectionUnits: 12,
+          groupPaidSelectionUnits: 10,
+          groupConfiguredExtraCents: 1_000,
+          optionSelectionUnits: 7,
+          optionPaidSelectionUnits: 6,
+          optionConfiguredExtraCents: 600,
+        },
+      ],
+    })
+    .mockResolvedValueOnce({
+      rows: [
+        {
+          variationGroupId: "variation-group-size",
+          variationGroupName: "Tamaño",
+          variationOptionId: "variation-option-large",
+          variationOptionName: "Grande",
+          groupSelectionUnits: 14,
+          groupAssociatedSalesCents: 12_000,
+          optionSelectionUnits: 9,
+          optionAssociatedSalesCents: 8_000,
         },
       ],
     });
@@ -164,7 +200,7 @@ describe("admin dashboard", () => {
       now: new Date("2026-07-16T18:00:00.000Z"),
     });
 
-    expect(execute).toHaveBeenCalledTimes(3);
+    expect(execute).toHaveBeenCalledTimes(5);
     expect(result.scope).toEqual(
       expect.objectContaining({
         organizationId: null,
@@ -174,9 +210,20 @@ describe("admin dashboard", () => {
     );
     expect(result.timeline).toHaveLength(16);
     expect(result.timeline[0]).toEqual(
-      expect.objectContaining({ bucket: "2026-07-01", orders: 2, freeDrinkUnits: 2 }),
+      expect.objectContaining({
+        bucket: "2026-07-01",
+        orders: 2,
+        freeDrinkUnits: 2,
+        freeDrinkRetailValueCents: 1_800,
+        freeDrinkBeverageValueCents: 1_500,
+        freeDrinkModifierValueCents: 300,
+      }),
     );
     expect(result.timeline[1]).toEqual(expect.objectContaining({ bucket: "2026-07-02", orders: 0 }));
+    expect(
+      (result.timeline[0]?.freeDrinkBeverageValueCents ?? 0) +
+        (result.timeline[0]?.freeDrinkModifierValueCents ?? 0),
+    ).toBe(result.timeline[0]?.freeDrinkRetailValueCents);
     expect(result.summary.orders).toEqual({ value: 2, previousValue: 1, changePercent: 100 });
     expect(result.summary.generatedSalesCents).toEqual({
       value: 10_000,
@@ -187,6 +234,19 @@ describe("admin dashboard", () => {
     expect(result.summary.tipsCents.value).toBe(1_000);
     expect(result.topProducts[0]).toEqual(
       expect.objectContaining({ deliveredUnits: 8, paidUnits: 6, freeUnits: 2 }),
+    );
+    expect(result.topModifierGroups[0]).toEqual(
+      expect.objectContaining({
+        name: "Leche",
+        selectionUnits: 12,
+        configuredExtraCents: 1_000,
+      }),
+    );
+    expect(result.topModifierGroups[0]?.options[0]).toEqual(
+      expect.objectContaining({ name: "Avena", selectionUnits: 7 }),
+    );
+    expect(result.topVariationGroups[0]).toEqual(
+      expect.objectContaining({ name: "Tamaño", associatedSalesCents: 12_000 }),
     );
   });
 
@@ -250,6 +310,8 @@ describe("admin dashboard authorization", () => {
       },
       timeline: [],
       topProducts: [],
+      topModifierGroups: [],
+      topVariationGroups: [],
     });
     await server.register(zodSchemaPlugin);
     server.decorate("auth", {
