@@ -283,6 +283,7 @@ async function recordStripePaymentIntent({
         allowCashbackRedemption: true,
         exposeCashbackBalance: true,
         requirePaymentForPositiveAmountDue: true,
+        source: "mobile",
       },
     );
   }
@@ -303,6 +304,7 @@ export function customerOrdersService(fastify: FastifyInstance): CustomerOrdersS
         allowCashbackRedemption: true,
         exposeCashbackBalance: true,
         requirePaymentForPositiveAmountDue: true,
+        source: "mobile",
       });
     },
     async get(input) {

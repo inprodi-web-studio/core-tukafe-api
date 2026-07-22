@@ -9,6 +9,7 @@ import type {
 } from "@core/db/schemas";
 
 export type OrderTipType = "none" | "percentage" | "amount";
+export type OrderSource = "inplace" | "mobile" | "admin" | "unknown";
 export type OrderPaymentProvider = "zettle" | "stripe";
 export type OrderPaymentAttemptStatus =
   | "pending"

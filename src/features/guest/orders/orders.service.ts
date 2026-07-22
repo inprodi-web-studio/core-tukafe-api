@@ -55,6 +55,7 @@ export function guestOrdersService(fastify: FastifyInstance): GuestOrdersService
       };
       return createOrder(fastify, createOrderInput, {
         requirePaymentForPositiveAmountDue: true,
+        source: "inplace",
       });
     },
   };

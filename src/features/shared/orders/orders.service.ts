@@ -42,6 +42,7 @@ import type {
   RecordOrderPaymentAttemptResultParams,
   OrderPromotionState,
   OrderResponse,
+  OrderSource,
 } from "./orders.types";
 import {
   buildOrderValidationContext,
@@ -92,6 +93,7 @@ interface OrderCalculationOptions {
 
 interface CreateOrderOptions extends OrderCalculationOptions {
   requirePaymentForPositiveAmountDue?: boolean;
+  source?: OrderSource;
 }
 
 interface CashbackAccountSnapshot {
@@ -1576,6 +1578,7 @@ export async function createOrder(
             customerId: normalizedInput.customerId,
             couponId: calculatedOrder.couponConsumption?.couponId ?? null,
             couponCode: calculatedOrder.couponConsumption?.couponCode ?? null,
+            source: options.source ?? "unknown",
             folio,
             comment: normalizedInput.comment,
             tipType: normalizedInput.tip.type,

@@ -11,6 +11,9 @@ import type {
   AdminDashboardService,
   DashboardMetric,
   DashboardModifierGroup,
+  DashboardOrderSource,
+  DashboardOrderSourceMetric,
+  DashboardOrderSources,
   DashboardParams,
   DashboardResponse,
   DashboardTimelineItem,
@@ -31,6 +34,18 @@ interface AggregateRow extends Record<string, unknown> {
   freeDrinkModifierValueCents?: string | number;
   cashbackRedemptions?: string | number;
   cashbackRedeemedCents?: string | number;
+  inplaceOrders?: string | number;
+  inplaceGeneratedSalesCents?: string | number;
+  inplaceNetCollectedCents?: string | number;
+  mobileOrders?: string | number;
+  mobileGeneratedSalesCents?: string | number;
+  mobileNetCollectedCents?: string | number;
+  adminOrders?: string | number;
+  adminGeneratedSalesCents?: string | number;
+  adminNetCollectedCents?: string | number;
+  unknownOrders?: string | number;
+  unknownGeneratedSalesCents?: string | number;
+  unknownNetCollectedCents?: string | number;
 }
 
 interface ModifierRankingRow extends Record<string, unknown> {
@@ -144,6 +159,71 @@ function aggregateTimeline(timeline: DashboardTimelineItem[]): DashboardTimeline
   );
 }
 
+const ORDER_SOURCES: DashboardOrderSource[] = ["inplace", "mobile", "admin", "unknown"];
+
+function emptyOrderSourceMetric(): DashboardOrderSourceMetric {
+  return { orders: 0, generatedSalesCents: 0, netCollectedCents: 0 };
+}
+
+function emptyOrderSourceRecord(): Record<DashboardOrderSource, DashboardOrderSourceMetric> {
+  return {
+    inplace: emptyOrderSourceMetric(),
+    mobile: emptyOrderSourceMetric(),
+    admin: emptyOrderSourceMetric(),
+    unknown: emptyOrderSourceMetric(),
+  };
+}
+
+function normalizeOrderSources(row?: AggregateRow): Record<DashboardOrderSource, DashboardOrderSourceMetric> {
+  if (!row) {
+    return emptyOrderSourceRecord();
+  }
+
+  return {
+    inplace: {
+      orders: toInteger(row.inplaceOrders),
+      generatedSalesCents: toInteger(row.inplaceGeneratedSalesCents),
+      netCollectedCents: toInteger(row.inplaceNetCollectedCents),
+    },
+    mobile: {
+      orders: toInteger(row.mobileOrders),
+      generatedSalesCents: toInteger(row.mobileGeneratedSalesCents),
+      netCollectedCents: toInteger(row.mobileNetCollectedCents),
+    },
+    admin: {
+      orders: toInteger(row.adminOrders),
+      generatedSalesCents: toInteger(row.adminGeneratedSalesCents),
+      netCollectedCents: toInteger(row.adminNetCollectedCents),
+    },
+    unknown: {
+      orders: toInteger(row.unknownOrders),
+      generatedSalesCents: toInteger(row.unknownGeneratedSalesCents),
+      netCollectedCents: toInteger(row.unknownNetCollectedCents),
+    },
+  };
+}
+
+function buildOrderSources(
+  buckets: string[],
+  aggregatesByBucket: Map<string, AggregateRow>,
+): DashboardOrderSources {
+  const timeline = buckets.map((bucket) => ({
+    bucket,
+    sources: normalizeOrderSources(aggregatesByBucket.get(bucket)),
+  }));
+  const totals = emptyOrderSourceRecord();
+
+  for (const item of timeline) {
+    for (const source of ORDER_SOURCES) {
+      totals[source].orders += item.sources[source].orders;
+      totals[source].generatedSalesCents += item.sources[source].generatedSalesCents;
+      totals[source].netCollectedCents += item.sources[source].netCollectedCents;
+    }
+  }
+
+  return { totals, timeline };
+}
+
 function localBucketExpression(granularity: "hour" | "day" | "month") {
   const format = granularity === "hour" ? 'YYYY-MM-DD"T"HH24:00:00' : "YYYY-MM-DD";
   return sql.raw(
@@ -223,7 +303,19 @@ async function loadAggregate(
       coalesce(sum(f.retail_value_cents - f.modifier_value_cents), 0)::bigint as "freeDrinkBeverageValueCents",
       coalesce(sum(f.modifier_value_cents), 0)::bigint as "freeDrinkModifierValueCents",
       count(*) filter (where o.cashback_redemption_cents > 0)::integer as "cashbackRedemptions",
-      coalesce(sum(o.cashback_redemption_cents), 0)::bigint as "cashbackRedeemedCents"
+      coalesce(sum(o.cashback_redemption_cents), 0)::bigint as "cashbackRedeemedCents",
+      count(*) filter (where o.source = 'inplace')::integer as "inplaceOrders",
+      coalesce(sum(o.subtotal_cents + o.taxes_cents) filter (where o.source = 'inplace'), 0)::bigint as "inplaceGeneratedSalesCents",
+      coalesce(sum(greatest(o.subtotal_cents + o.taxes_cents - o.cashback_redemption_cents, 0)) filter (where o.source = 'inplace'), 0)::bigint as "inplaceNetCollectedCents",
+      count(*) filter (where o.source = 'mobile')::integer as "mobileOrders",
+      coalesce(sum(o.subtotal_cents + o.taxes_cents) filter (where o.source = 'mobile'), 0)::bigint as "mobileGeneratedSalesCents",
+      coalesce(sum(greatest(o.subtotal_cents + o.taxes_cents - o.cashback_redemption_cents, 0)) filter (where o.source = 'mobile'), 0)::bigint as "mobileNetCollectedCents",
+      count(*) filter (where o.source = 'admin')::integer as "adminOrders",
+      coalesce(sum(o.subtotal_cents + o.taxes_cents) filter (where o.source = 'admin'), 0)::bigint as "adminGeneratedSalesCents",
+      coalesce(sum(greatest(o.subtotal_cents + o.taxes_cents - o.cashback_redemption_cents, 0)) filter (where o.source = 'admin'), 0)::bigint as "adminNetCollectedCents",
+      count(*) filter (where o.source = 'unknown')::integer as "unknownOrders",
+      coalesce(sum(o.subtotal_cents + o.taxes_cents) filter (where o.source = 'unknown'), 0)::bigint as "unknownGeneratedSalesCents",
+      coalesce(sum(greatest(o.subtotal_cents + o.taxes_cents - o.cashback_redemption_cents, 0)) filter (where o.source = 'unknown'), 0)::bigint as "unknownNetCollectedCents"
     from "order" o
     left join order_free_values f on f.order_id = o.id
     where o.organization_id in (${organizationList})
@@ -656,10 +748,12 @@ export function adminDashboardService(fastify: FastifyInstance): AdminDashboardS
           .filter((row) => row.bucket)
           .map((row) => [formatBucket(row.bucket!, range.granularity), row]),
       );
-      const timeline = listDashboardBuckets(range).map((bucket) => {
+      const buckets = listDashboardBuckets(range);
+      const timeline = buckets.map((bucket) => {
         const row = aggregatesByBucket.get(bucket);
         return row ? normalizeAggregate(row, bucket) : emptyTimelineItem(bucket);
       });
+      const orderSources = buildOrderSources(buckets, aggregatesByBucket);
       const current = aggregateTimeline(timeline);
       const previous = normalizeAggregate(previousRows[0] ?? {}, "previous");
 
@@ -691,6 +785,7 @@ export function adminDashboardService(fastify: FastifyInstance): AdminDashboardS
         topProducts,
         topModifierGroups,
         topVariationGroups,
+        orderSources,
       };
     },
   };

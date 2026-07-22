@@ -9,7 +9,7 @@ import type { AdminOrdersService } from "./orders.types";
 export function adminOrdersService(fastify: FastifyInstance): AdminOrdersService {
   return {
     async create(input) {
-      return createOrder(fastify, input);
+      return createOrder(fastify, input, { source: "admin" });
     },
     async createPaymentAttempt(input) {
       return createOrderPaymentAttempt(fastify, input);

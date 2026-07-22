@@ -32,6 +32,9 @@ const orders = pgTable(
     customerId: text("customer_id").references(() => customersDB.id, { onDelete: "restrict" }),
     couponId: text("coupon_id").references(() => couponsDB.id, { onDelete: "restrict" }),
     couponCode: text("coupon_code"),
+    source: text("source", { enum: ["inplace", "mobile", "admin", "unknown"] })
+      .notNull()
+      .default("unknown"),
     folio: text("folio").notNull(),
     comment: text("comment"),
     tipType: text("tip_type", { enum: ["none", "percentage", "amount"] })
@@ -59,6 +62,10 @@ const orders = pgTable(
     index("order_customer_id_created_at_idx").on(table.customerId, table.createdAt),
     index("order_created_at_idx").on(table.createdAt),
     check("order_folio_format_check", sql`${table.folio} ~ '^(0[1-9]|1[0-2])-[0-9]{2}-[0-9]{6}$'`),
+    check(
+      "order_source_check",
+      sql`${table.source} in ('inplace', 'mobile', 'admin', 'unknown')`,
+    ),
     check("order_subtotal_cents_non_negative_check", sql`${table.subtotalCents} >= 0`),
     check("order_taxes_cents_non_negative_check", sql`${table.taxesCents} >= 0`),
     check("order_tip_cents_non_negative_check", sql`${table.tipCents} >= 0`),

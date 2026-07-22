@@ -45,6 +45,18 @@ function createDashboardFastify({
           freeDrinkModifierValueCents: 300,
           cashbackRedemptions: 1,
           cashbackRedeemedCents: 2_000,
+          inplaceOrders: 1,
+          inplaceGeneratedSalesCents: 6_000,
+          inplaceNetCollectedCents: 6_000,
+          mobileOrders: 1,
+          mobileGeneratedSalesCents: 4_000,
+          mobileNetCollectedCents: 2_000,
+          adminOrders: 0,
+          adminGeneratedSalesCents: 0,
+          adminNetCollectedCents: 0,
+          unknownOrders: 0,
+          unknownGeneratedSalesCents: 0,
+          unknownNetCollectedCents: 0,
         },
       ],
     })
@@ -232,6 +244,21 @@ describe("admin dashboard", () => {
     });
     expect(result.summary.netCollectedCents.value).toBe(8_000);
     expect(result.summary.tipsCents.value).toBe(1_000);
+    expect(result.orderSources.totals).toEqual({
+      inplace: { orders: 1, generatedSalesCents: 6_000, netCollectedCents: 6_000 },
+      mobile: { orders: 1, generatedSalesCents: 4_000, netCollectedCents: 2_000 },
+      admin: { orders: 0, generatedSalesCents: 0, netCollectedCents: 0 },
+      unknown: { orders: 0, generatedSalesCents: 0, netCollectedCents: 0 },
+    });
+    expect(result.orderSources.timeline[1]).toEqual({
+      bucket: "2026-07-02",
+      sources: {
+        inplace: { orders: 0, generatedSalesCents: 0, netCollectedCents: 0 },
+        mobile: { orders: 0, generatedSalesCents: 0, netCollectedCents: 0 },
+        admin: { orders: 0, generatedSalesCents: 0, netCollectedCents: 0 },
+        unknown: { orders: 0, generatedSalesCents: 0, netCollectedCents: 0 },
+      },
+    });
     expect(result.topProducts[0]).toEqual(
       expect.objectContaining({ deliveredUnits: 8, paidUnits: 6, freeUnits: 2 }),
     );
@@ -312,6 +339,15 @@ describe("admin dashboard authorization", () => {
       topProducts: [],
       topModifierGroups: [],
       topVariationGroups: [],
+      orderSources: {
+        totals: {
+          inplace: { orders: 0, generatedSalesCents: 0, netCollectedCents: 0 },
+          mobile: { orders: 0, generatedSalesCents: 0, netCollectedCents: 0 },
+          admin: { orders: 0, generatedSalesCents: 0, netCollectedCents: 0 },
+          unknown: { orders: 0, generatedSalesCents: 0, netCollectedCents: 0 },
+        },
+        timeline: [],
+      },
     });
     await server.register(zodSchemaPlugin);
     server.decorate("auth", {

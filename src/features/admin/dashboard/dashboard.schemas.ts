@@ -72,6 +72,19 @@ const dashboardVariationGroupSchema = z.object({
   options: z.array(dashboardVariationOptionSchema).max(8),
 });
 
+const dashboardOrderSourceMetricSchema = z.object({
+  orders: z.number().int().nonnegative(),
+  generatedSalesCents: z.number().int().nonnegative(),
+  netCollectedCents: z.number().int().nonnegative(),
+});
+
+const dashboardOrderSourceRecordSchema = z.object({
+  inplace: dashboardOrderSourceMetricSchema,
+  mobile: dashboardOrderSourceMetricSchema,
+  admin: dashboardOrderSourceMetricSchema,
+  unknown: dashboardOrderSourceMetricSchema,
+});
+
 export const dashboardResponseSchema = z.object({
   scope: z.object({
     period: dashboardPeriodSchema,
@@ -94,6 +107,15 @@ export const dashboardResponseSchema = z.object({
   topProducts: z.array(dashboardTopProductSchema).max(5),
   topModifierGroups: z.array(dashboardModifierGroupSchema).max(8),
   topVariationGroups: z.array(dashboardVariationGroupSchema).max(8),
+  orderSources: z.object({
+    totals: dashboardOrderSourceRecordSchema,
+    timeline: z.array(
+      z.object({
+        bucket: z.string(),
+        sources: dashboardOrderSourceRecordSchema,
+      }),
+    ),
+  }),
 });
 
 export type DashboardQuery = z.infer<typeof dashboardQuerySchema>;

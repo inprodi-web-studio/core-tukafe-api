@@ -1,5 +1,6 @@
 export type DashboardPeriod = "day" | "week" | "month" | "year";
 export type DashboardGranularity = "hour" | "day" | "month";
+export type DashboardOrderSource = "inplace" | "mobile" | "admin" | "unknown";
 
 export interface DashboardMetric {
   value: number;
@@ -63,6 +64,20 @@ export interface DashboardTopProduct {
   generatedSalesCents: number;
 }
 
+export interface DashboardOrderSourceMetric {
+  orders: number;
+  generatedSalesCents: number;
+  netCollectedCents: number;
+}
+
+export interface DashboardOrderSources {
+  totals: Record<DashboardOrderSource, DashboardOrderSourceMetric>;
+  timeline: Array<{
+    bucket: string;
+    sources: Record<DashboardOrderSource, DashboardOrderSourceMetric>;
+  }>;
+}
+
 export interface DashboardResponse {
   scope: {
     period: DashboardPeriod;
@@ -85,6 +100,7 @@ export interface DashboardResponse {
   topProducts: DashboardTopProduct[];
   topModifierGroups: DashboardModifierGroup[];
   topVariationGroups: DashboardVariationGroup[];
+  orderSources: DashboardOrderSources;
 }
 
 export interface DashboardParams {
