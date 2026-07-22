@@ -42,11 +42,11 @@ Lychee,,assembled,Fresh Soda,Pieza,Lychee,"Ligera y refrescante. Una soda difere
 Fresa Limón,,assembled,Fresh Soda,Pieza,Fresa Limón,"Fresa dulce con un toque cítrico de limón. Fresca, divertida y muy antojable.",,soda_fresa_limon,NO
 Moras Lavanda,,assembled,Fresh Soda,Pieza,Moras Lavanda,"Frutos rojos con un toque floral de lavanda. Refrescante, bonita y con mucho estilo.",,soda_moras,NO
 Spicy Mango,,assembled,Fresh Soda,Pieza,Spicy Mango,"Mango dulce con un toque spicy. Fresca, atrevida y con tantita emoción en cada trago.",,soda_mango,NO
-Lima Limón Frappé,85,assembled,Frappé,Pieza,Lima Limón Frappé,"Cítrico, frío y súper refrescante. Perfecto para días de calor o antojos frescos.",,frappe_lemon,NO
-Fresa Frappé,85,assembled,Frappé,Pieza,Fresa Frappé,"Dulce, cremoso y con sabor a fresa. Un clásico que siempre cae bien.",,frappe_fresa,NO
-Moras Lavanda Frappé,85,assembled,Frappé,Pieza,Moras Lavanda Frappé,"Frutos rojos y lavanda en versión frappé. Cremoso, floral y diferente.",,frappe_moras,NO
-Spicy Mango Frappé,85,assembled,Frappé,Pieza,Spicy Mango Frappé,Mango dulce con un toque picosito en versión frappé. Refrescante y con personalidad.,,frappe_mango,NO
-Frutos Rojos Frappé,85,assembled,Frappé,Pieza,Frutos Rojos Frappé,"Frío, frutal y cremoso. Una mezcla intensa de frutos rojos para consentirte.",,frappe_frutos,NO
+Lima Limón Frappé,87.00,assembled,Frappé,Pieza,Lima Limón Frappé,"Cítrico, frío y súper refrescante. Perfecto para días de calor o antojos frescos.",,frappe_lemon,NO
+Fresa Frappé,87.00,assembled,Frappé,Pieza,Fresa Frappé,"Dulce, cremoso y con sabor a fresa. Un clásico que siempre cae bien.",,frappe_fresa,NO
+Moras Lavanda Frappé,87.00,assembled,Frappé,Pieza,Moras Lavanda Frappé,"Frutos rojos y lavanda en versión frappé. Cremoso, floral y diferente.",,frappe_moras,NO
+Spicy Mango Frappé,87.00,assembled,Frappé,Pieza,Spicy Mango Frappé,Mango dulce con un toque picosito en versión frappé. Refrescante y con personalidad.,,frappe_mango,NO
+Frutos Rojos Frappé,87.00,assembled,Frappé,Pieza,Frutos Rojos Frappé,"Frío, frutal y cremoso. Una mezcla intensa de frutos rojos para consentirte.",,frappe_frutos,NO
 Nutella Caliente,,assembled,Not Coffee,Pieza,Nutella Caliente,"Chocolate cremoso con el delicioso sabor de Nutella. No es cualquier chocolate caliente, es Nutella en mood apapacho.",,nutella_latte,NO
 Nutella Frío,,assembled,Not Coffee,Pieza,Nutella Frío,"El sabor de Nutella en una bebida fría, cremosa y dulce. Perfecta para consentirte.",,cold_nutella,NO
 Dulce de Leche Caliente,,assembled,Not Coffee,Pieza,Dulce de Leche Caliente,"Cremosa, dulce y calientita. Sabe a postre casero en versión bebida.",,dulce_leche_caliente,NO
@@ -87,7 +87,7 @@ Tukafe Distinción Grano 250gr,250,simple,Tukafe en Casa,Pieza,Tukafe Distinció
 Osito Latte,,assembled,Osito Tukafe,Pieza,Osito Latte,"Nuestro latte favorito servido en el vaso de osito, el consentido y trend de nuestros clientes. Tierno, cremoso y muy instagrameable.",,osito_cafe,NO
 Osito Chai,,assembled,Osito Tukafe,Pieza,Osito Chai,"Chai cremoso servido en vaso de osito. Especiado, bonito y listo para robar miradas.",,osito_chai,NO
 Osito Matcha,,assembled,Osito Tukafe,Pieza,Osito Matcha,"Matcha cremoso en el vaso favorito de todos. Verde, cute y perfecto para amantes del matcha.",,osito_matcha,NO
-Latte + Pan,85,compound,Combos,Pieza,Latte + Pan,El combo perfecto para empezar bien: nuestro latte estrella acompañado de un pan delicioso.,,latte_bread,NO
-Latte + Croissant,95,compound,Combos,Pieza,Latte + Croissant,Latte cremoso y croissant hojaldrado. Una dupla clásica que siempre gana.,,latte_croissant,NO
-Latte + Baguette,110,compound,Combos,Pieza,Latte + Baguette,Tu latte favorito con una baguette rica y llenadora. Ideal para cuando sí traes hambre.,,latte_baguette,NO
-Latte + Sandwich,105,compound,Combos,Pieza,Latte + Sandwich,"Latte cremoso más sandwich. Práctico, rico y perfecto para resolver el día.",,latte_sandwich,NO
+Latte + Pan,110.00,compound,Combos,Pieza,Latte + Pan,El combo perfecto para empezar bien: nuestro latte estrella acompañado de un pan delicioso.,,latte_bread,NO
+Latte + Croissant,110.00,compound,Combos,Pieza,Latte + Croissant,Latte cremoso y croissant hojaldrado. Una dupla clásica que siempre gana.,,latte_croissant,NO
+Latte + Baguette,120.00,compound,Combos,Pieza,Latte + Baguette,Tu latte favorito con una baguette rica y llenadora. Ideal para cuando sí traes hambre.,,latte_baguette,NO
+Latte + Sandwich,110.00,compound,Combos,Pieza,Latte + Sandwich,"Latte cremoso más sandwich. Práctico, rico y perfecto para resolver el día.",,latte_sandwich,NO

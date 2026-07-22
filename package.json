@@ -16,6 +16,7 @@
     "catalog:sync-modifier-options": "node --import tsx scripts/run-product-modifier-options-sync.ts",
     "catalog:sync-modifier-visibility": "node --import tsx scripts/run-product-modifier-visibility-sync.ts",
     "catalog:sync-compound-components": "node --import tsx scripts/run-product-compound-components-sync.ts",
+    "catalog:sync-prices": "node --import tsx scripts/run-product-price-sync.ts",
     "catalog:rollback": "node --import tsx scripts/run-catalog-rollback.ts",
     "customers:import": "node --import tsx scripts/run-customer-import.ts",
     "promo:backfill": "node --import tsx scripts/backfill-order-promotion-state.ts",
@@ -56,6 +57,7 @@
     "stripe": "^18.0.0",
     "tsx": "^4.22.3",
     "twilio": "^6.0.2",
+    "xlsx": "^0.18.5",
     "zod": "^4.3.6"
   },
   "devDependencies": {
