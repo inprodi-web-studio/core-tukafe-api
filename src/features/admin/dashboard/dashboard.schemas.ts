@@ -2,11 +2,20 @@ import { z } from "zod";
 
 export const dashboardPeriodSchema = z.enum(["day", "week", "month", "year"]);
 
+const dashboardCategoryIdsSchema = z.preprocess(
+  (value) => (typeof value === "string" ? value.split(",") : value),
+  z
+    .array(z.string().trim().min(1))
+    .max(50)
+    .transform((categoryIds) => [...new Set(categoryIds)]),
+);
+
 export const dashboardQuerySchema = z
   .object({
     period: dashboardPeriodSchema.default("month"),
     anchorDate: z.iso.date(),
     organizationId: z.string().trim().min(1).optional(),
+    categoryIds: dashboardCategoryIdsSchema.optional(),
   })
   .strict();
 

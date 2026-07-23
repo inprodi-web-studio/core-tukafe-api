@@ -110,6 +110,7 @@ export interface DashboardParams {
   period: DashboardPeriod;
   anchorDate: string;
   organizationId?: string;
+  categoryIds?: string[];
   now?: Date;
 }
 

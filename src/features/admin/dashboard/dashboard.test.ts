@@ -5,7 +5,10 @@ import zodSchemaPlugin from "@core/plugins/zodSchema.plugin";
 import { getDashboard } from "./dashboard.controllers";
 import { buildDashboardPeriodRange, listDashboardBuckets } from "./dashboard.period";
 import { dashboardQuerySchema } from "./dashboard.schemas";
-import { adminDashboardService } from "./dashboard.service";
+import {
+  adminDashboardService,
+  collectCategoryAndDescendantIds,
+} from "./dashboard.service";
 import { adminDashboardRoutes } from "./dashboard.routes";
 
 function createReply() {
@@ -19,15 +22,21 @@ function createReply() {
 function createDashboardFastify({
   memberships,
   bucket = "2026-07-01",
+  categories = [
+    { id: "category-drinks", parentId: null },
+    { id: "category-coffee", parentId: "category-drinks" },
+  ],
 }: {
   memberships: Array<{ organizationId: string }>;
   bucket?: string;
+  categories?: Array<{ id: string; parentId: string | null }>;
 }) {
   const orderBy = vi.fn().mockResolvedValue(memberships);
   const where = vi.fn().mockReturnValue({ orderBy });
   const innerJoin = vi.fn().mockReturnValue({ where });
   const from = vi.fn().mockReturnValue({ innerJoin });
   const select = vi.fn().mockReturnValue({ from });
+  const findManyCategories = vi.fn().mockResolvedValue(categories);
   const execute = vi
     .fn()
     .mockResolvedValueOnce({
@@ -123,8 +132,19 @@ function createDashboardFastify({
     });
 
   return {
-    fastify: { db: { select, execute } } as unknown as FastifyInstance,
+    fastify: {
+      db: {
+        select,
+        execute,
+        query: {
+          productCategoriesDB: {
+            findMany: findManyCategories,
+          },
+        },
+      },
+    } as unknown as FastifyInstance,
     execute,
+    findManyCategories,
   };
 }
 
@@ -136,6 +156,16 @@ describe("admin dashboard", () => {
     expect(
       dashboardQuerySchema.parse({ period: "day", anchorDate: "2026-07-16" }),
     ).toEqual({ period: "day", anchorDate: "2026-07-16" });
+    expect(
+      dashboardQuerySchema.parse({
+        anchorDate: "2026-07-16",
+        categoryIds: "category-drinks,category-coffee,category-drinks",
+      }),
+    ).toEqual({
+      period: "month",
+      anchorDate: "2026-07-16",
+      categoryIds: ["category-drinks", "category-coffee"],
+    });
     expect(() =>
       dashboardQuerySchema.parse({
         anchorDate: "2026-07-16",
@@ -143,6 +173,32 @@ describe("admin dashboard", () => {
       }),
     ).toThrow();
     expect(() => dashboardQuerySchema.parse({ anchorDate: "16/07/2026" })).toThrow();
+  });
+
+  it("incluye descendientes y deduplica categorías seleccionadas", () => {
+    expect(
+      collectCategoryAndDescendantIds(
+        [
+          { id: "drinks", parentId: null },
+          { id: "coffee", parentId: "drinks" },
+          { id: "seasonal", parentId: "coffee" },
+          { id: "food", parentId: null },
+        ],
+        ["drinks", "coffee"],
+      ),
+    ).toEqual(["drinks", "coffee", "seasonal"]);
+
+    expect(() =>
+      collectCategoryAndDescendantIds(
+        [{ id: "drinks", parentId: null }],
+        ["unknown"],
+      ),
+    ).toThrowError(
+      expect.objectContaining({
+        code: "dashboard.invalidCategory",
+        statusCode: 400,
+      }),
+    );
   });
 
   it("construye semanas de lunes a domingo y rellena buckets hasta hoy", () => {
@@ -296,6 +352,29 @@ describe("admin dashboard", () => {
     expect(result.topVariationGroups[0]).toEqual(
       expect.objectContaining({ name: "Tamaño", associatedSalesCents: 12_000 }),
     );
+  });
+
+  it("resuelve el filtro de categorías antes de calcular las unidades", async () => {
+    const { fastify, findManyCategories } = createDashboardFastify({
+      memberships: [{ organizationId: "org-one" }],
+    });
+
+    const result = await adminDashboardService(fastify).get({
+      userId: "user-admin",
+      period: "month",
+      anchorDate: "2026-07-16",
+      categoryIds: ["category-drinks"],
+      now: new Date("2026-07-16T18:00:00.000Z"),
+    });
+
+    expect(findManyCategories).toHaveBeenCalledWith({
+      columns: {
+        id: true,
+        parentId: true,
+      },
+    });
+    expect(result.summary.productUnits.value).toBe(7.5);
+    expect(result.summary.orders.value).toBe(2);
   });
 
   it("rechaza una sucursal fuera de las membresías administrativas", async () => {

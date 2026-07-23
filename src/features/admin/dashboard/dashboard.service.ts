@@ -91,6 +91,61 @@ function toInteger(value: string | number | null | undefined): number {
   return Math.max(0, Math.round(toNumber(value)));
 }
 
+export function collectCategoryAndDescendantIds(
+  categories: Array<{ id: string; parentId: string | null }>,
+  selectedCategoryIds: string[],
+): string[] {
+  const knownCategoryIds = new Set(categories.map((category) => category.id));
+  const missingCategoryId = selectedCategoryIds.find(
+    (categoryId) => !knownCategoryIds.has(categoryId),
+  );
+
+  if (missingCategoryId) {
+    throw badRequest(
+      "dashboard.invalidCategory",
+      "One or more product categories were not found",
+    );
+  }
+
+  const includedCategoryIds = new Set(selectedCategoryIds);
+  let addedCategory = true;
+
+  while (addedCategory) {
+    addedCategory = false;
+
+    for (const category of categories) {
+      if (
+        category.parentId &&
+        includedCategoryIds.has(category.parentId) &&
+        !includedCategoryIds.has(category.id)
+      ) {
+        includedCategoryIds.add(category.id);
+        addedCategory = true;
+      }
+    }
+  }
+
+  return [...includedCategoryIds];
+}
+
+async function resolveCategoryFilterIds(
+  fastify: FastifyInstance,
+  selectedCategoryIds?: string[],
+): Promise<string[] | undefined> {
+  if (!selectedCategoryIds?.length) {
+    return undefined;
+  }
+
+  const categories = await fastify.db.query.productCategoriesDB.findMany({
+    columns: {
+      id: true,
+      parentId: true,
+    },
+  });
+
+  return collectCategoryAndDescendantIds(categories, selectedCategoryIds);
+}
+
 function buildMetric(value: number, previousValue: number): DashboardMetric {
   return {
     value,
@@ -241,6 +296,7 @@ async function loadAggregate(
   start: Date,
   end: Date,
   granularity?: "hour" | "day" | "month",
+  categoryIds?: string[],
 ): Promise<AggregateRow[]> {
   const organizationList = sql.join(
     organizationIds.map((organizationId) => sql`${organizationId}`),
@@ -248,6 +304,27 @@ async function loadAggregate(
   );
   const bucket = granularity ? localBucketExpression(granularity) : sql`null`;
   const groupBy = granularity ? sql`group by 1 order by 1` : sql``;
+  const categoryList = categoryIds
+    ? sql.join(
+        categoryIds.map((categoryId) => sql`${categoryId}`),
+        sql`, `,
+      )
+    : null;
+  const categoryFilter = categoryList
+    ? sql`
+        and exists (
+          select 1
+          from product category_product
+          left join product_category_link category_link
+            on category_link.product_id = category_product.id
+          where category_product.id = oi.product_id
+            and (
+              category_product.category_id in (${categoryList})
+              or category_link.category_id in (${categoryList})
+            )
+        )
+      `
+    : sql``;
 
   const result = await fastify.db.execute<AggregateRow>(sql`
     with order_product_units as (
@@ -259,6 +336,7 @@ async function loadAggregate(
       where product_order.organization_id in (${organizationList})
         and product_order.created_at >= ${start}
         and product_order.created_at < ${end}
+        ${categoryFilter}
       group by oi.order_id
     ),
     regular_free_modifier_values as (
@@ -720,6 +798,8 @@ export function adminDashboardService(fastify: FastifyInstance): AdminDashboardS
         );
       }
 
+      const categoryFilterIds = await resolveCategoryFilterIds(fastify, input.categoryIds);
+
       const [
         aggregateRows,
         previousRows,
@@ -733,12 +813,15 @@ export function adminDashboardService(fastify: FastifyInstance): AdminDashboardS
           range.start.toDate(),
           range.effectiveEnd.toDate(),
           range.granularity,
+          categoryFilterIds,
         ),
         loadAggregate(
           fastify,
           organizationIds,
           range.comparisonStart.toDate(),
           range.comparisonEnd.toDate(),
+          undefined,
+          categoryFilterIds,
         ),
         loadTopProducts(
           fastify,
