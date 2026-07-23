@@ -99,6 +99,7 @@ export const dashboardResponseSchema = z.object({
   }),
   summary: z.object({
     orders: dashboardMetricSchema,
+    productUnits: dashboardMetricSchema,
     generatedSalesCents: dashboardMetricSchema,
     netCollectedCents: dashboardMetricSchema,
     tipsCents: dashboardMetricSchema,

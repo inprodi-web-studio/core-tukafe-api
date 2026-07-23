@@ -35,6 +35,7 @@ function createDashboardFastify({
         {
           bucket,
           orders: 2,
+          productUnits: 7.5,
           generatedSalesCents: 10_000,
           netCollectedCents: 8_000,
           tipsCents: 1_000,
@@ -64,6 +65,7 @@ function createDashboardFastify({
       rows: [
         {
           orders: 1,
+          productUnits: 3,
           generatedSalesCents: 5_000,
           netCollectedCents: 5_000,
           tipsCents: 500,
@@ -237,6 +239,11 @@ describe("admin dashboard", () => {
         (result.timeline[0]?.freeDrinkModifierValueCents ?? 0),
     ).toBe(result.timeline[0]?.freeDrinkRetailValueCents);
     expect(result.summary.orders).toEqual({ value: 2, previousValue: 1, changePercent: 100 });
+    expect(result.summary.productUnits).toEqual({
+      value: 7.5,
+      previousValue: 3,
+      changePercent: 150,
+    });
     expect(result.summary.generatedSalesCents).toEqual({
       value: 10_000,
       previousValue: 5_000,
@@ -331,6 +338,7 @@ describe("admin dashboard authorization", () => {
       },
       summary: {
         orders: { value: 0, previousValue: 0, changePercent: null },
+        productUnits: { value: 0, previousValue: 0, changePercent: null },
         generatedSalesCents: { value: 0, previousValue: 0, changePercent: null },
         netCollectedCents: { value: 0, previousValue: 0, changePercent: null },
         tipsCents: { value: 0, previousValue: 0, changePercent: null },

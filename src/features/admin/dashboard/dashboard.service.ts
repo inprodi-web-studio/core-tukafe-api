@@ -24,6 +24,7 @@ import type {
 interface AggregateRow extends Record<string, unknown> {
   bucket?: string | Date;
   orders?: string | number;
+  productUnits?: string | number;
   generatedSalesCents?: string | number;
   netCollectedCents?: string | number;
   tipsCents?: string | number;
@@ -246,7 +247,18 @@ async function loadAggregate(
   const groupBy = granularity ? sql`group by 1 order by 1` : sql``;
 
   const result = await fastify.db.execute<AggregateRow>(sql`
-    with regular_free_modifier_values as (
+    with order_product_units as (
+      select
+        oi.order_id,
+        coalesce(sum(oi.quantity), 0)::double precision as product_units
+      from order_item oi
+      inner join "order" product_order on product_order.id = oi.order_id
+      where product_order.organization_id in (${organizationList})
+        and product_order.created_at >= ${start}
+        and product_order.created_at < ${end}
+      group by oi.order_id
+    ),
+    regular_free_modifier_values as (
       select
         oi.id as order_item_id,
         coalesce(
@@ -294,6 +306,7 @@ async function loadAggregate(
     select
       ${bucket} as bucket,
       count(*)::integer as "orders",
+      coalesce(sum(product_units.product_units), 0)::double precision as "productUnits",
       coalesce(sum(o.subtotal_cents + o.taxes_cents), 0)::bigint as "generatedSalesCents",
       coalesce(sum(greatest(o.subtotal_cents + o.taxes_cents - o.cashback_redemption_cents, 0)), 0)::bigint as "netCollectedCents",
       coalesce(sum(o.tip_cents), 0)::bigint as "tipsCents",
@@ -317,6 +330,7 @@ async function loadAggregate(
       coalesce(sum(o.subtotal_cents + o.taxes_cents) filter (where o.source = 'unknown'), 0)::bigint as "unknownGeneratedSalesCents",
       coalesce(sum(greatest(o.subtotal_cents + o.taxes_cents - o.cashback_redemption_cents, 0)) filter (where o.source = 'unknown'), 0)::bigint as "unknownNetCollectedCents"
     from "order" o
+    left join order_product_units product_units on product_units.order_id = o.id
     left join order_free_values f on f.order_id = o.id
     where o.organization_id in (${organizationList})
       and o.created_at >= ${start}
@@ -756,6 +770,11 @@ export function adminDashboardService(fastify: FastifyInstance): AdminDashboardS
       const orderSources = buildOrderSources(buckets, aggregatesByBucket);
       const current = aggregateTimeline(timeline);
       const previous = normalizeAggregate(previousRows[0] ?? {}, "previous");
+      const currentProductUnits = aggregateRows.reduce(
+        (total, row) => total + toNumber(row.productUnits),
+        0,
+      );
+      const previousProductUnits = toNumber(previousRows[0]?.productUnits);
 
       return {
         scope: {
@@ -771,6 +790,7 @@ export function adminDashboardService(fastify: FastifyInstance): AdminDashboardS
         },
         summary: {
           orders: buildMetric(current.orders, previous.orders),
+          productUnits: buildMetric(currentProductUnits, previousProductUnits),
           generatedSalesCents: buildMetric(
             current.generatedSalesCents,
             previous.generatedSalesCents,

@@ -92,6 +92,7 @@ export interface DashboardResponse {
   };
   summary: {
     orders: DashboardMetric;
+    productUnits: DashboardMetric;
     generatedSalesCents: DashboardMetric;
     netCollectedCents: DashboardMetric;
     tipsCents: DashboardMetric;
