@@ -183,6 +183,13 @@
       "when": 1784750400000,
       "tag": "0026_order_source",
       "breakpoints": false
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1784836800000,
+      "tag": "0027_enable_fuzzy_search_extensions",
+      "breakpoints": false
     }
   ]
 }
