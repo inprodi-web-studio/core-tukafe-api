@@ -41,6 +41,10 @@ export interface AdminProductsService {
     productId: string,
     isFeatured: boolean,
   ): Promise<{ id: string; isFeatured: boolean }>;
+  updateCategories(
+    productId: string,
+    input: UpdateProductCategoriesParams,
+  ): Promise<{ id: string; categories: ProductListCategory[] }>;
   createVariation(productId: string, input: CreateProductVariationParams): Promise<ProductResponse>;
   createModifier(productId: string, input: CreateProductModifierParams): Promise<ProductResponse>;
   updateModifierOptions(
@@ -127,6 +131,10 @@ export interface CreateProductServiceParams {
   variationGroupIds?: string[] | null;
   variations?: CreateProductVariationParams[] | null;
   compoundComponents?: CreateProductCompoundComponentParams[] | null;
+}
+
+export interface UpdateProductCategoriesParams {
+  categoryIds: string[];
 }
 
 export interface CreateProductCompoundComponentParams {

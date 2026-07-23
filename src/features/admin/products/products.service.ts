@@ -1429,5 +1429,68 @@ export function adminProductsService(fastify: FastifyInstance): AdminProductsSer
 
       return updatedProduct;
     },
+
+    async updateCategories(productId, input) {
+      const categoryIds = [...new Set(input.categoryIds)];
+      const [product, categories] = await Promise.all([
+        fastify.db.query.productsDB.findFirst({
+          where(table, { and, eq: eqOperator, isNull }) {
+            return and(eqOperator(table.id, productId), isNull(table.deletedAt));
+          },
+          columns: { id: true },
+        }),
+        categoryIds.length > 0
+          ? fastify.db
+              .select({
+                id: productCategoriesDB.id,
+                name: productCategoriesDB.name,
+                color: productCategoriesDB.color,
+              })
+              .from(productCategoriesDB)
+              .where(inArray(productCategoriesDB.id, categoryIds))
+          : Promise.resolve([]),
+      ]);
+
+      if (!product) {
+        throw notFound("product.notFound", "The product was not found");
+      }
+
+      if (categories.length !== categoryIds.length) {
+        throw notFound("productCategory.notFound", "One or more product categories were not found");
+      }
+
+      await fastify.db.transaction(async (tx) => {
+        await tx
+          .delete(productCategoryLinksDB)
+          .where(eq(productCategoryLinksDB.productId, productId));
+
+        if (categoryIds.length > 0) {
+          await tx.insert(productCategoryLinksDB).values(
+            categoryIds.map((categoryId) => ({
+              productId,
+              categoryId,
+            })),
+          );
+        }
+
+        await tx
+          .update(productsDB)
+          .set({
+            categoryId: categoryIds[0] ?? null,
+            updatedAt: sql`now()`,
+          })
+          .where(and(eq(productsDB.id, productId), isNull(productsDB.deletedAt)));
+      });
+
+      const categoryById = new Map(categories.map((category) => [category.id, category]));
+
+      return {
+        id: productId,
+        categories: categoryIds.flatMap((categoryId) => {
+          const category = categoryById.get(categoryId);
+          return category ? [category] : [];
+        }),
+      };
+    },
   };
 }
