@@ -11,6 +11,7 @@ export interface DashboardMetric {
 export interface DashboardTimelineItem {
   bucket: string;
   orders: number;
+  productUnits: number;
   generatedSalesCents: number;
   netCollectedCents: number;
   tipsCents: number;

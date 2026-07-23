@@ -197,7 +197,11 @@ describe("admin dashboard", () => {
     expect(result.scope.granularity).toBe("hour");
     expect(result.timeline).toHaveLength(13);
     expect(result.timeline[9]).toEqual(
-      expect.objectContaining({ bucket: "2026-07-16T09:00:00", orders: 2 }),
+      expect.objectContaining({
+        bucket: "2026-07-16T09:00:00",
+        orders: 2,
+        productUnits: 7.5,
+      }),
     );
   });
 
@@ -227,13 +231,20 @@ describe("admin dashboard", () => {
       expect.objectContaining({
         bucket: "2026-07-01",
         orders: 2,
+        productUnits: 7.5,
         freeDrinkUnits: 2,
         freeDrinkRetailValueCents: 1_800,
         freeDrinkBeverageValueCents: 1_500,
         freeDrinkModifierValueCents: 300,
       }),
     );
-    expect(result.timeline[1]).toEqual(expect.objectContaining({ bucket: "2026-07-02", orders: 0 }));
+    expect(result.timeline[1]).toEqual(
+      expect.objectContaining({
+        bucket: "2026-07-02",
+        orders: 0,
+        productUnits: 0,
+      }),
+    );
     expect(
       (result.timeline[0]?.freeDrinkBeverageValueCents ?? 0) +
         (result.timeline[0]?.freeDrinkModifierValueCents ?? 0),
@@ -244,6 +255,9 @@ describe("admin dashboard", () => {
       previousValue: 3,
       changePercent: 150,
     });
+    expect(result.timeline.reduce((total, item) => total + item.productUnits, 0)).toBe(
+      result.summary.productUnits.value,
+    );
     expect(result.summary.generatedSalesCents).toEqual({
       value: 10_000,
       previousValue: 5_000,

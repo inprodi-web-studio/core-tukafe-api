@@ -107,6 +107,7 @@ function emptyTimelineItem(bucket: string): DashboardTimelineItem {
   return {
     bucket,
     orders: 0,
+    productUnits: 0,
     generatedSalesCents: 0,
     netCollectedCents: 0,
     tipsCents: 0,
@@ -124,6 +125,7 @@ function normalizeAggregate(row: AggregateRow, bucket: string): DashboardTimelin
   return {
     bucket,
     orders: toInteger(row.orders),
+    productUnits: Math.max(0, toNumber(row.productUnits)),
     generatedSalesCents: toInteger(row.generatedSalesCents),
     netCollectedCents: toInteger(row.netCollectedCents),
     tipsCents: toInteger(row.tipsCents),
@@ -142,6 +144,7 @@ function aggregateTimeline(timeline: DashboardTimelineItem[]): DashboardTimeline
     (total, item) => ({
       bucket: "total",
       orders: total.orders + item.orders,
+      productUnits: total.productUnits + item.productUnits,
       generatedSalesCents: total.generatedSalesCents + item.generatedSalesCents,
       netCollectedCents: total.netCollectedCents + item.netCollectedCents,
       tipsCents: total.tipsCents + item.tipsCents,
@@ -770,11 +773,6 @@ export function adminDashboardService(fastify: FastifyInstance): AdminDashboardS
       const orderSources = buildOrderSources(buckets, aggregatesByBucket);
       const current = aggregateTimeline(timeline);
       const previous = normalizeAggregate(previousRows[0] ?? {}, "previous");
-      const currentProductUnits = aggregateRows.reduce(
-        (total, row) => total + toNumber(row.productUnits),
-        0,
-      );
-      const previousProductUnits = toNumber(previousRows[0]?.productUnits);
 
       return {
         scope: {
@@ -790,7 +788,7 @@ export function adminDashboardService(fastify: FastifyInstance): AdminDashboardS
         },
         summary: {
           orders: buildMetric(current.orders, previous.orders),
-          productUnits: buildMetric(currentProductUnits, previousProductUnits),
+          productUnits: buildMetric(current.productUnits, previous.productUnits),
           generatedSalesCents: buildMetric(
             current.generatedSalesCents,
             previous.generatedSalesCents,

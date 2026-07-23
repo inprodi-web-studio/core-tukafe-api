@@ -19,6 +19,7 @@ const dashboardMetricSchema = z.object({
 const dashboardTimelineItemSchema = z.object({
   bucket: z.string(),
   orders: z.number().int().nonnegative(),
+  productUnits: z.number().nonnegative(),
   generatedSalesCents: z.number().int().nonnegative(),
   netCollectedCents: z.number().int().nonnegative(),
   tipsCents: z.number().int().nonnegative(),
