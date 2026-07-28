@@ -45,6 +45,7 @@ export const workOrderResponseSchema = z.object({
   unitIndex: z.number().int().positive(),
   quantitySnapshot: z.number().positive(),
   status: z.enum(["open", "completed"]),
+  scheduledFor: z.date().nullable(),
   completedAt: z.date().nullable(),
   completedByUserId: z.string().nullable(),
   productImage: workOrderProductImageSchema.nullable().optional(),

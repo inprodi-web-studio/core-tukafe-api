@@ -72,6 +72,7 @@ function buildOrderPayload(input: CreateStripePaymentSheetServiceParams): Record
     customerId: input.customerId,
     couponCode: input.couponCode ?? null,
     cashbackRedeemCents: input.cashbackRedeemCents ?? null,
+    preparationDelayMinutes: input.preparationDelayMinutes ?? 0,
     comment: input.comment ?? null,
     tip: input.tip ?? null,
     items: input.items,

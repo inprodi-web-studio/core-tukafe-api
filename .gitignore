@@ -34,6 +34,8 @@ pnpm-debug.log*
 .env.test.local
 .env.production.local
 .env.local
+firebase-service-account*.json
+*-firebase-adminsdk-*.json
 
 # caches
 .eslintcache

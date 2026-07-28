@@ -11,6 +11,7 @@ const portalSession: PortalSession = {
     name: "Admin",
     middleName: null,
     lastName: null,
+    role: "owner",
   },
   activeOrganization: {
     id: "org-owner",
@@ -50,7 +51,7 @@ async function createServer() {
   const server = Fastify();
   servers.push(server);
   await server.register(zodSchemaPlugin);
-  server.decorate("admin", { auth: service });
+  server.decorate("admin", { auth: service } as unknown as typeof server.admin);
   await server.register(adminAuthRoutes, { prefix: "/auth" });
   await server.ready();
 

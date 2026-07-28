@@ -43,6 +43,11 @@ export const orderItemBodySchema = z
 export const orderCouponCodeSchema = z.string().trim().min(1).max(64);
 export const orderPaymentAttemptIdSchema = z.nanoid();
 export const orderCashbackRedeemCentsSchema = z.number().int().nonnegative();
+export const orderPreparationDelayMinutesSchema = z.union([
+  z.literal(0),
+  z.literal(15),
+  z.literal(30),
+]);
 
 export const orderTipBodySchema = z.discriminatedUnion("type", [
   z

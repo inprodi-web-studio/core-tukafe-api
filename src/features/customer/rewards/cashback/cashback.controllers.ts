@@ -46,7 +46,7 @@ export async function listCashbackMovements(
           orderFolio: ordersDB.folio,
         })
         .from(customerCashbackLedgerDB)
-        .innerJoin(ordersDB, eq(customerCashbackLedgerDB.orderId, ordersDB.id))
+        .leftJoin(ordersDB, eq(customerCashbackLedgerDB.orderId, ordersDB.id))
         .where(eq(customerCashbackLedgerDB.customerId, customerId))
         .$dynamic(),
     orderBy: [desc(customerCashbackLedgerDB.createdAt), desc(customerCashbackLedgerDB.id)],
@@ -59,10 +59,13 @@ export async function listCashbackMovements(
       balanceAfterCents: movement.balanceAfterCents,
       organizationId: movement.organizationId,
       createdAt: movement.createdAt,
-      order: {
-        id: movement.orderId,
-        folio: movement.orderFolio,
-      },
+      order:
+        movement.orderId && movement.orderFolio
+          ? {
+              id: movement.orderId,
+              folio: movement.orderFolio,
+            }
+          : null,
     }),
   });
 

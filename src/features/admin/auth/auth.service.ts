@@ -69,6 +69,7 @@ async function getPortalUser(
       name: userDB.name,
       middleName: userDB.middleName,
       lastName: userDB.lastName,
+      role: userDB.role,
     })
     .from(userDB)
     .where(eq(userDB.id, userId))
@@ -120,6 +121,7 @@ export function buildPortalSession(
       name: user.name,
       middleName: user.middleName ?? null,
       lastName: user.lastName ?? null,
+      role: user.role,
     },
     activeOrganization,
     organizations,

@@ -57,6 +57,11 @@ const envSchema = z
     GCS_PUBLIC_BUCKET: z.string().trim().optional(),
     GCS_PRIVATE_BUCKET: z.string().trim().optional(),
     GCS_UPLOADS_PREFIX: z.string().trim().default("uploads"),
+    FIREBASE_PROJECT_ID: z.string().trim().optional(),
+    FIREBASE_CLIENT_EMAIL: z.string().trim().optional(),
+    FIREBASE_PRIVATE_KEY: certificateEnv,
+    NOTIFICATION_WORKER_INTERVAL_MS: z.coerce.number().int().min(1000).default(5000),
+    NOTIFICATION_WORKER_BATCH_SIZE: z.coerce.number().int().min(1).max(100).default(20),
     STRIPE_SECRET_KEY: z.string().trim().optional(),
     STRIPE_PUBLISHABLE_KEY: z.string().trim().optional(),
     STRIPE_WEBHOOK_SECRET: z.string().trim().optional(),
@@ -81,6 +86,22 @@ const envSchema = z
         code: z.ZodIssueCode.custom,
         path: ["GCP_CLIENT_EMAIL"],
         message: "GCP_CLIENT_EMAIL and GCP_PRIVATE_KEY must be provided together",
+      });
+    }
+
+    const firebaseCredentials = [
+      input.FIREBASE_PROJECT_ID,
+      input.FIREBASE_CLIENT_EMAIL,
+      input.FIREBASE_PRIVATE_KEY,
+    ];
+    const configuredFirebaseCredentials = firebaseCredentials.filter(Boolean).length;
+
+    if (configuredFirebaseCredentials !== 0 && configuredFirebaseCredentials !== 3) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["FIREBASE_PROJECT_ID"],
+        message:
+          "FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL and FIREBASE_PRIVATE_KEY must be provided together",
       });
     }
   });

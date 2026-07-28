@@ -166,6 +166,7 @@ export const orderResponseSchema = z.object({
   customerId: z.string().nullable(),
   folio: z.string(),
   comment: z.string().nullable(),
+  scheduledFor: z.date().nullable(),
   tipType: z.enum(["none", "percentage", "amount"]),
   tipRateBps: z.number().int().min(1).max(10000).nullable(),
   tipCents: z.number().int().nonnegative(),

@@ -1,11 +1,14 @@
 import {
   orderItemCompoundComponentsDB,
   orderItemsDB,
+  notificationOutboxDB,
+  ordersDB,
+  organizationDB,
   productsDB,
   uploadsDB,
   workOrdersDB,
 } from "@core/db/schemas";
-import { buildFuzzySearch, conflict, notFound, paginate } from "@core/utils";
+import { buildFuzzySearch, conflict, generateNanoId, notFound, paginate } from "@core/utils";
 import { and, asc, desc, eq, inArray, type SQL, sql } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
 import type {
@@ -13,6 +16,18 @@ import type {
   WorkOrderListStatus,
   WorkOrderResponse,
 } from "./workOrders.types";
+
+export function shouldEnqueueOrderReadyNotification({
+  source,
+  customerId,
+  hasRemainingWorkOrders,
+}: {
+  source: string;
+  customerId: string | null;
+  hasRemainingWorkOrders: boolean;
+}) {
+  return source === "mobile" && customerId !== null && !hasRemainingWorkOrders;
+}
 
 function getDefaultOrderBy(status: WorkOrderListStatus): [SQL, ...SQL[]] {
   if (status === "completed") {
@@ -22,12 +37,19 @@ function getDefaultOrderBy(status: WorkOrderListStatus): [SQL, ...SQL[]] {
   if (status === "all") {
     return [
       sql`case when ${workOrdersDB.status} = 'open' then 0 else 1 end`,
+      sql`case when ${workOrdersDB.scheduledFor} is null then 0 else 1 end`,
+      asc(workOrdersDB.scheduledFor),
       asc(workOrdersDB.createdAt),
       asc(workOrdersDB.id),
     ];
   }
 
-  return [asc(workOrdersDB.createdAt), asc(workOrdersDB.id)];
+  return [
+    sql`case when ${workOrdersDB.scheduledFor} is null then 0 else 1 end`,
+    asc(workOrdersDB.scheduledFor),
+    asc(workOrdersDB.createdAt),
+    asc(workOrdersDB.id),
+  ];
 }
 
 export async function attachWorkOrderDetails(
@@ -160,25 +182,94 @@ export function adminWorkOrdersService(fastify: FastifyInstance): AdminWorkOrder
     },
 
     async complete({ organizationId, workOrderId, completedByUserId }) {
-      const [completedWorkOrder] = await fastify.db
-        .update(workOrdersDB)
-        .set({
-          status: "completed",
-          completedAt: sql`now()`,
-          completedByUserId,
-          updatedAt: sql`now()`,
-        })
-        .where(
-          and(
-            eq(workOrdersDB.id, workOrderId),
-            eq(workOrdersDB.organizationId, organizationId),
-            eq(workOrdersDB.status, "open"),
-          ),
-        )
-        .returning();
+      return fastify.db.transaction(async (tx) => {
+        const existingWorkOrder = await tx.query.workOrdersDB.findFirst({
+          where(table, { and: andOperator, eq: eqOperator }) {
+            return andOperator(
+              eqOperator(table.id, workOrderId),
+              eqOperator(table.organizationId, organizationId),
+            );
+          },
+        });
 
-      if (completedWorkOrder) {
-        await fastify.db.execute(sql`
+        if (!existingWorkOrder) {
+          throw notFound("workOrder.notFound", "The work order was not found");
+        }
+
+        await tx.execute(
+          sql`select pg_advisory_xact_lock(hashtextextended(${existingWorkOrder.orderId}, 0))`,
+        );
+
+        const [completedWorkOrder] = await tx
+          .update(workOrdersDB)
+          .set({
+            status: "completed",
+            completedAt: sql`now()`,
+            completedByUserId,
+            updatedAt: sql`now()`,
+          })
+          .where(
+            and(
+              eq(workOrdersDB.id, workOrderId),
+              eq(workOrdersDB.organizationId, organizationId),
+              eq(workOrdersDB.status, "open"),
+            ),
+          )
+          .returning();
+
+        if (!completedWorkOrder) {
+          throw conflict("workOrder.alreadyCompleted", "The work order is already completed");
+        }
+
+        const remainingWorkOrder = await tx.query.workOrdersDB.findFirst({
+          where(table, { and: andOperator, eq: eqOperator }) {
+            return andOperator(
+              eqOperator(table.orderId, completedWorkOrder.orderId),
+              eqOperator(table.status, "open"),
+            );
+          },
+          columns: { id: true },
+        });
+
+        if (!remainingWorkOrder) {
+          const [order] = await tx
+            .select({
+              id: ordersDB.id,
+              customerId: ordersDB.customerId,
+              source: ordersDB.source,
+              folio: ordersDB.folio,
+              organizationName: organizationDB.name,
+            })
+            .from(ordersDB)
+            .innerJoin(organizationDB, eq(ordersDB.organizationId, organizationDB.id))
+            .where(eq(ordersDB.id, completedWorkOrder.orderId))
+            .limit(1);
+
+          if (
+            order &&
+            shouldEnqueueOrderReadyNotification({
+              source: order.source,
+              customerId: order.customerId,
+              hasRemainingWorkOrders: false,
+            })
+          ) {
+            await tx
+              .insert(notificationOutboxDB)
+              .values({
+                id: generateNanoId(),
+                dedupeKey: `order.ready:${order.id}`,
+                eventType: "order.ready",
+                customerId: order.customerId!,
+                orderId: order.id,
+                title: "¡Tu pedido está listo!",
+                body: `Tu pedido ${order.folio} en ${order.organizationName} ya está listo para recoger.`,
+                destination: "orders",
+              })
+              .onConflictDoNothing({ target: notificationOutboxDB.dedupeKey });
+          }
+        }
+
+        await tx.execute(sql`
           select pg_notify(
             'work_order_events',
             json_build_object(
@@ -190,23 +281,7 @@ export function adminWorkOrdersService(fastify: FastifyInstance): AdminWorkOrder
         `);
 
         return completedWorkOrder;
-      }
-
-      const existingWorkOrder = await fastify.db.query.workOrdersDB.findFirst({
-        where(table, { and, eq }) {
-          return and(eq(table.id, workOrderId), eq(table.organizationId, organizationId));
-        },
-        columns: {
-          id: true,
-          status: true,
-        },
       });
-
-      if (!existingWorkOrder) {
-        throw notFound("workOrder.notFound", "The work order was not found");
-      }
-
-      throw conflict("workOrder.alreadyCompleted", "The work order is already completed");
     },
   };
 }

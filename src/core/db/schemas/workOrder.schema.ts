@@ -73,6 +73,7 @@ const workOrders = pgTable(
       mode: "number",
     }).notNull(),
     status: text("status", { enum: WORK_ORDER_STATUSES }).notNull().default("open"),
+    scheduledFor: timestamp("scheduled_for", { mode: "date", withTimezone: true }),
     completedAt: timestamp("completed_at", { mode: "date" }),
     completedByUserId: text("completed_by_user_id").references(() => userDB.id, {
       onDelete: "restrict",
@@ -84,6 +85,11 @@ const workOrders = pgTable(
       table.organizationId,
       table.status,
       table.createdAt,
+    ),
+    index("work_order_organization_status_scheduled_for_idx").on(
+      table.organizationId,
+      table.status,
+      table.scheduledFor,
     ),
     index("work_order_order_id_idx").on(table.orderId),
     index("work_order_order_item_id_idx").on(table.orderItemId),

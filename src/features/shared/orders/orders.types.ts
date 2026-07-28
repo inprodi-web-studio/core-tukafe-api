@@ -45,6 +45,7 @@ export interface CreateOrderParams {
   paymentAttemptId?: string | null;
   couponCode?: string | null;
   cashbackRedeemCents?: number | null;
+  preparationDelayMinutes?: 0 | 15 | 30 | null;
   comment?: string | null;
   tip?: CreateOrderTipParams | null;
   items: CreateOrderItemParams[];
@@ -130,6 +131,7 @@ export interface NormalizedCreateOrderParams extends Omit<
   customerName: string | null;
   couponCode: string | null;
   cashbackRedeemCents: number;
+  preparationDelayMinutes: 0 | 15 | 30;
   comment: string | null;
   tip: NormalizedCreateOrderTipParams;
   items: NormalizedCreateOrderItemParams[];

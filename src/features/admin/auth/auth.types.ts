@@ -11,7 +11,7 @@ export interface PortalOrganization {
 }
 
 export interface PortalSession {
-  user: Pick<User, "id" | "email" | "name" | "middleName" | "lastName">;
+  user: Pick<User, "id" | "email" | "name" | "middleName" | "lastName" | "role">;
   activeOrganization: PortalOrganization;
   organizations: PortalOrganization[];
 }

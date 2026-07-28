@@ -43,6 +43,7 @@ export function normalizeCreateOrderInput({
   customerId,
   couponCode,
   cashbackRedeemCents,
+  preparationDelayMinutes,
   tip,
   ...rest
 }: CreateOrderParams): NormalizedCreateOrderParams {
@@ -74,11 +75,12 @@ export function normalizeCreateOrderInput({
           collapseWhitespace: true,
           maxLength: 160,
         }),
-        slotOptionId: normalizeString(component.slotOptionId ?? "", {
-          trim: true,
-          collapseWhitespace: true,
-          maxLength: 160,
-        }) || null,
+        slotOptionId:
+          normalizeString(component.slotOptionId ?? "", {
+            trim: true,
+            collapseWhitespace: true,
+            maxLength: 160,
+          }) || null,
         productId: component.productId,
         variationId: component.variationId ?? null,
         modifiers: (component.modifiers ?? []).map((modifier) => ({
@@ -106,6 +108,14 @@ export function normalizeCreateOrderInput({
     );
   }
 
+  const normalizedPreparationDelayMinutes = preparationDelayMinutes ?? 0;
+  if (![0, 15, 30].includes(normalizedPreparationDelayMinutes)) {
+    throw validation(
+      "order.preparationDelay.invalid",
+      "preparationDelayMinutes must be 0, 15, or 30",
+    );
+  }
+
   return {
     ...rest,
     customerId: customerId ?? null,
@@ -124,6 +134,7 @@ export function normalizeCreateOrderInput({
         maxLength: 64,
       }) || null,
     cashbackRedeemCents: normalizedCashbackRedeemCents,
+    preparationDelayMinutes: normalizedPreparationDelayMinutes as 0 | 15 | 30,
     comment: normalizeNullableText(comment),
     tip: normalizeOrderTipInput(tip),
     items: normalizedItems,

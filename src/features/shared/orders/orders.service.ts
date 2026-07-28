@@ -208,6 +208,7 @@ function buildWorkOrderRows({
   orderFolio,
   customerDisplayName,
   orderComment,
+  scheduledFor,
 }: {
   payload: PreparedOrderPayload;
   organizationId: string;
@@ -215,6 +216,7 @@ function buildWorkOrderRows({
   orderFolio: string;
   customerDisplayName: string | null;
   orderComment: string | null;
+  scheduledFor: Date | null;
 }): WorkOrderInsert[] {
   return payload.items.flatMap((preparedOrderItem) => {
     const quantity = preparedOrderItem.item.quantity ?? 0;
@@ -247,6 +249,7 @@ function buildWorkOrderRows({
           })),
           orderComment,
           itemComment: preparedOrderItem.item.comment ?? null,
+          scheduledFor,
           unitIndex: index + 1,
           quantitySnapshot,
           status: "open",
@@ -268,6 +271,7 @@ function buildWorkOrderRows({
       modifiersSnapshot: preparedOrderItem.workOrderSnapshot.modifiers,
       orderComment,
       itemComment: preparedOrderItem.item.comment ?? null,
+      scheduledFor,
       unitIndex: index + 1,
       quantitySnapshot,
       status: "open",
@@ -1566,6 +1570,10 @@ export async function createOrder(
 
         const orderId = generateNanoId();
         const folio = formatOrderFolio(folioPrefix, nextSequence);
+        const scheduledFor =
+          normalizedInput.preparationDelayMinutes > 0
+            ? new Date(now.getTime() + normalizedInput.preparationDelayMinutes * 60_000)
+            : null;
         const customerDisplayName =
           normalizedInput.customerName ??
           (await loadWorkOrderCustomerDisplayName(tx, normalizedInput.customerId));
@@ -1581,6 +1589,7 @@ export async function createOrder(
             source: options.source ?? "unknown",
             folio,
             comment: normalizedInput.comment,
+            scheduledFor,
             tipType: normalizedInput.tip.type,
             tipRateBps: normalizedInput.tip.rateBps,
             tipCents: calculatedOrder.tipCents,
@@ -1642,6 +1651,7 @@ export async function createOrder(
           orderFolio: folio,
           customerDisplayName,
           orderComment: normalizedInput.comment,
+          scheduledFor,
         });
 
         if (workOrdersToInsert.length > 0) {

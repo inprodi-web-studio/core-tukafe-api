@@ -17,6 +17,8 @@ const organizationStatements = {
   units: ["create", "read", "update", "delete"],
   orders: ["create", "read", "update", "delete"],
   coupons: ["create", "read", "update", "delete"],
+  cashback: ["read", "update"],
+  notifications: ["create", "read", "update"],
   uploads: ["create", "read", "update", "delete"],
 } as const;
 
@@ -47,6 +49,8 @@ export const ORGANIZATION_ROLES = {
     units: ["create", "read", "update", "delete"],
     orders: ["create", "read", "update", "delete"],
     coupons: ["create", "read", "update", "delete"],
+    cashback: ["read", "update"],
+    notifications: ["create", "read", "update"],
     uploads: ["create", "read", "update", "delete"],
   }),
   admin: ORGANIZATION_AC.newRole({
@@ -67,6 +71,8 @@ export const ORGANIZATION_ROLES = {
     units: ["read"],
     orders: ["create", "read", "update", "delete"],
     coupons: ["create", "read", "update", "delete"],
+    cashback: ["read", "update"],
+    notifications: ["create", "read", "update"],
     uploads: ["create", "read"],
   }),
   member: ORGANIZATION_AC.newRole({

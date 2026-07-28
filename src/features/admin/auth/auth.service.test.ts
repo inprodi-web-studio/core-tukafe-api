@@ -8,6 +8,7 @@ const user = {
   name: "Admin",
   middleName: null,
   lastName: null,
+  role: "owner",
 };
 
 const organizations: PortalOrganization[] = [

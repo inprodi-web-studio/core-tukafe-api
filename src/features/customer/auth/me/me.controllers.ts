@@ -1,4 +1,11 @@
-import { accountDB, customersDB, sessionDB, userDB } from "@core/db/schemas";
+import {
+  accountDB,
+  customerNotificationPreferencesDB,
+  customerPushInstallationsDB,
+  customersDB,
+  sessionDB,
+  userDB,
+} from "@core/db/schemas";
 import { eq, sql } from "drizzle-orm";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import type { UpdateCurrentCustomerBody } from "./me.schemas";
@@ -54,6 +61,13 @@ export async function closeCurrentCustomer(request: FastifyRequest, reply: Fasti
   const closedAccountEmail = `closed-${user.id}@closed.tukafe.local`;
 
   await request.server.db.transaction(async (tx) => {
+    await tx
+      .delete(customerPushInstallationsDB)
+      .where(eq(customerPushInstallationsDB.customerId, customer.id));
+    await tx
+      .delete(customerNotificationPreferencesDB)
+      .where(eq(customerNotificationPreferencesDB.customerId, customer.id));
+
     await tx
       .update(customersDB)
       .set({

@@ -2,6 +2,7 @@ import {
   orderItemBodySchema,
   orderCouponCodeSchema,
   orderCashbackRedeemCentsSchema,
+  orderPreparationDelayMinutesSchema,
   orderPaymentAttemptIdSchema,
   orderTipBodySchema,
 } from "@features/shared/orders/create-order.schemas";
@@ -14,6 +15,7 @@ export const createBodySchema = z
     paymentAttemptId: orderPaymentAttemptIdSchema.nullish(),
     couponCode: orderCouponCodeSchema.nullish(),
     cashbackRedeemCents: orderCashbackRedeemCentsSchema.nullish(),
+    preparationDelayMinutes: orderPreparationDelayMinutesSchema.nullish(),
     comment: z.string().nullish(),
     tip: orderTipBodySchema.nullish(),
     items: z.array(orderItemBodySchema).min(1),

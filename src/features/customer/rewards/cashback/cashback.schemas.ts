@@ -23,17 +23,18 @@ export type CashbackMovementsQuery = z.infer<typeof cashbackMovementsQuerySchema
 export const cashbackMovementSchema = z
   .object({
     id: z.string(),
-    type: z.enum(["earned", "redeemed"]),
+    type: z.enum(["earned", "redeemed", "adjustment_credit", "adjustment_debit"]),
     amountCents: z.number().int().positive(),
     balanceAfterCents: z.number().int().nonnegative(),
-    organizationId: z.string(),
+    organizationId: z.string().nullable(),
     createdAt: z.date(),
     order: z
       .object({
         id: z.string(),
         folio: z.string(),
       })
-      .strict(),
+      .strict()
+      .nullable(),
   })
   .strict();
 

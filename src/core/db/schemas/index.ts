@@ -12,6 +12,7 @@ export * from "./invitation.schema";
 export * from "./legacyCustomerPassword.schema";
 export * from "./member.schema";
 export * from "./modifier.schema";
+export * from "./notification.schema";
 export * from "./organization.schema";
 export * from "./organizationSchedule.schema";
 export * from "./order.schema";

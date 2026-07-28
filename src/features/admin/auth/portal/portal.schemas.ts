@@ -19,6 +19,7 @@ const portalUserSchema = z.object({
   name: z.string(),
   middleName: z.string().nullable(),
   lastName: z.string().nullable(),
+  role: z.string(),
 });
 
 const portalOrganizationSchema = z.object({

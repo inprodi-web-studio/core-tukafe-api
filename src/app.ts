@@ -6,13 +6,16 @@ import {
   errorHandlerPlugin,
   featureNamespacesPlugin,
   multipartPlugin,
+  notificationsPlugin,
   workOrderRealtimePlugin,
   zodSchemaPlugin,
 } from "@core/plugins";
 import cors from "@fastify/cors";
 import { adminApiKeysRoutes, adminApiKeysServicesPlugin } from "@features/admin/apiKeys";
 import { adminAuthRoutes, adminAuthServicesPlugin } from "@features/admin/auth";
+import { adminCashbackRoutes, adminCashbackServicesPlugin } from "@features/admin/cashback";
 import { adminCouponsRoutes, adminCouponsServicesPlugin } from "@features/admin/coupons";
+import { adminCustomersRoutes, adminCustomersServicesPlugin } from "@features/admin/customers";
 import { adminDashboardRoutes, adminDashboardServicesPlugin } from "@features/admin/dashboard";
 import {
   adminIngredientCategoriesRoutes,
@@ -23,6 +26,7 @@ import {
   adminIngredientsServicesPlugin,
 } from "@features/admin/ingredients";
 import { adminModifiersRoutes, adminModifiersServicesPlugin } from "@features/admin/modifiers";
+import { adminNotificationsRoutes } from "@features/admin/notifications";
 import { adminOrdersRoutes, adminOrdersServicesPlugin } from "@features/admin/orders";
 import {
   adminOrganizationsRoutes,
@@ -49,6 +53,7 @@ import {
 import { adminUploadsRoutes, adminUploadsServicesPlugin } from "@features/admin/uploads";
 import { adminWorkOrdersRoutes, adminWorkOrdersServicesPlugin } from "@features/admin/workOrders";
 import { customerAuthRoutes, customerAuthServicesPlugin } from "@features/customer/auth";
+import { customerNotificationsRoutes } from "@features/customer/notifications";
 import { customerOrganizationsRoutes } from "@features/customer/organizations";
 import { customerOrdersRoutes, customerOrdersServicesPlugin } from "@features/customer/orders";
 import { customerProductCategoriesRoutes } from "@features/customer/productCategories";
@@ -111,6 +116,7 @@ await server.register(errorHandlerPlugin);
 await server.register(authPlugin);
 await server.register(featureNamespacesPlugin);
 await server.register(workOrderRealtimePlugin);
+await server.register(notificationsPlugin);
 
 server.get("/health", async () => ({
   status: "ok",
@@ -126,7 +132,9 @@ await server.register(adminModifiersServicesPlugin);
 await server.register(adminTaxesServicesPlugin);
 await server.register(adminUnitsServicesPlugin);
 await server.register(adminProductsServicesPlugin);
+await server.register(adminCashbackServicesPlugin);
 await server.register(adminCouponsServicesPlugin);
+await server.register(adminCustomersServicesPlugin);
 await server.register(adminDashboardServicesPlugin);
 await server.register(adminUploadsServicesPlugin);
 await server.register(adminOrdersServicesPlugin);
@@ -158,13 +166,16 @@ await server.register(
         await adminApp.register(adminTaxesRoutes, { prefix: "/taxes" });
         await adminApp.register(adminUnitsRoutes, { prefix: "/units" });
         await adminApp.register(adminProductsRoutes, { prefix: "/products" });
+        await adminApp.register(adminCashbackRoutes, { prefix: "/cashback" });
         await adminApp.register(adminCouponsRoutes, { prefix: "/coupons" });
+        await adminApp.register(adminCustomersRoutes, { prefix: "/customers" });
         await adminApp.register(adminDashboardRoutes, { prefix: "/dashboard" });
         await adminApp.register(adminUploadsRoutes, { prefix: "/uploads" });
         await adminApp.register(adminOrdersRoutes, { prefix: "/orders" });
         await adminApp.register(adminOrganizationsRoutes, { prefix: "/organizations" });
         await adminApp.register(adminTeamRoutes, { prefix: "/team" });
         await adminApp.register(adminWorkOrdersRoutes, { prefix: "/work-orders" });
+        await adminApp.register(adminNotificationsRoutes, { prefix: "/notifications" });
         await adminApp.register(adminProductcategoriesRoutes, { prefix: "/products/categories" });
         await adminApp.register(adminVariationGroupsRoutes, {
           prefix: "/variations/groups",
@@ -188,6 +199,7 @@ await server.register(
         await customerApp.register(customerAuthRoutes, { prefix: "/auth" });
         await customerApp.register(customerOrganizationsRoutes, { prefix: "/organizations" });
         await customerApp.register(customerOrdersRoutes, { prefix: "/orders" });
+        await customerApp.register(customerNotificationsRoutes, { prefix: "/notifications" });
         await customerApp.register(customerProductCategoriesRoutes, {
           prefix: "/product-categories",
         });
