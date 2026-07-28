@@ -163,7 +163,7 @@ describe("admin customers", () => {
       email: "ana@tukafe.test",
       cashbackBalanceCents: "12500",
       orderCount: "3",
-      lastOrderAt: new Date("2026-07-20T12:00:00.000Z"),
+      lastOrderAt: "2026-07-20T12:00:00.000Z",
       createdAt: new Date("2026-06-01T12:00:00.000Z"),
     };
     const customerWithoutOrders = {
@@ -200,7 +200,12 @@ describe("admin customers", () => {
 
     expect(result).toEqual({
       data: [
-        { ...activeCustomer, cashbackBalanceCents: 12500, orderCount: 3 },
+        {
+          ...activeCustomer,
+          cashbackBalanceCents: 12500,
+          orderCount: 3,
+          lastOrderAt: new Date("2026-07-20T12:00:00.000Z"),
+        },
         { ...customerWithoutOrders, cashbackBalanceCents: 0, orderCount: 0 },
       ],
       pagination: { page: 1, pageSize: 30, totalItems: 2, totalPages: 1 },

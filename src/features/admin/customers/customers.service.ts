@@ -11,7 +11,7 @@ import type {
 function resolveOrderBy(
   { sortBy, sortDirection }: Pick<CustomerListParams, "sortBy" | "sortDirection">,
   orderCount: SQL<number>,
-  lastOrderAt: SQL<Date | null>,
+  lastOrderAt: SQL<Date | string | null>,
 ): [SQL, ...SQL[]] {
   const order = sortDirection === "desc" ? desc : asc;
   const column = {
@@ -26,12 +26,26 @@ function resolveOrderBy(
   return [sql`${order(column)} nulls last`, desc(customersDB.createdAt), asc(customersDB.id)];
 }
 
+function normalizeDate(value: Date | string | null): Date | null {
+  if (value === null) {
+    return null;
+  }
+
+  const date = value instanceof Date ? value : new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    throw new Error("Customer has an invalid last order date");
+  }
+
+  return date;
+}
+
 export function adminCustomersService(fastify: FastifyInstance): AdminCustomersService {
   return {
     async list(input) {
       const normalizedSearch = input.search?.trim();
       const orderCount = sql<number>`count(${ordersDB.id})::integer`;
-      const lastOrderAt = sql<Date | null>`max(${ordersDB.createdAt})`;
+      const lastOrderAt = sql<Date | string | null>`max(${ordersDB.createdAt})`;
       const cashbackBalanceCents = sql<number>`coalesce(${customerCashbackAccountsDB.balanceCents}, 0)::integer`;
       const orderBy = resolveOrderBy(input, orderCount, lastOrderAt);
 
@@ -91,6 +105,7 @@ export function adminCustomersService(fastify: FastifyInstance): AdminCustomersS
             ...customer,
             cashbackBalanceCents: Number(customer.cashbackBalanceCents),
             orderCount: Number(customer.orderCount),
+            lastOrderAt: normalizeDate(customer.lastOrderAt),
             createdAt: customer.createdAt,
           } satisfies CustomerListItem;
         },
