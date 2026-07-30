@@ -28,8 +28,10 @@ import type { ListQuery } from "./list/list.schemas";
 
 export interface AdminProductsService {
   get(id: string, config?: GetServiceConfig): Promise<ProductResponse | null>;
+  getGeneral(id: string): Promise<ProductGeneralResponse>;
   list(input: ListQuery & { organizationId: string }): Promise<PaginatedResult<ProductListItem>>;
   create(input: CreateProductServiceParams): Promise<ProductResponse>;
+  updateGeneral(id: string, input: UpdateProductGeneralParams): Promise<ProductGeneralResponse>;
   assignOrganization(productId: string, organizationId: string): Promise<ProductResponse>;
   unassignOrganization(productId: string, organizationId: string): Promise<ProductResponse>;
   updateOrganizationStatus(
@@ -74,6 +76,21 @@ export interface ProductListItem {
   minPriceCents: number | null;
   maxPriceCents: number | null;
   organizationStatus: ProductOrganizationStatus;
+}
+
+export interface ProductGeneralResponse {
+  id: string;
+  name: string;
+  kitchenName: string | null;
+  customerDescription: string | null;
+  kitchenDescription: string | null;
+  isFeatured: boolean;
+  productType: ProductType;
+  updatedAt: Date;
+  image: ProductImageResponse | null;
+  unit: Pick<Unit, "id" | "name" | "abbreviation" | "precision">;
+  categories: ProductListCategory[];
+  taxes: Array<Pick<Tax, "id" | "name" | "rate">>;
 }
 
 export interface ProductCategoryResponse extends Omit<ProductCategory, "imageUploadId"> {
@@ -135,6 +152,18 @@ export interface CreateProductServiceParams {
 
 export interface UpdateProductCategoriesParams {
   categoryIds: string[];
+}
+
+export interface UpdateProductGeneralParams {
+  name?: string;
+  kitchenName?: string | null;
+  customerDescription?: string | null;
+  kitchenDescription?: string | null;
+  unitId?: string;
+  imageUploadId?: string | null;
+  isFeatured?: boolean;
+  categoryIds?: string[];
+  taxIds?: string[];
 }
 
 export interface CreateProductCompoundComponentParams {

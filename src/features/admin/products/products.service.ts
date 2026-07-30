@@ -12,6 +12,7 @@ import {
   recipeIngredientsDB,
   recipesDB,
   recipeSuppliesDB,
+  taxDB,
   variationRecipeIngredientsDB,
   variationRecipesDB,
   variationRecipeSuppliesDB,
@@ -26,6 +27,7 @@ import {
   generateNanoId,
   getPgError,
   notFound,
+  normalizeString,
   paginate,
 } from "@core/utils";
 import { and, asc, desc, eq, inArray, isNull, or, sql, type SQL } from "drizzle-orm";
@@ -482,6 +484,98 @@ export function adminProductsService(fastify: FastifyInstance): AdminProductsSer
         modifiers: productModifiers,
         compoundComponents,
       });
+    },
+
+    async getGeneral(id) {
+      const product = await fastify.db.query.productsDB.findFirst({
+        where(table, { and, eq: eqOperator, isNull: isNullOperator }) {
+          return and(eqOperator(table.id, id), isNullOperator(table.deletedAt));
+        },
+        columns: {
+          categoryId: false,
+          imageUploadId: false,
+          priceCents: false,
+          unitId: false,
+          createdAt: false,
+          deletedAt: false,
+        },
+        with: {
+          image: {
+            columns: {
+              id: true,
+              name: true,
+              path: true,
+              visibility: true,
+              mimeType: true,
+            },
+          },
+          unit: {
+            columns: {
+              id: true,
+              name: true,
+              abbreviation: true,
+              precision: true,
+            },
+          },
+          categories: {
+            columns: {
+              productId: false,
+              categoryId: false,
+              createdAt: false,
+              updatedAt: false,
+            },
+            with: {
+              category: {
+                columns: {
+                  id: true,
+                  name: true,
+                  color: true,
+                },
+              },
+            },
+          },
+          taxes: {
+            columns: {
+              productId: false,
+              taxId: false,
+              createdAt: false,
+              updatedAt: false,
+            },
+            with: {
+              tax: {
+                columns: {
+                  id: true,
+                  name: true,
+                  rate: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!product) {
+        throw notFound("product.notFound", "The product was not found");
+      }
+
+      return {
+        id: product.id,
+        name: product.name,
+        kitchenName: product.kitchenName,
+        customerDescription: product.customerDescription,
+        kitchenDescription: product.kitchenDescription,
+        isFeatured: product.isFeatured,
+        productType: product.productType,
+        updatedAt: product.updatedAt!,
+        image: product.image,
+        unit: product.unit,
+        categories: product.categories
+          .map(({ category }) => category)
+          .sort((left, right) => left.name.localeCompare(right.name)),
+        taxes: product.taxes
+          .map(({ tax }) => tax)
+          .sort((left, right) => left.name.localeCompare(right.name)),
+      };
     },
 
     async list({
@@ -1009,6 +1103,151 @@ export function adminProductsService(fastify: FastifyInstance): AdminProductsSer
 
         throw error;
       }
+    },
+
+    async updateGeneral(id, input) {
+      const existingProduct = await fastify.db.query.productsDB.findFirst({
+        where(table, { and, eq: eqOperator, isNull: isNullOperator }) {
+          return and(eqOperator(table.id, id), isNullOperator(table.deletedAt));
+        },
+        columns: { id: true },
+      });
+
+      if (!existingProduct) {
+        throw notFound("product.notFound", "The product was not found");
+      }
+
+      const categoryIds =
+        input.categoryIds === undefined ? undefined : [...new Set(input.categoryIds)];
+      const taxIds = input.taxIds === undefined ? undefined : [...new Set(input.taxIds)];
+      const imageUploadId = input.imageUploadId;
+      const normalizeOptionalText = (value: string | null | undefined) => {
+        if (value === undefined || value === null) {
+          return value;
+        }
+
+        const normalized = normalizeString(value, {
+          trim: true,
+          collapseWhitespace: true,
+        });
+
+        return normalized.length > 0 ? normalized : null;
+      };
+      const name =
+        input.name === undefined
+          ? undefined
+          : normalizeString(input.name, {
+              trim: true,
+              collapseWhitespace: true,
+            });
+
+      if (input.unitId) {
+        await fastify.admin.units.get(input.unitId);
+      }
+
+      const [categories, taxes, imageUpload] = await Promise.all([
+        categoryIds && categoryIds.length > 0
+          ? fastify.db
+              .select({ id: productCategoriesDB.id })
+              .from(productCategoriesDB)
+              .where(inArray(productCategoriesDB.id, categoryIds))
+          : Promise.resolve([]),
+        taxIds && taxIds.length > 0
+          ? fastify.db.select({ id: taxDB.id }).from(taxDB).where(inArray(taxDB.id, taxIds))
+          : Promise.resolve([]),
+        imageUploadId
+          ? fastify.db.query.uploadsDB.findFirst({
+              columns: { id: true, mimeType: true },
+              where(table, { eq: eqOperator }) {
+                return eqOperator(table.id, imageUploadId);
+              },
+            })
+          : Promise.resolve(null),
+      ]);
+
+      if (categoryIds && categories.length !== categoryIds.length) {
+        throw notFound("productCategory.notFound", "One or more product categories were not found");
+      }
+
+      if (taxIds && taxes.length !== taxIds.length) {
+        throw notFound("tax.notFound", "One or more taxes were not found");
+      }
+
+      if (imageUploadId && !imageUpload) {
+        throw notFound("upload.notFound", "The image upload was not found");
+      }
+
+      if (imageUpload && !imageUpload.mimeType.toLowerCase().startsWith("image/")) {
+        throw badRequest("product.invalidImageUpload", "The selected upload must be an image file");
+      }
+
+      try {
+        await fastify.db.transaction(async (tx) => {
+          const [updatedProduct] = await tx
+            .update(productsDB)
+            .set({
+              ...(name !== undefined && { name }),
+              ...(input.kitchenName !== undefined && {
+                kitchenName: normalizeOptionalText(input.kitchenName),
+              }),
+              ...(input.customerDescription !== undefined && {
+                customerDescription: normalizeOptionalText(input.customerDescription),
+              }),
+              ...(input.kitchenDescription !== undefined && {
+                kitchenDescription: normalizeOptionalText(input.kitchenDescription),
+              }),
+              ...(input.unitId !== undefined && { unitId: input.unitId }),
+              ...(imageUploadId !== undefined && { imageUploadId }),
+              ...(input.isFeatured !== undefined && { isFeatured: input.isFeatured }),
+              ...(categoryIds !== undefined && { categoryId: categoryIds[0] ?? null }),
+              updatedAt: sql`now()`,
+            })
+            .where(and(eq(productsDB.id, id), isNull(productsDB.deletedAt)))
+            .returning({ id: productsDB.id });
+
+          if (!updatedProduct) {
+            throw notFound("product.notFound", "The product was not found");
+          }
+
+          if (categoryIds !== undefined) {
+            await tx
+              .delete(productCategoryLinksDB)
+              .where(eq(productCategoryLinksDB.productId, id));
+
+            if (categoryIds.length > 0) {
+              await tx.insert(productCategoryLinksDB).values(
+                categoryIds.map((categoryId) => ({
+                  productId: id,
+                  categoryId,
+                })),
+              );
+            }
+          }
+
+          if (taxIds !== undefined) {
+            await tx.delete(productTaxDB).where(eq(productTaxDB.productId, id));
+
+            if (taxIds.length > 0) {
+              await tx.insert(productTaxDB).values(
+                taxIds.map((taxId) => ({
+                  productId: id,
+                  taxId,
+                })),
+              );
+            }
+          }
+        });
+      } catch (error) {
+        const pgError = getPgError(error);
+
+        if (pgError?.code === "23505" && pgError.constraint === "product_name_active_unique") {
+          throw conflict("product.duplicatedName", "A product with this name already exists");
+        }
+
+        throw error;
+      }
+
+      return fastify.admin.products.getGeneral(id);
     },
 
     async createVariation(productId, input) {

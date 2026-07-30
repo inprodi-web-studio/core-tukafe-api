@@ -1,11 +1,14 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { describe, expect, it, vi } from "vitest";
+import { getProduct } from "./get/get.controllers";
 import { updateCategories } from "./updateCategories/updateCategories.controllers";
 import { bodySchema as categoriesBodySchema } from "./updateCategories/updateCategories.schemas";
 import { updateFeatured } from "./updateFeatured/updateFeatured.controllers";
 import { bodySchema as featuredBodySchema } from "./updateFeatured/updateFeatured.schemas";
 import { updateOrganizationStatus } from "./updateOrganizationStatus/updateOrganizationStatus.controllers";
 import { bodySchema as organizationStatusBodySchema } from "./updateOrganizationStatus/updateOrganizationStatus.schemas";
+import { updateProduct } from "./update/update.controllers";
+import { bodySchema as updateBodySchema } from "./update/update.schemas";
 
 function createReply() {
   const send = vi.fn();
@@ -35,6 +38,79 @@ describe("admin product actions", () => {
     expect(() =>
       categoriesBodySchema.parse({ categoryIds: [categoryId], organizationId: "org-other" }),
     ).toThrow();
+  });
+
+  it("acepta únicamente campos generales editables", () => {
+    const unitId = "V1StGXR8_Z5jdHi6B-myT";
+    const categoryId = "Uakgb_J5m9g-0JDMbcJqL";
+
+    expect(
+      updateBodySchema.parse({
+        name: " Americano ",
+        kitchenName: null,
+        customerDescription: "",
+        kitchenDescription: null,
+        unitId,
+        imageUploadId: null,
+        isFeatured: true,
+        categoryIds: [categoryId],
+        taxIds: [],
+      }),
+    ).toEqual({
+      name: "Americano",
+      kitchenName: null,
+      customerDescription: "",
+      kitchenDescription: null,
+      unitId,
+      imageUploadId: null,
+      isFeatured: true,
+      categoryIds: [categoryId],
+      taxIds: [],
+    });
+
+    expect(() => updateBodySchema.parse({})).toThrow();
+    expect(() => updateBodySchema.parse({ productType: "compound" })).toThrow();
+    expect(() => updateBodySchema.parse({ price: 90 })).toThrow();
+    expect(() => updateBodySchema.parse({ organizationId: "org-other" })).toThrow();
+  });
+
+  it("consulta el detalle general del producto", async () => {
+    const detail = { id: "product-id", name: "Americano" };
+    const getGeneral = vi.fn().mockResolvedValue(detail);
+    const request = {
+      params: { productId: "product-id" },
+      server: { admin: { products: { getGeneral } } },
+    } as unknown as FastifyRequest<{ Params: { productId: string } }>;
+    const { reply, send } = createReply();
+
+    await getProduct(request, reply);
+
+    expect(getGeneral).toHaveBeenCalledWith("product-id");
+    expect(send).toHaveBeenCalledWith(detail);
+  });
+
+  it("actualiza únicamente la información general", async () => {
+    const body = {
+      name: "Americano",
+      categoryIds: ["category-id"],
+      taxIds: [],
+    };
+    const detail = { id: "product-id", ...body };
+    const updateGeneral = vi.fn().mockResolvedValue(detail);
+    const request = {
+      params: { productId: "product-id" },
+      body,
+      server: { admin: { products: { updateGeneral } } },
+    } as unknown as FastifyRequest<{
+      Params: { productId: string };
+      Body: typeof body;
+    }>;
+    const { reply, send } = createReply();
+
+    await updateProduct(request, reply);
+
+    expect(updateGeneral).toHaveBeenCalledWith("product-id", body);
+    expect(send).toHaveBeenCalledWith(detail);
   });
 
   it("inactiva usando exclusivamente la organización de la sesión", async () => {

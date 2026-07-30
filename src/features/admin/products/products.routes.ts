@@ -3,8 +3,10 @@ import { assignOrganizationRoutes } from "./assignOrganization";
 import { createRoutes } from "./create";
 import { createModifierRoutes } from "./createModifier";
 import { createVariationRoutes } from "./createVariation";
+import { getRoutes } from "./get";
 import { listRoutes } from "./list";
 import { unassignOrganizationRoutes } from "./unassignOrganization";
+import { updateRoutes } from "./update";
 import { updateModifierOptionsRoutes } from "./updateModifierOptions";
 import { updateOrganizationStatusRoutes } from "./updateOrganizationStatus";
 import { updateFeaturedRoutes } from "./updateFeatured";
@@ -12,7 +14,9 @@ import { updateCategoriesRoutes } from "./updateCategories";
 
 export async function adminProductsRoutes(server: FastifyInstance) {
   await server.register(listRoutes);
+  await server.register(getRoutes);
   await server.register(createRoutes);
+  await server.register(updateRoutes);
   await server.register(assignOrganizationRoutes);
   await server.register(unassignOrganizationRoutes);
   await server.register(createVariationRoutes);
