@@ -1,8 +1,11 @@
 import {
+  organizationProductDB,
   orderItemsDB,
   orderPaymentAttemptsDB,
   ordersDB,
   productCategoryLinksDB,
+  productCompoundComponentsDB,
+  productCompoundSlotsDB,
   productVariationGroupsDB,
   productsDB,
   variationsDB,
@@ -19,6 +22,7 @@ import type {
   GuestProductVariation,
   GuestProductVariationGroup,
 } from "./products.types";
+import { hasAvailableCompoundConfiguration } from "./products.availability";
 
 function sortVariationGroups(
   variationGroups: GuestProductVariationGroup[],
@@ -124,6 +128,113 @@ async function productModifierVisibilityRulesTableExists(
   `);
 
   return result.rows[0]?.exists ?? false;
+}
+
+async function getActiveProductIdsForOrganization(
+  fastify: FastifyInstance,
+  organizationId: string,
+  productIds: string[],
+): Promise<Set<string>> {
+  if (productIds.length === 0) {
+    return new Set();
+  }
+
+  const activeProducts = await fastify.db
+    .select({
+      productId: organizationProductDB.productId,
+    })
+    .from(organizationProductDB)
+    .innerJoin(productsDB, eq(organizationProductDB.productId, productsDB.id))
+    .where(
+      and(
+        eq(organizationProductDB.organizationId, organizationId),
+        eq(organizationProductDB.isActive, true),
+        inArray(organizationProductDB.productId, productIds),
+        isNull(productsDB.deletedAt),
+      ),
+    );
+
+  return new Set(activeProducts.map((product) => product.productId));
+}
+
+async function getAvailableCompoundProductIds(
+  fastify: FastifyInstance,
+  organizationId: string,
+  compoundProductIds: string[],
+): Promise<Set<string>> {
+  if (compoundProductIds.length === 0) {
+    return new Set();
+  }
+
+  const [slots, legacyComponents] = await Promise.all([
+    fastify.db.query.productCompoundSlotsDB.findMany({
+      where: inArray(productCompoundSlotsDB.compoundProductId, compoundProductIds),
+      columns: {
+        id: true,
+        compoundProductId: true,
+      },
+      with: {
+        options: {
+          columns: {
+            componentProductId: true,
+          },
+        },
+      },
+    }),
+    fastify.db.query.productCompoundComponentsDB.findMany({
+      where: inArray(productCompoundComponentsDB.compoundProductId, compoundProductIds),
+      columns: {
+        compoundProductId: true,
+        componentProductId: true,
+        sortOrder: true,
+      },
+    }),
+  ]);
+
+  const componentProductIds = [
+    ...new Set([
+      ...slots.flatMap((slot) => slot.options.map((option) => option.componentProductId)),
+      ...legacyComponents.map((component) => component.componentProductId),
+    ]),
+  ];
+  const activeProductIds = await getActiveProductIdsForOrganization(
+    fastify,
+    organizationId,
+    componentProductIds,
+  );
+  const slotsByCompoundProductId = new Map<string, Array<{ optionProductIds: string[] }>>();
+  const compoundsUsingSlots = new Set(slots.map((slot) => slot.compoundProductId));
+
+  for (const slot of slots) {
+    const currentSlots = slotsByCompoundProductId.get(slot.compoundProductId) ?? [];
+    currentSlots.push({
+      optionProductIds: slot.options.map((option) => option.componentProductId),
+    });
+    slotsByCompoundProductId.set(slot.compoundProductId, currentSlots);
+  }
+
+  for (const component of legacyComponents) {
+    if (compoundsUsingSlots.has(component.compoundProductId)) {
+      continue;
+    }
+
+    const currentSlots = slotsByCompoundProductId.get(component.compoundProductId) ?? [];
+    currentSlots.push({
+      optionProductIds: [component.componentProductId],
+    });
+    slotsByCompoundProductId.set(component.compoundProductId, currentSlots);
+  }
+
+  const availableCompoundProductIds = new Set<string>();
+
+  for (const compoundProductId of compoundProductIds) {
+    const compoundSlots = slotsByCompoundProductId.get(compoundProductId) ?? [];
+    if (hasAvailableCompoundConfiguration(compoundSlots, activeProductIds)) {
+      availableCompoundProductIds.add(compoundProductId);
+    }
+  }
+
+  return availableCompoundProductIds;
 }
 
 export function guestProductsService(fastify: FastifyInstance): GuestProductsService {
@@ -471,6 +582,13 @@ export function guestProductsService(fastify: FastifyInstance): GuestProductsSer
         variationsByProductId.set(variation.productId, currentVariations);
       }
 
+      const compoundProductIds = products
+        .filter((product) => product.productType === "compound")
+        .map((product) => product.id);
+      const availableCompoundProductIds = organizationId
+        ? await getAvailableCompoundProductIds(fastify, organizationId, compoundProductIds)
+        : new Set(compoundProductIds);
+
       return products
         .map<GuestProductListItem>((product) => ({
           id: product.id,
@@ -508,7 +626,12 @@ export function guestProductsService(fastify: FastifyInstance): GuestProductsSer
           variationGroups: sortVariationGroups(variationGroupsByProductId.get(product.id) ?? []),
           variations: sortVariations(variationsByProductId.get(product.id) ?? []),
         }))
-        .filter((product) => !organizationId || product.organizations.length > 0);
+        .filter(
+          (product) =>
+            !organizationId ||
+            (product.organizations.length > 0 &&
+              (product.productType !== "compound" || availableCompoundProductIds.has(product.id))),
+        );
     },
 
     async listPopular(input = {}) {
@@ -666,7 +789,7 @@ export function guestProductsService(fastify: FastifyInstance): GuestProductsSer
       return hydratedRecommendedProducts;
     },
 
-    async getConfiguration(productId) {
+    async getConfiguration(productId, organizationId = null) {
       const product = await fastify.db.query.productsDB.findFirst({
         where(table, { and: andOperator, eq, isNull: isNullOperator }) {
           return andOperator(eq(table.id, productId), isNullOperator(table.deletedAt));
@@ -694,6 +817,19 @@ export function guestProductsService(fastify: FastifyInstance): GuestProductsSer
 
       if (!product) {
         throw notFound("product.notFound", "The product was not found");
+      }
+
+      if (organizationId) {
+        const activeProductIds = await getActiveProductIdsForOrganization(fastify, organizationId, [
+          product.id,
+        ]);
+
+        if (!activeProductIds.has(product.id)) {
+          throw notFound(
+            "product.notAvailableInOrganization",
+            "The product is not available in this organization",
+          );
+        }
       }
 
       const [includeAllowedModifierOptions, includeModifierVisibilityRules] = await Promise.all([
@@ -1048,21 +1184,21 @@ export function guestProductsService(fastify: FastifyInstance): GuestProductsSer
           },
         }),
         fastify.db.query.productCompoundComponentsDB.findMany({
-        where(table, { eq }) {
-          return eq(table.compoundProductId, product.id);
-        },
-        columns: {
-          compoundProductId: true,
-          componentProductId: true,
-          quantity: true,
-          sortOrder: true,
-          label: true,
-          createdAt: false,
-          updatedAt: false,
-        },
-        orderBy(table, { asc }) {
-          return [asc(table.sortOrder), asc(table.componentProductId)];
-        },
+          where(table, { eq }) {
+            return eq(table.compoundProductId, product.id);
+          },
+          columns: {
+            compoundProductId: true,
+            componentProductId: true,
+            quantity: true,
+            sortOrder: true,
+            label: true,
+            createdAt: false,
+            updatedAt: false,
+          },
+          orderBy(table, { asc }) {
+            return [asc(table.sortOrder), asc(table.componentProductId)];
+          },
         }),
       ]);
 
@@ -1086,15 +1222,47 @@ export function guestProductsService(fastify: FastifyInstance): GuestProductsSer
               ],
             }));
 
+      const activeComponentProductIds = organizationId
+        ? await getActiveProductIdsForOrganization(fastify, organizationId, [
+            ...new Set(
+              resolvedCompoundSlots.flatMap((slot) =>
+                slot.options.map((option) => option.componentProductId),
+              ),
+            ),
+          ])
+        : null;
+      const availableCompoundSlots = resolvedCompoundSlots.map((slot) => ({
+        ...slot,
+        options: activeComponentProductIds
+          ? slot.options.filter((option) =>
+              activeComponentProductIds.has(option.componentProductId),
+            )
+          : slot.options,
+      }));
+
+      if (
+        organizationId &&
+        (availableCompoundSlots.length < 2 ||
+          availableCompoundSlots.some((slot) => slot.options.length === 0))
+      ) {
+        throw notFound(
+          "product.notAvailableInOrganization",
+          "The product is not available in this organization",
+        );
+      }
+
       const compoundSlotResponses = await Promise.all(
-        resolvedCompoundSlots.map(async (slot) => ({
+        availableCompoundSlots.map(async (slot) => ({
           slotId: slot.id,
           label: slot.label,
           quantity: slot.quantity,
           sortOrder: slot.sortOrder,
           options: await Promise.all(
             slot.options.map(async (option) => {
-              const optionConfiguration = await service.getConfiguration(option.componentProductId);
+              const optionConfiguration = await service.getConfiguration(
+                option.componentProductId,
+                organizationId,
+              );
 
               return {
                 optionId: option.id,
@@ -1115,39 +1283,44 @@ export function guestProductsService(fastify: FastifyInstance): GuestProductsSer
         ...configuration,
         compoundSlots: compoundSlotResponses,
         compoundComponents: await Promise.all(
-          resolvedCompoundSlots.flatMap((slot) => {
-            if (slot.options.length !== 1) {
-              return [];
-            }
+          availableCompoundSlots
+            .flatMap((slot) => {
+              if (slot.options.length !== 1) {
+                return [];
+              }
 
-            const [option] = slot.options;
-            if (!option) {
-              return [];
-            }
+              const [option] = slot.options;
+              if (!option) {
+                return [];
+              }
 
-            return [
-              {
-                componentId: slot.id,
-                quantity: slot.quantity,
-                sortOrder: slot.sortOrder,
-                label: slot.label,
-                componentProductId: option.componentProductId,
-              },
-            ];
-          }).map(async (component) => {
-            const componentConfiguration = await service.getConfiguration(component.componentProductId);
+              return [
+                {
+                  componentId: slot.id,
+                  quantity: slot.quantity,
+                  sortOrder: slot.sortOrder,
+                  label: slot.label,
+                  componentProductId: option.componentProductId,
+                },
+              ];
+            })
+            .map(async (component) => {
+              const componentConfiguration = await service.getConfiguration(
+                component.componentProductId,
+                organizationId,
+              );
 
-            return {
-              componentId: component.componentId,
-              quantity: component.quantity,
-              sortOrder: component.sortOrder,
-              label: component.label,
-              product: componentConfiguration.product,
-              pricing: componentConfiguration.pricing,
-              steps: componentConfiguration.steps,
-              variations: componentConfiguration.variations,
-            };
-          }),
+              return {
+                componentId: component.componentId,
+                quantity: component.quantity,
+                sortOrder: component.sortOrder,
+                label: component.label,
+                product: componentConfiguration.product,
+                pricing: componentConfiguration.pricing,
+                steps: componentConfiguration.steps,
+                variations: componentConfiguration.variations,
+              };
+            }),
         ),
       };
     },

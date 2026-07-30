@@ -1,5 +1,4 @@
 import { customerProductFavoritesDB, productsDB } from "@core/db/schemas";
-import { paginate } from "@core/utils";
 import { and, asc, eq, isNull } from "drizzle-orm";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { assertCustomerProductExists } from "../products.helpers";
@@ -12,30 +11,29 @@ export async function listFavorites(
   reply: FastifyReply,
 ) {
   const customerId = request.customerAuth.customer.id;
-  const { page, pageSize } = request.query;
+  const normalizedPage = request.query.page ?? 1;
+  const normalizedPageSize = request.query.pageSize ?? 10;
+  const favorites = await request.server.db
+    .select({
+      productId: customerProductFavoritesDB.productId,
+    })
+    .from(customerProductFavoritesDB)
+    .innerJoin(productsDB, eq(customerProductFavoritesDB.productId, productsDB.id))
+    .where(and(eq(customerProductFavoritesDB.customerId, customerId), isNull(productsDB.deletedAt)))
+    .orderBy(asc(productsDB.name), asc(productsDB.id));
 
-  const paginatedFavoriteProductIds = await paginate({
-    executor: request.server.db,
-    createQuery: () =>
-      request.server.db
-        .select({
-          productId: customerProductFavoritesDB.productId,
-        })
-        .from(customerProductFavoritesDB)
-        .innerJoin(productsDB, eq(customerProductFavoritesDB.productId, productsDB.id))
-        .where(
-          and(eq(customerProductFavoritesDB.customerId, customerId), isNull(productsDB.deletedAt)),
-        )
-        .$dynamic(),
-    orderBy: [asc(productsDB.name), asc(productsDB.id)],
-    page,
-    pageSize,
-    mapRow: (favorite) => favorite.productId,
+  const products = await request.server.guest.products.list({
+    organizationId: request.query.organizationId,
   });
-
-  const products = await request.server.guest.products.list();
   const productsById = new Map(products.map((product) => [product.id, product]));
-  const favoriteProducts = paginatedFavoriteProductIds.data
+  const availableFavoriteProductIds = favorites
+    .map((favorite) => favorite.productId)
+    .filter((productId) => productsById.has(productId));
+  const totalItems = availableFavoriteProductIds.length;
+  const totalPages = totalItems === 0 ? 0 : Math.ceil(totalItems / normalizedPageSize);
+  const offset = (normalizedPage - 1) * normalizedPageSize;
+  const favoriteProducts = availableFavoriteProductIds
+    .slice(offset, offset + normalizedPageSize)
     .map((productId) => productsById.get(productId))
     .filter((product): product is NonNullable<typeof product> => Boolean(product))
     .map((product) => ({
@@ -45,7 +43,12 @@ export async function listFavorites(
 
   return reply.status(200).send({
     data: favoriteProducts,
-    pagination: paginatedFavoriteProductIds.pagination,
+    pagination: {
+      page: normalizedPage,
+      pageSize: normalizedPageSize,
+      totalItems,
+      totalPages,
+    },
   });
 }
 

@@ -317,7 +317,7 @@ export async function buildOrderValidationContext(
       return and(
         eq(table.organizationId, organizationId),
         eq(table.isActive, true),
-        inArray(table.productId, uniqueTopLevelProductIds),
+        inArray(table.productId, uniqueProductIds),
       );
     },
     columns: {
@@ -325,7 +325,7 @@ export async function buildOrderValidationContext(
     },
   });
 
-  if (activeOrganizationProducts.length !== uniqueTopLevelProductIds.length) {
+  if (activeOrganizationProducts.length !== uniqueProductIds.length) {
     throw notFound(
       "product.notAvailableInOrganization",
       "One or more products are not available in this organization",
@@ -880,8 +880,9 @@ export function validateAndPrepareOrderPayload(
 
         const selectedOption =
           componentInput.slotOptionId && componentInput.slotOptionId.trim().length > 0
-            ? (catalogSlot.options.find((option) => option.optionId === componentInput.slotOptionId) ??
-              null)
+            ? (catalogSlot.options.find(
+                (option) => option.optionId === componentInput.slotOptionId,
+              ) ?? null)
             : catalogSlot.options.length === 1
               ? catalogSlot.options[0]
               : (catalogSlot.options.find(

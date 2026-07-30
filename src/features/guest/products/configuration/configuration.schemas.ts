@@ -12,6 +12,12 @@ export const paramsSchema = z.object({
   productId: z.nanoid(),
 });
 
+export const querySchema = z
+  .object({
+    organizationId: z.string().nonempty().optional(),
+  })
+  .strict();
+
 const variationStepSchema = z.object({
   type: z.literal("variation"),
   id: z.string(),
@@ -129,4 +135,5 @@ export const configurationResponseSchema = configurationBaseSchema.extend({
 });
 
 export type Params = z.infer<typeof paramsSchema>;
+export type Query = z.infer<typeof querySchema>;
 export type ConfigurationResponse = z.infer<typeof configurationResponseSchema>;

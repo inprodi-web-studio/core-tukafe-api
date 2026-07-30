@@ -207,7 +207,10 @@ export interface GuestProductsService {
     limit?: number;
     windowDays?: number;
   }): Promise<GuestProductListItem[]>;
-  getConfiguration(productId: string): Promise<GuestProductConfiguration>;
+  getConfiguration(
+    productId: string,
+    organizationId?: string | null,
+  ): Promise<GuestProductConfiguration>;
   getCustomerProductOrderCount(
     productId: string,
     customerId: string,

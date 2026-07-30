@@ -6,6 +6,7 @@ export const favoritesQuerySchema = z
   .object({
     page: z.coerce.number().int().min(1).optional(),
     pageSize: z.coerce.number().int().min(1).max(100).optional(),
+    organizationId: z.string().nonempty().optional(),
   })
   .strict();
 
