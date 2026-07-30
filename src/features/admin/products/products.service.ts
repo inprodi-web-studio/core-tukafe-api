@@ -3,6 +3,8 @@ import {
   productCategoriesDB,
   productCategoryLinksDB,
   productCompoundComponentsDB,
+  productCompoundSlotOptionsDB,
+  productCompoundSlotsDB,
   productModifierOptionsDB,
   productModifierVisibilityRulesDB,
   productModifiersDB,
@@ -30,7 +32,7 @@ import {
   normalizeString,
   paginate,
 } from "@core/utils";
-import { and, asc, desc, eq, inArray, isNull, or, sql, type SQL } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull, ne, or, sql, type SQL } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
 import {
   buildProductModifierInsertPayloads,
@@ -486,7 +488,7 @@ export function adminProductsService(fastify: FastifyInstance): AdminProductsSer
       });
     },
 
-    async getGeneral(id) {
+    async getGeneral(id, organizationId) {
       const product = await fastify.db.query.productsDB.findFirst({
         where(table, { and, eq: eqOperator, isNull: isNullOperator }) {
           return and(eqOperator(table.id, id), isNullOperator(table.deletedAt));
@@ -558,6 +560,155 @@ export function adminProductsService(fastify: FastifyInstance): AdminProductsSer
         throw notFound("product.notFound", "The product was not found");
       }
 
+      const [configuredSlots, legacyComponents] =
+        product.productType === "compound"
+          ? await Promise.all([
+              fastify.db.query.productCompoundSlotsDB.findMany({
+                where(table, { eq: eqOperator }) {
+                  return eqOperator(table.compoundProductId, id);
+                },
+                columns: {
+                  id: true,
+                  label: true,
+                  quantity: true,
+                  sortOrder: true,
+                },
+                with: {
+                  options: {
+                    columns: {
+                      label: true,
+                      sortOrder: true,
+                    },
+                    with: {
+                      componentProduct: {
+                        columns: {
+                          id: true,
+                          name: true,
+                          kitchenName: true,
+                          productType: true,
+                        },
+                        with: {
+                          image: {
+                            columns: {
+                              id: true,
+                              name: true,
+                              path: true,
+                              visibility: true,
+                              mimeType: true,
+                            },
+                          },
+                          organizations: {
+                            columns: {
+                              organizationId: true,
+                              isActive: true,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              }),
+              fastify.db.query.productCompoundComponentsDB.findMany({
+                where(table, { eq: eqOperator }) {
+                  return eqOperator(table.compoundProductId, id);
+                },
+                columns: {
+                  label: true,
+                  quantity: true,
+                  sortOrder: true,
+                },
+                with: {
+                  componentProduct: {
+                    columns: {
+                      id: true,
+                      name: true,
+                      kitchenName: true,
+                      productType: true,
+                    },
+                    with: {
+                      image: {
+                        columns: {
+                          id: true,
+                          name: true,
+                          path: true,
+                          visibility: true,
+                          mimeType: true,
+                        },
+                      },
+                      organizations: {
+                        columns: {
+                          organizationId: true,
+                          isActive: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              }),
+            ])
+          : [[], []];
+      const getOrganizationStatus = (
+        organizations: Array<{ organizationId: string; isActive: boolean }>,
+      ): ProductOrganizationStatus => {
+        const assignment = organizations.find(
+          (organization) => organization.organizationId === organizationId,
+        );
+
+        return assignment ? (assignment.isActive ? "active" : "inactive") : "unassigned";
+      };
+      const mapComponentProduct = (componentProduct: {
+        id: string;
+        name: string;
+        kitchenName: string | null;
+        productType: "simple" | "assembled" | "compound";
+        image: {
+          id: string;
+          name: string;
+          path: string;
+          visibility: "PUBLIC" | "PRIVATE";
+          mimeType: string;
+        } | null;
+        organizations: Array<{ organizationId: string; isActive: boolean }>;
+      }) => ({
+        id: componentProduct.id,
+        name: componentProduct.name,
+        kitchenName: componentProduct.kitchenName,
+        productType: componentProduct.productType as "simple" | "assembled",
+        image: componentProduct.image,
+        organizationStatus: getOrganizationStatus(componentProduct.organizations),
+      });
+      const compoundSlots =
+        configuredSlots.length > 0
+          ? configuredSlots
+              .map((slot) => ({
+                label: slot.label,
+                quantity: slot.quantity,
+                sortOrder: slot.sortOrder,
+                options: slot.options
+                  .map((option) => ({
+                    label: option.label,
+                    sortOrder: option.sortOrder,
+                    product: mapComponentProduct(option.componentProduct),
+                  }))
+                  .sort((left, right) => left.sortOrder - right.sortOrder),
+              }))
+              .sort((left, right) => left.sortOrder - right.sortOrder)
+          : legacyComponents
+              .map((component) => ({
+                label: component.label ?? `Componente ${component.sortOrder + 1}`,
+                quantity: component.quantity,
+                sortOrder: component.sortOrder,
+                options: [
+                  {
+                    label: component.label,
+                    sortOrder: 0,
+                    product: mapComponentProduct(component.componentProduct),
+                  },
+                ],
+              }))
+              .sort((left, right) => left.sortOrder - right.sortOrder);
+
       return {
         id: product.id,
         name: product.name,
@@ -575,6 +726,7 @@ export function adminProductsService(fastify: FastifyInstance): AdminProductsSer
         taxes: product.taxes
           .map(({ tax }) => tax)
           .sort((left, right) => left.name.localeCompare(right.name)),
+        compoundSlots,
       };
     },
 
@@ -805,6 +957,104 @@ export function adminProductsService(fastify: FastifyInstance): AdminProductsSer
           organizationStatus: product.organizationStatus,
         })),
         pagination: paginatedProducts.pagination,
+      };
+    },
+
+    async listCompoundOptions(productId, { organizationId, page, pageSize, search }) {
+      const compoundProduct = await fastify.db.query.productsDB.findFirst({
+        where(table, { and: andOperator, eq: eqOperator, isNull: isNullOperator }) {
+          return andOperator(eqOperator(table.id, productId), isNullOperator(table.deletedAt));
+        },
+        columns: {
+          id: true,
+          productType: true,
+        },
+      });
+
+      if (!compoundProduct) {
+        throw notFound("product.notFound", "The product was not found");
+      }
+
+      if (compoundProduct.productType !== "compound") {
+        throw badRequest(
+          "product.compoundOptionsNotAllowed",
+          "Compound options can only be listed for compound products",
+        );
+      }
+
+      const fuzzySearch = buildFuzzySearch({
+        query: search,
+        values: [productsDB.name, productsDB.kitchenName],
+      });
+      const organizationStatusExpression = sql<ProductOrganizationStatus>`case
+        when ${organizationProductDB.productId} is null then 'unassigned'
+        when ${organizationProductDB.isActive} = true then 'active'
+        else 'inactive'
+      end`;
+      const whereConditions: SQL[] = [
+        isNull(productsDB.deletedAt),
+        ne(productsDB.id, productId),
+        inArray(productsDB.productType, ["simple", "assembled"]),
+      ];
+
+      if (fuzzySearch.where) {
+        whereConditions.push(fuzzySearch.where);
+      }
+
+      const paginatedOptions = await paginate({
+        executor: fastify.db,
+        createQuery: () => {
+          const query = fastify.db
+            .select({
+              id: productsDB.id,
+              name: productsDB.name,
+              kitchenName: productsDB.kitchenName,
+              productType: productsDB.productType,
+              imageId: uploadsDB.id,
+              imageName: uploadsDB.name,
+              imagePath: uploadsDB.path,
+              imageVisibility: uploadsDB.visibility,
+              imageMimeType: uploadsDB.mimeType,
+              organizationStatus: organizationStatusExpression,
+            })
+            .from(productsDB)
+            .leftJoin(uploadsDB, eq(uploadsDB.id, productsDB.imageUploadId))
+            .leftJoin(
+              organizationProductDB,
+              and(
+                eq(organizationProductDB.productId, productsDB.id),
+                eq(organizationProductDB.organizationId, organizationId),
+              ),
+            )
+            .$dynamic();
+
+          query.where(and(...whereConditions));
+
+          return query;
+        },
+        orderBy: [asc(productsDB.name), asc(productsDB.id)],
+        page,
+        pageSize,
+      });
+
+      return {
+        data: paginatedOptions.data.map((option) => ({
+          id: option.id,
+          name: option.name,
+          kitchenName: option.kitchenName,
+          productType: option.productType as "simple" | "assembled",
+          image: option.imageId
+            ? {
+                id: option.imageId,
+                name: option.imageName ?? "",
+                path: option.imagePath ?? "",
+                visibility: option.imageVisibility ?? "PUBLIC",
+                mimeType: option.imageMimeType ?? "application/octet-stream",
+              }
+            : null,
+          organizationStatus: option.organizationStatus,
+        })),
+        pagination: paginatedOptions.pagination,
       };
     },
 
@@ -1105,12 +1355,12 @@ export function adminProductsService(fastify: FastifyInstance): AdminProductsSer
       }
     },
 
-    async updateGeneral(id, input) {
+    async updateGeneral(id, organizationId, input) {
       const existingProduct = await fastify.db.query.productsDB.findFirst({
         where(table, { and, eq: eqOperator, isNull: isNullOperator }) {
           return and(eqOperator(table.id, id), isNullOperator(table.deletedAt));
         },
-        columns: { id: true },
+        columns: { id: true, productType: true },
       });
 
       if (!existingProduct) {
@@ -1140,6 +1390,134 @@ export function adminProductsService(fastify: FastifyInstance): AdminProductsSer
               trim: true,
               collapseWhitespace: true,
             });
+      const compoundSlots = input.compoundSlots?.map((slot) => ({
+        label: normalizeString(slot.label, { trim: true, collapseWhitespace: true }),
+        quantity: slot.quantity,
+        sortOrder: slot.sortOrder,
+        options: slot.options.map((option) => ({
+          productId: option.productId,
+          label:
+            option.label === null
+              ? null
+              : normalizeString(option.label, { trim: true, collapseWhitespace: true }),
+          sortOrder: option.sortOrder,
+        })),
+      }));
+
+      if (compoundSlots !== undefined) {
+        if (existingProduct.productType !== "compound") {
+          throw badRequest(
+            "product.compoundSlotsNotAllowed",
+            "Only compound products can include compound slots",
+          );
+        }
+
+        if (compoundSlots.length < 2) {
+          throw badRequest(
+            "product.compoundSlotsRequired",
+            "Compound products require at least two sections",
+          );
+        }
+
+        if (new Set(compoundSlots.map((slot) => slot.sortOrder)).size !== compoundSlots.length) {
+          throw badRequest(
+            "productCompoundSlot.duplicateSortOrder",
+            "Compound sections cannot contain duplicated sort orders",
+          );
+        }
+
+        for (const slot of compoundSlots) {
+          if (
+            !slot.label ||
+            !Number.isInteger(slot.quantity) ||
+            slot.quantity <= 0 ||
+            !Number.isInteger(slot.sortOrder) ||
+            slot.sortOrder < 0
+          ) {
+            throw badRequest(
+              "productCompoundSlot.invalid",
+              "Each compound section requires a label and a positive integer quantity",
+            );
+          }
+
+          if (slot.options.length === 0) {
+            throw badRequest(
+              "productCompoundSlot.optionsRequired",
+              "Each compound section requires at least one product option",
+            );
+          }
+
+          if (
+            new Set(slot.options.map((option) => option.sortOrder)).size !== slot.options.length
+          ) {
+            throw badRequest(
+              "productCompoundSlotOption.duplicateSortOrder",
+              "Compound section options cannot contain duplicated sort orders",
+            );
+          }
+
+          if (
+            new Set(slot.options.map((option) => option.productId)).size !== slot.options.length
+          ) {
+            throw badRequest(
+              "productCompoundSlotOption.duplicateProduct",
+              "A product cannot be repeated within the same compound section",
+            );
+          }
+
+          if (
+            slot.options.some(
+              (option) =>
+                !Number.isInteger(option.sortOrder) || option.sortOrder < 0 || option.label === "",
+            )
+          ) {
+            throw badRequest(
+              "productCompoundSlotOption.invalid",
+              "Compound options require a non-negative integer order and a valid optional label",
+            );
+          }
+        }
+
+        const componentProductIds = [
+          ...new Set(
+            compoundSlots.flatMap((slot) => slot.options.map((option) => option.productId)),
+          ),
+        ];
+
+        if (componentProductIds.includes(id)) {
+          throw badRequest(
+            "productCompoundSlotOption.selfReference",
+            "A compound product cannot include itself",
+          );
+        }
+
+        const componentProducts = await fastify.db.query.productsDB.findMany({
+          where(table, { and: andOperator, inArray: inArrayOperator, isNull: isNullOperator }) {
+            return andOperator(
+              inArrayOperator(table.id, componentProductIds),
+              isNullOperator(table.deletedAt),
+            );
+          },
+          columns: {
+            id: true,
+            productType: true,
+          },
+        });
+
+        if (componentProducts.length !== componentProductIds.length) {
+          throw notFound(
+            "productCompoundSlotOption.productNotFound",
+            "One or more component products were not found",
+          );
+        }
+
+        if (componentProducts.some((product) => product.productType === "compound")) {
+          throw badRequest(
+            "productCompoundSlotOption.nestedCompoundNotAllowed",
+            "Compound products cannot include compound products as options",
+          );
+        }
+      }
 
       if (input.unitId) {
         await fastify.admin.units.get(input.unitId);
@@ -1210,9 +1588,7 @@ export function adminProductsService(fastify: FastifyInstance): AdminProductsSer
           }
 
           if (categoryIds !== undefined) {
-            await tx
-              .delete(productCategoryLinksDB)
-              .where(eq(productCategoryLinksDB.productId, id));
+            await tx.delete(productCategoryLinksDB).where(eq(productCategoryLinksDB.productId, id));
 
             if (categoryIds.length > 0) {
               await tx.insert(productCategoryLinksDB).values(
@@ -1236,6 +1612,39 @@ export function adminProductsService(fastify: FastifyInstance): AdminProductsSer
               );
             }
           }
+
+          if (compoundSlots !== undefined) {
+            await tx
+              .delete(productCompoundSlotsDB)
+              .where(eq(productCompoundSlotsDB.compoundProductId, id));
+            await tx
+              .delete(productCompoundComponentsDB)
+              .where(eq(productCompoundComponentsDB.compoundProductId, id));
+
+            const slotRecords = compoundSlots.map((slot) => ({
+              id: generateNanoId(),
+              compoundProductId: id,
+              label: slot.label,
+              quantity: slot.quantity,
+              sortOrder: slot.sortOrder,
+              options: slot.options,
+            }));
+
+            await tx
+              .insert(productCompoundSlotsDB)
+              .values(slotRecords.map(({ options: _options, ...slot }) => slot));
+            await tx.insert(productCompoundSlotOptionsDB).values(
+              slotRecords.flatMap((slot) =>
+                slot.options.map((option) => ({
+                  id: generateNanoId(),
+                  slotId: slot.id,
+                  componentProductId: option.productId,
+                  label: option.label,
+                  sortOrder: option.sortOrder,
+                })),
+              ),
+            );
+          }
         });
       } catch (error) {
         const pgError = getPgError(error);
@@ -1247,7 +1656,7 @@ export function adminProductsService(fastify: FastifyInstance): AdminProductsSer
         throw error;
       }
 
-      return fastify.admin.products.getGeneral(id);
+      return fastify.admin.products.getGeneral(id, organizationId);
     },
 
     async createVariation(productId, input) {

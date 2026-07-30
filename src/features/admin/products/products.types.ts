@@ -28,10 +28,18 @@ import type { ListQuery } from "./list/list.schemas";
 
 export interface AdminProductsService {
   get(id: string, config?: GetServiceConfig): Promise<ProductResponse | null>;
-  getGeneral(id: string): Promise<ProductGeneralResponse>;
+  getGeneral(id: string, organizationId: string): Promise<ProductGeneralResponse>;
   list(input: ListQuery & { organizationId: string }): Promise<PaginatedResult<ProductListItem>>;
+  listCompoundOptions(
+    productId: string,
+    input: ListCompoundOptionsParams,
+  ): Promise<PaginatedResult<ProductCompoundOption>>;
   create(input: CreateProductServiceParams): Promise<ProductResponse>;
-  updateGeneral(id: string, input: UpdateProductGeneralParams): Promise<ProductGeneralResponse>;
+  updateGeneral(
+    id: string,
+    organizationId: string,
+    input: UpdateProductGeneralParams,
+  ): Promise<ProductGeneralResponse>;
   assignOrganization(productId: string, organizationId: string): Promise<ProductResponse>;
   unassignOrganization(productId: string, organizationId: string): Promise<ProductResponse>;
   updateOrganizationStatus(
@@ -91,6 +99,36 @@ export interface ProductGeneralResponse {
   unit: Pick<Unit, "id" | "name" | "abbreviation" | "precision">;
   categories: ProductListCategory[];
   taxes: Array<Pick<Tax, "id" | "name" | "rate">>;
+  compoundSlots: ProductCompoundSlotResponse[];
+}
+
+export interface ProductCompoundOption {
+  id: string;
+  name: string;
+  kitchenName: string | null;
+  productType: Exclude<ProductType, "compound">;
+  image: ProductImageResponse | null;
+  organizationStatus: ProductOrganizationStatus;
+}
+
+export interface ProductCompoundSlotOptionResponse {
+  label: string | null;
+  sortOrder: number;
+  product: ProductCompoundOption;
+}
+
+export interface ProductCompoundSlotResponse {
+  label: string;
+  quantity: number;
+  sortOrder: number;
+  options: ProductCompoundSlotOptionResponse[];
+}
+
+export interface ListCompoundOptionsParams {
+  organizationId: string;
+  page: number;
+  pageSize: number;
+  search?: string | null;
 }
 
 export interface ProductCategoryResponse extends Omit<ProductCategory, "imageUploadId"> {
@@ -164,6 +202,20 @@ export interface UpdateProductGeneralParams {
   isFeatured?: boolean;
   categoryIds?: string[];
   taxIds?: string[];
+  compoundSlots?: UpdateProductCompoundSlotParams[];
+}
+
+export interface UpdateProductCompoundSlotOptionParams {
+  productId: string;
+  label: string | null;
+  sortOrder: number;
+}
+
+export interface UpdateProductCompoundSlotParams {
+  label: string;
+  quantity: number;
+  sortOrder: number;
+  options: UpdateProductCompoundSlotOptionParams[];
 }
 
 export interface CreateProductCompoundComponentParams {

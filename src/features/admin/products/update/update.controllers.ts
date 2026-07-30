@@ -7,6 +7,7 @@ export async function updateProduct(
 ) {
   const product = await request.server.admin.products.updateGeneral(
     request.params.productId,
+    request.auth.member.organizationId,
     request.body,
   );
   return reply.status(200).send(product);

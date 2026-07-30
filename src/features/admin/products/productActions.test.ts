@@ -1,5 +1,6 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { describe, expect, it, vi } from "vitest";
+import { listCompoundOptions } from "./compoundOptions/compoundOptions.controllers";
 import { getProduct } from "./get/get.controllers";
 import { updateCategories } from "./updateCategories/updateCategories.controllers";
 import { bodySchema as categoriesBodySchema } from "./updateCategories/updateCategories.schemas";
@@ -74,18 +75,46 @@ describe("admin product actions", () => {
     expect(() => updateBodySchema.parse({ organizationId: "org-other" })).toThrow();
   });
 
+  it("valida secciones y opciones de productos compuestos", () => {
+    const firstProductId = "V1StGXR8_Z5jdHi6B-myT";
+    const secondProductId = "Uakgb_J5m9g-0JDMbcJqL";
+    const compoundSlots = [
+      {
+        label: "Bebida",
+        quantity: 1,
+        sortOrder: 0,
+        options: [{ productId: firstProductId, label: null, sortOrder: 0 }],
+      },
+      {
+        label: "Pan",
+        quantity: 1,
+        sortOrder: 1,
+        options: [{ productId: secondProductId, label: "Croissant", sortOrder: 0 }],
+      },
+    ];
+
+    expect(updateBodySchema.parse({ compoundSlots })).toEqual({ compoundSlots });
+    expect(() => updateBodySchema.parse({ compoundSlots: compoundSlots.slice(0, 1) })).toThrow();
+    expect(() =>
+      updateBodySchema.parse({
+        compoundSlots: [{ ...compoundSlots[0], options: [] }, compoundSlots[1]],
+      }),
+    ).toThrow();
+  });
+
   it("consulta el detalle general del producto", async () => {
     const detail = { id: "product-id", name: "Americano" };
     const getGeneral = vi.fn().mockResolvedValue(detail);
     const request = {
       params: { productId: "product-id" },
+      auth: { member: { organizationId: "org-active" } },
       server: { admin: { products: { getGeneral } } },
     } as unknown as FastifyRequest<{ Params: { productId: string } }>;
     const { reply, send } = createReply();
 
     await getProduct(request, reply);
 
-    expect(getGeneral).toHaveBeenCalledWith("product-id");
+    expect(getGeneral).toHaveBeenCalledWith("product-id", "org-active");
     expect(send).toHaveBeenCalledWith(detail);
   });
 
@@ -100,6 +129,7 @@ describe("admin product actions", () => {
     const request = {
       params: { productId: "product-id" },
       body,
+      auth: { member: { organizationId: "org-active" } },
       server: { admin: { products: { updateGeneral } } },
     } as unknown as FastifyRequest<{
       Params: { productId: string };
@@ -109,8 +139,36 @@ describe("admin product actions", () => {
 
     await updateProduct(request, reply);
 
-    expect(updateGeneral).toHaveBeenCalledWith("product-id", body);
+    expect(updateGeneral).toHaveBeenCalledWith("product-id", "org-active", body);
     expect(send).toHaveBeenCalledWith(detail);
+  });
+
+  it("lista candidatos compound usando la sucursal de la sesión", async () => {
+    const response = {
+      data: [],
+      pagination: { page: 1, pageSize: 30, totalItems: 0, totalPages: 0 },
+    };
+    const list = vi.fn().mockResolvedValue(response);
+    const request = {
+      params: { productId: "product-id" },
+      query: { page: 1, pageSize: 30, search: "latte" },
+      auth: { member: { organizationId: "org-active" } },
+      server: { admin: { products: { listCompoundOptions: list } } },
+    } as unknown as FastifyRequest<{
+      Params: { productId: string };
+      Querystring: { page: number; pageSize: number; search?: string };
+    }>;
+    const { reply, send } = createReply();
+
+    await listCompoundOptions(request, reply);
+
+    expect(list).toHaveBeenCalledWith("product-id", {
+      page: 1,
+      pageSize: 30,
+      search: "latte",
+      organizationId: "org-active",
+    });
+    expect(send).toHaveBeenCalledWith(response);
   });
 
   it("inactiva usando exclusivamente la organización de la sesión", async () => {

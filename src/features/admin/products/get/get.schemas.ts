@@ -14,6 +14,28 @@ const imageSchema = z.object({
   mimeType: z.string(),
 });
 
+export const compoundOptionSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  kitchenName: z.string().nullable(),
+  productType: z.enum(["simple", "assembled"]),
+  image: imageSchema.nullable(),
+  organizationStatus: z.enum(["active", "inactive", "unassigned"]),
+});
+
+export const compoundSlotSchema = z.object({
+  label: z.string(),
+  quantity: z.number().int().positive(),
+  sortOrder: z.number().int().nonnegative(),
+  options: z.array(
+    z.object({
+      label: z.string().nullable(),
+      sortOrder: z.number().int().nonnegative(),
+      product: compoundOptionSchema,
+    }),
+  ),
+});
+
 export const responseSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -44,6 +66,7 @@ export const responseSchema = z.object({
       rate: z.number().int().nonnegative(),
     }),
   ),
+  compoundSlots: z.array(compoundSlotSchema),
 });
 
 export type Params = z.infer<typeof paramsSchema>;

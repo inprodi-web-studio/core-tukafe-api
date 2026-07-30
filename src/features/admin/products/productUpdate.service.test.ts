@@ -1,6 +1,9 @@
 import {
   productCategoriesDB,
   productCategoryLinksDB,
+  productCompoundComponentsDB,
+  productCompoundSlotOptionsDB,
+  productCompoundSlotsDB,
   productsDB,
   productTaxDB,
   taxDB,
@@ -43,20 +46,24 @@ describe("admin product general update service", () => {
     };
     const db = {
       query: {
-        productsDB: { findFirst: vi.fn().mockResolvedValue({ id: "product-id" }) },
+        productsDB: {
+          findFirst: vi.fn().mockResolvedValue({ id: "product-id", productType: "assembled" }),
+        },
         uploadsDB: {
           findFirst: vi.fn().mockResolvedValue({ id: "image-id", mimeType: "image/webp" }),
         },
       },
       select: vi.fn(() => ({
         from: vi.fn((table: unknown) => ({
-          where: vi.fn().mockResolvedValue(
-            table === productCategoriesDB
-              ? [{ id: "category-one" }, { id: "category-two" }]
-              : table === taxDB
-                ? [{ id: "tax-one" }]
-                : [],
-          ),
+          where: vi
+            .fn()
+            .mockResolvedValue(
+              table === productCategoriesDB
+                ? [{ id: "category-one" }, { id: "category-two" }]
+                : table === taxDB
+                  ? [{ id: "tax-one" }]
+                  : [],
+            ),
         })),
       })),
       transaction: vi.fn(async (callback: (transaction: typeof tx) => unknown) => callback(tx)),
@@ -69,7 +76,7 @@ describe("admin product general update service", () => {
       },
     } as unknown as FastifyInstance;
 
-    const result = await adminProductsService(fastify).updateGeneral("product-id", {
+    const result = await adminProductsService(fastify).updateGeneral("product-id", "org-active", {
       name: "  Latte   especial ",
       kitchenName: "  Latte   grande ",
       customerDescription: " ",
@@ -101,10 +108,8 @@ describe("admin product general update service", () => {
       { productId: "product-id", categoryId: "category-one" },
       { productId: "product-id", categoryId: "category-two" },
     ]);
-    expect(inserted.get(productTaxDB)).toEqual([
-      { productId: "product-id", taxId: "tax-one" },
-    ]);
-    expect(getGeneral).toHaveBeenCalledWith("product-id");
+    expect(inserted.get(productTaxDB)).toEqual([{ productId: "product-id", taxId: "tax-one" }]);
+    expect(getGeneral).toHaveBeenCalledWith("product-id", "org-active");
     expect(result).toEqual({ id: "product-id", name: "Latte especial" });
   });
 
@@ -132,7 +137,9 @@ describe("admin product general update service", () => {
     const fastify = {
       db: {
         query: {
-          productsDB: { findFirst: vi.fn().mockResolvedValue({ id: "product-id" }) },
+          productsDB: {
+            findFirst: vi.fn().mockResolvedValue({ id: "product-id", productType: "assembled" }),
+          },
           uploadsDB: { findFirst: vi.fn() },
         },
         select: vi.fn(),
@@ -144,7 +151,7 @@ describe("admin product general update service", () => {
       },
     } as unknown as FastifyInstance;
 
-    await adminProductsService(fastify).updateGeneral("product-id", {
+    await adminProductsService(fastify).updateGeneral("product-id", "org-active", {
       imageUploadId: null,
       categoryIds: [],
       taxIds: [],
@@ -158,5 +165,144 @@ describe("admin product general update service", () => {
     );
     expect(deleted).toEqual([productCategoryLinksDB, productTaxDB]);
     expect(tx.insert).not.toHaveBeenCalled();
+  });
+
+  it("reemplaza secciones y opciones compound en la misma transacción", async () => {
+    const inserted = new Map<unknown, unknown>();
+    const deleted: unknown[] = [];
+    const getGeneral = vi.fn().mockResolvedValue({
+      id: "compound-id",
+      productType: "compound",
+    });
+    const tx = {
+      update: vi.fn(() => ({
+        set: vi.fn(() => ({
+          where: vi.fn(() => ({
+            returning: vi.fn().mockResolvedValue([{ id: "compound-id" }]),
+          })),
+        })),
+      })),
+      delete: vi.fn((table: unknown) => ({
+        where: vi.fn(async () => {
+          deleted.push(table);
+        }),
+      })),
+      insert: vi.fn((table: unknown) => ({
+        values: vi.fn(async (values: unknown) => {
+          inserted.set(table, values);
+        }),
+      })),
+    };
+    const db = {
+      query: {
+        productsDB: {
+          findFirst: vi.fn().mockResolvedValue({ id: "compound-id", productType: "compound" }),
+          findMany: vi.fn().mockResolvedValue([
+            { id: "drink-id", productType: "assembled" },
+            { id: "bread-id", productType: "simple" },
+          ]),
+        },
+        uploadsDB: { findFirst: vi.fn() },
+      },
+      select: vi.fn(),
+      transaction: vi.fn(async (callback: (transaction: typeof tx) => unknown) => callback(tx)),
+    };
+    const fastify = {
+      db,
+      admin: {
+        units: { get: vi.fn() },
+        products: { getGeneral },
+      },
+    } as unknown as FastifyInstance;
+
+    await adminProductsService(fastify).updateGeneral("compound-id", "org-active", {
+      compoundSlots: [
+        {
+          label: "  Bebida ",
+          quantity: 1,
+          sortOrder: 0,
+          options: [{ productId: "drink-id", label: null, sortOrder: 0 }],
+        },
+        {
+          label: "Pan",
+          quantity: 2,
+          sortOrder: 1,
+          options: [{ productId: "bread-id", label: " Croissant ", sortOrder: 0 }],
+        },
+      ],
+    });
+
+    expect(deleted).toEqual([productCompoundSlotsDB, productCompoundComponentsDB]);
+    expect(inserted.get(productCompoundSlotsDB)).toEqual([
+      expect.objectContaining({
+        compoundProductId: "compound-id",
+        label: "Bebida",
+        quantity: 1,
+        sortOrder: 0,
+      }),
+      expect.objectContaining({
+        compoundProductId: "compound-id",
+        label: "Pan",
+        quantity: 2,
+        sortOrder: 1,
+      }),
+    ]);
+    expect(inserted.get(productCompoundSlotOptionsDB)).toEqual([
+      expect.objectContaining({
+        componentProductId: "drink-id",
+        label: null,
+        sortOrder: 0,
+      }),
+      expect.objectContaining({
+        componentProductId: "bread-id",
+        label: "Croissant",
+        sortOrder: 0,
+      }),
+    ]);
+    expect(getGeneral).toHaveBeenCalledWith("compound-id", "org-active");
+  });
+
+  it("rechaza compuestos anidados antes de abrir la transacción", async () => {
+    const transaction = vi.fn();
+    const fastify = {
+      db: {
+        query: {
+          productsDB: {
+            findFirst: vi.fn().mockResolvedValue({ id: "compound-id", productType: "compound" }),
+            findMany: vi.fn().mockResolvedValue([
+              { id: "nested-id", productType: "compound" },
+              { id: "bread-id", productType: "simple" },
+            ]),
+          },
+          uploadsDB: { findFirst: vi.fn() },
+        },
+        select: vi.fn(),
+        transaction,
+      },
+      admin: {
+        units: { get: vi.fn() },
+        products: { getGeneral: vi.fn() },
+      },
+    } as unknown as FastifyInstance;
+
+    await expect(
+      adminProductsService(fastify).updateGeneral("compound-id", "org-active", {
+        compoundSlots: [
+          {
+            label: "Bebida",
+            quantity: 1,
+            sortOrder: 0,
+            options: [{ productId: "nested-id", label: null, sortOrder: 0 }],
+          },
+          {
+            label: "Pan",
+            quantity: 1,
+            sortOrder: 1,
+            options: [{ productId: "bread-id", label: null, sortOrder: 0 }],
+          },
+        ],
+      }),
+    ).rejects.toMatchObject({ code: "productCompoundSlotOption.nestedCompoundNotAllowed" });
+    expect(transaction).not.toHaveBeenCalled();
   });
 });

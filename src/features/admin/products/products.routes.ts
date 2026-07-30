@@ -1,4 +1,5 @@
 import type { FastifyInstance } from "fastify";
+import { compoundOptionsRoutes } from "./compoundOptions";
 import { assignOrganizationRoutes } from "./assignOrganization";
 import { createRoutes } from "./create";
 import { createModifierRoutes } from "./createModifier";
@@ -14,6 +15,7 @@ import { updateCategoriesRoutes } from "./updateCategories";
 
 export async function adminProductsRoutes(server: FastifyInstance) {
   await server.register(listRoutes);
+  await server.register(compoundOptionsRoutes);
   await server.register(getRoutes);
   await server.register(createRoutes);
   await server.register(updateRoutes);
