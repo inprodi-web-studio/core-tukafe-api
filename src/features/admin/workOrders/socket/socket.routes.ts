@@ -77,8 +77,8 @@ export async function socketRoutes(server: FastifyInstance) {
           socket,
         });
 
-        socket.on("close", cleanup);
-        socket.on("error", cleanup);
+        socket.once("close", cleanup);
+        socket.once("error", cleanup);
         socket.send(
           JSON.stringify({
             type: "connected",

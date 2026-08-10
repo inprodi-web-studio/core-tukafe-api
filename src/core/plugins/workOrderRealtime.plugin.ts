@@ -19,6 +19,15 @@ interface RegisterWorkOrderRealtimeConnectionInput {
   socket: WebSocket;
 }
 
+interface NotificationListenerConnection {
+  client: pg.PoolClient;
+  onError: (error: Error) => void;
+  onEnd: () => void;
+}
+
+const SOCKET_HEARTBEAT_INTERVAL_MS = 25_000;
+const LISTENER_RECONNECT_MAX_DELAY_MS = 30_000;
+
 export interface WorkOrderRealtimeRegistry {
   registerConnection(input: RegisterWorkOrderRealtimeConnectionInput): () => void;
 }
@@ -59,6 +68,8 @@ const workOrderRealtimePlugin: FastifyPluginAsync = async (fastify) => {
   await fastify.register(fastifyWebsocket);
 
   const socketsByOrganization = new Map<string, Set<WebSocket>>();
+  const socketLiveness = new WeakMap<WebSocket, boolean>();
+  const socketCleanup = new WeakMap<WebSocket, () => void>();
 
   const sendToOrganization = async (event: WorkOrderEventPayload) => {
     const sockets = socketsByOrganization.get(event.organizationId);
@@ -85,12 +96,32 @@ const workOrderRealtimePlugin: FastifyPluginAsync = async (fastify) => {
     });
     let sentCount = 0;
 
-    for (const socket of sockets) {
+    for (const socket of [...sockets]) {
       if (socket.readyState === 1) {
-        socket.send(message);
-        sentCount += 1;
+        try {
+          socket.send(message, (error?: Error) => {
+            if (!error) {
+              return;
+            }
+
+            fastify.log.warn(
+              { err: error, organizationId: event.organizationId },
+              "Failed to send work order realtime event",
+            );
+            socketCleanup.get(socket)?.();
+            socket.terminate();
+          });
+          sentCount += 1;
+        } catch (error) {
+          fastify.log.warn(
+            { err: error, organizationId: event.organizationId },
+            "Failed to send work order realtime event",
+          );
+          socketCleanup.get(socket)?.();
+          socket.terminate();
+        }
       } else {
-        sockets.delete(socket);
+        socketCleanup.get(socket)?.();
       }
     }
 
@@ -104,16 +135,28 @@ const workOrderRealtimePlugin: FastifyPluginAsync = async (fastify) => {
   fastify.decorate("workOrderRealtime", {
     registerConnection({ organizationId, socket }) {
       const sockets = socketsByOrganization.get(organizationId) ?? new Set<WebSocket>();
+      let cleanedUp = false;
+      const markAlive = () => socketLiveness.set(socket, true);
 
       sockets.add(socket);
       socketsByOrganization.set(organizationId, sockets);
+      socketLiveness.set(socket, true);
+      socket.on("pong", markAlive);
 
       fastify.log.info(
         { organizationId, socketCount: sockets.size },
         "Work order realtime socket connected",
       );
 
-      return () => {
+      const cleanup = () => {
+        if (cleanedUp) {
+          return;
+        }
+
+        cleanedUp = true;
+        socket.off("pong", markAlive);
+        socketLiveness.delete(socket);
+        socketCleanup.delete(socket);
         sockets.delete(socket);
 
         if (sockets.size === 0) {
@@ -125,10 +168,51 @@ const workOrderRealtimePlugin: FastifyPluginAsync = async (fastify) => {
           "Work order realtime socket disconnected",
         );
       };
+
+      socketCleanup.set(socket, cleanup);
+      return cleanup;
     },
   });
 
-  const client = await fastify.pg.connect();
+  const heartbeatTimer = setInterval(() => {
+    for (const [organizationId, sockets] of socketsByOrganization) {
+      for (const socket of [...sockets]) {
+        if (socket.readyState !== 1) {
+          socketCleanup.get(socket)?.();
+          continue;
+        }
+
+        if (socketLiveness.get(socket) === false) {
+          fastify.log.warn(
+            { organizationId },
+            "Work order realtime socket terminated after heartbeat timeout",
+          );
+          socketCleanup.get(socket)?.();
+          socket.terminate();
+          continue;
+        }
+
+        socketLiveness.set(socket, false);
+
+        try {
+          socket.ping();
+        } catch (error) {
+          fastify.log.warn(
+            { err: error, organizationId },
+            "Failed to ping work order realtime socket",
+          );
+          socketCleanup.get(socket)?.();
+          socket.terminate();
+        }
+      }
+    }
+  }, SOCKET_HEARTBEAT_INTERVAL_MS);
+
+  let notificationConnection: NotificationListenerConnection | null = null;
+  let listenerReconnectTimer: NodeJS.Timeout | null = null;
+  let listenerReconnectAttempt = 0;
+  let listenerConnecting = false;
+  let isClosing = false;
 
   const notificationHandler = (notification: pg.Notification) => {
     if (notification.channel !== "work_order_events") {
@@ -149,20 +233,136 @@ const workOrderRealtimePlugin: FastifyPluginAsync = async (fastify) => {
     });
   };
 
-  client.on("notification", notificationHandler);
-  await client.query("LISTEN work_order_events");
+  const detachNotificationConnection = (connection: NotificationListenerConnection) => {
+    connection.client.off("notification", notificationHandler);
+    connection.client.off("error", connection.onError);
+    connection.client.off("end", connection.onEnd);
+  };
+
+  const scheduleListenerReconnect = () => {
+    if (isClosing || listenerReconnectTimer) {
+      return;
+    }
+
+    const delayMs = Math.min(
+      LISTENER_RECONNECT_MAX_DELAY_MS,
+      1_000 * 2 ** listenerReconnectAttempt,
+    );
+    listenerReconnectAttempt = Math.min(5, listenerReconnectAttempt + 1);
+
+    fastify.log.warn(
+      { delayMs, attempt: listenerReconnectAttempt },
+      "Work order realtime listener reconnect scheduled",
+    );
+
+    listenerReconnectTimer = setTimeout(() => {
+      listenerReconnectTimer = null;
+      void connectNotificationListener();
+    }, delayMs);
+  };
+
+  const handleNotificationConnectionFailure = (
+    connection: NotificationListenerConnection,
+    error: Error,
+  ) => {
+    if (notificationConnection !== connection) {
+      return;
+    }
+
+    notificationConnection = null;
+    detachNotificationConnection(connection);
+    connection.client.release(error);
+
+    fastify.log.error({ err: error }, "Work order realtime listener disconnected");
+    scheduleListenerReconnect();
+  };
+
+  async function connectNotificationListener() {
+    if (isClosing || listenerConnecting || notificationConnection) {
+      return;
+    }
+
+    listenerConnecting = true;
+    let connection: NotificationListenerConnection | null = null;
+
+    try {
+      const client = await fastify.pg.connect();
+
+      if (isClosing) {
+        client.release(true);
+        return;
+      }
+
+      connection = {
+        client,
+        onError: (error) => handleNotificationConnectionFailure(connection!, error),
+        onEnd: () =>
+          handleNotificationConnectionFailure(
+            connection!,
+            new Error("PostgreSQL notification connection ended"),
+          ),
+      };
+      notificationConnection = connection;
+
+      client.on("notification", notificationHandler);
+      client.once("error", connection.onError);
+      client.once("end", connection.onEnd);
+      await client.query("LISTEN work_order_events");
+
+      listenerReconnectAttempt = 0;
+      fastify.log.info("Work order realtime listener connected");
+    } catch (error) {
+      const normalizedError =
+        error instanceof Error ? error : new Error("Failed to connect PostgreSQL listener");
+
+      if (connection && notificationConnection === connection) {
+        handleNotificationConnectionFailure(connection, normalizedError);
+      } else {
+        fastify.log.error(
+          { err: normalizedError },
+          "Work order realtime listener failed to connect",
+        );
+        scheduleListenerReconnect();
+      }
+    } finally {
+      listenerConnecting = false;
+    }
+  }
+
+  await connectNotificationListener();
 
   fastify.addHook("onClose", async () => {
+    isClosing = true;
+    clearInterval(heartbeatTimer);
+
+    if (listenerReconnectTimer) {
+      clearTimeout(listenerReconnectTimer);
+      listenerReconnectTimer = null;
+    }
+
     for (const sockets of socketsByOrganization.values()) {
-      for (const socket of sockets) {
+      for (const socket of [...sockets]) {
+        socketCleanup.get(socket)?.();
         socket.close(1001, "Server shutting down");
       }
     }
 
     socketsByOrganization.clear();
-    client.off("notification", notificationHandler);
-    await client.query("UNLISTEN work_order_events");
-    client.release();
+
+    const connection = notificationConnection;
+    notificationConnection = null;
+
+    if (connection) {
+      detachNotificationConnection(connection);
+
+      try {
+        await connection.client.query("UNLISTEN work_order_events");
+        connection.client.release();
+      } catch (error) {
+        fastify.log.warn({ err: error }, "Failed to close work order realtime listener cleanly");
+        connection.client.release(true);
+      }
+    }
   });
 
   fastify.log.info("Work order realtime initialized");
