@@ -160,7 +160,7 @@ const productCategoryResponseSchema = z.object({
   parentId: z.string().nullish(),
 });
 
-const productModifierResponseSchema = modifierResponseSchema.extend({
+export const productModifierResponseSchema = modifierResponseSchema.extend({
   optionScope: z.enum(["all", "subset"]),
   allowedOptionIds: z.array(z.string()).nullable(),
   visibleWhen: z.array(

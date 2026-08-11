@@ -26,6 +26,10 @@ function resolveAllowedRecipeDecimalPlaces(unitPrecision: number): number {
   return Math.max(0, Math.min(unitPrecision, MAX_SUPPORTED_DECIMAL_PLACES));
 }
 
+export function calculateVariationMatrixSize(groups: ProductVariationGroupResponse[]): number {
+  return groups.reduce((total, group) => total * group.options.length, groups.length > 0 ? 1 : 0);
+}
+
 function validateRecipeQuantity(
   quantity: number,
   unitPrecision: number,

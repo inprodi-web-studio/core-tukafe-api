@@ -12,11 +12,13 @@ import { updateModifierOptionsRoutes } from "./updateModifierOptions";
 import { updateOrganizationStatusRoutes } from "./updateOrganizationStatus";
 import { updateFeaturedRoutes } from "./updateFeatured";
 import { updateCategoriesRoutes } from "./updateCategories";
+import { productConfigurationRoutes } from "./configuration";
 
 export async function adminProductsRoutes(server: FastifyInstance) {
   await server.register(listRoutes);
   await server.register(compoundOptionsRoutes);
   await server.register(getRoutes);
+  await server.register(productConfigurationRoutes);
   await server.register(createRoutes);
   await server.register(updateRoutes);
   await server.register(assignOrganizationRoutes);

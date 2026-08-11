@@ -16,6 +16,7 @@ export const bodySchema = z
     unitId: z.nanoid().optional(),
     imageUploadId: z.nanoid().nullable().optional(),
     isFeatured: z.boolean().optional(),
+    price: z.number().nonnegative().optional(),
     categoryIds: z.array(z.nanoid()).max(100).optional(),
     taxIds: z.array(z.nanoid()).max(100).optional(),
     compoundSlots: z

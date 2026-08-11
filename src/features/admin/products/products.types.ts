@@ -29,6 +29,7 @@ import type { ListQuery } from "./list/list.schemas";
 export interface AdminProductsService {
   get(id: string, config?: GetServiceConfig): Promise<ProductResponse | null>;
   getGeneral(id: string, organizationId: string): Promise<ProductGeneralResponse>;
+  getConfiguration(id: string): Promise<ProductConfigurationResponse>;
   list(input: ListQuery & { organizationId: string }): Promise<PaginatedResult<ProductListItem>>;
   listCompoundOptions(
     productId: string,
@@ -62,6 +63,18 @@ export interface AdminProductsService {
     modifierId: string,
     input: UpdateProductModifierOptionsParams,
   ): Promise<ProductResponse>;
+  replaceVariationConfiguration(
+    productId: string,
+    input: ReplaceProductVariationConfigurationParams,
+  ): Promise<ProductConfigurationResponse>;
+  replaceModifiers(
+    productId: string,
+    input: ReplaceProductModifiersParams,
+  ): Promise<ProductConfigurationResponse>;
+  replaceRecipe(
+    productId: string,
+    input: CreateProductRecipeParams,
+  ): Promise<ProductConfigurationResponse>;
 }
 
 export type ProductOrganizationStatus = "active" | "inactive" | "unassigned";
@@ -94,6 +107,7 @@ export interface ProductGeneralResponse {
   kitchenDescription: string | null;
   isFeatured: boolean;
   productType: ProductType;
+  priceCents: number | null;
   updatedAt: Date;
   image: ProductImageResponse | null;
   unit: Pick<Unit, "id" | "name" | "abbreviation" | "precision">;
@@ -200,9 +214,31 @@ export interface UpdateProductGeneralParams {
   unitId?: string;
   imageUploadId?: string | null;
   isFeatured?: boolean;
+  price?: number;
   categoryIds?: string[];
   taxIds?: string[];
   compoundSlots?: UpdateProductCompoundSlotParams[];
+}
+
+export interface ProductConfigurationResponse {
+  id: string;
+  productType: ProductType;
+  priceCents: number | null;
+  recipe: RecipeDetailsResponse | null;
+  variationGroups: ProductVariationGroupResponse[];
+  variations: ProductVariationResponse[];
+  modifiers: ProductModifierResponse[];
+}
+
+export interface ReplaceProductVariationConfigurationParams {
+  variationGroupIds: string[];
+  variations: CreateProductVariationParams[];
+  basePrice?: number;
+  baseRecipe?: CreateProductRecipeParams;
+}
+
+export interface ReplaceProductModifiersParams {
+  modifiers: CreateProductModifierParams[];
 }
 
 export interface UpdateProductCompoundSlotOptionParams {

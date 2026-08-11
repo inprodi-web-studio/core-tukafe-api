@@ -44,6 +44,7 @@ export const responseSchema = z.object({
   kitchenDescription: z.string().nullable(),
   isFeatured: z.boolean(),
   productType: z.enum(["simple", "assembled", "compound"]),
+  priceCents: z.number().int().nonnegative().nullable(),
   updatedAt: z.date(),
   image: imageSchema.nullable(),
   unit: z.object({

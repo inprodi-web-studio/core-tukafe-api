@@ -71,7 +71,8 @@ describe("admin product actions", () => {
 
     expect(() => updateBodySchema.parse({})).toThrow();
     expect(() => updateBodySchema.parse({ productType: "compound" })).toThrow();
-    expect(() => updateBodySchema.parse({ price: 90 })).toThrow();
+    expect(updateBodySchema.parse({ price: 90 })).toEqual({ price: 90 });
+    expect(() => updateBodySchema.parse({ price: -1 })).toThrow();
     expect(() => updateBodySchema.parse({ organizationId: "org-other" })).toThrow();
   });
 
