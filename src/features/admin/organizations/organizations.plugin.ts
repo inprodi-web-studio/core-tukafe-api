@@ -13,6 +13,11 @@ const adminOrganizationsServicesPlugin: FastifyPluginAsync = async (fastify) => 
   const organizationsService = adminOrganizationsService(fastify);
 
   fastify.admin.organizations = {
+    list: organizationsService.list,
+    create: organizationsService.create,
+    update: organizationsService.update,
+    deactivate: organizationsService.deactivate,
+    restore: organizationsService.restore,
     updateLocation: organizationsService.updateLocation,
   };
 };

@@ -81,6 +81,9 @@ async function createRouteServer({
           role,
         }),
       },
+      organizationDB: {
+        findFirst: vi.fn().mockResolvedValue({ id: "org-active" }),
+      },
     },
   } as unknown as typeof server.db);
   await server.register(adminCustomersRoutes, { prefix: "/customers" });

@@ -478,6 +478,9 @@ describe("admin dashboard authorization", () => {
               : null,
           ),
         },
+        organizationDB: {
+          findFirst: vi.fn().mockResolvedValue({ id: "org-1" }),
+        },
       },
     } as never);
     server.decorate("admin", { dashboard: { get } } as never);

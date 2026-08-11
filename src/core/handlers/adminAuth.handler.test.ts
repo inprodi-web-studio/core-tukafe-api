@@ -2,7 +2,7 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import { describe, expect, it, vi } from "vitest";
 import adminAuthHandler from "./adminAuth.handler";
 
-function createRequest(role: string | null, hasSession = true) {
+function createRequest(role: string | null, hasSession = true, organizationActive = true) {
   const member = role
     ? {
         id: `member-${role}`,
@@ -27,7 +27,14 @@ function createRequest(role: string | null, hasSession = true) {
     headers: {},
     server: {
       auth: { api: { getSession, hasPermission } },
-      db: { query: { memberDB: { findFirst } } },
+      db: {
+        query: {
+          memberDB: { findFirst },
+          organizationDB: {
+            findFirst: vi.fn().mockResolvedValue(organizationActive ? { id: "org-1" } : null),
+          },
+        },
+      },
     },
   } as unknown as FastifyRequest;
 
@@ -70,6 +77,16 @@ describe("adminAuthHandler role restrictions", () => {
 
     await expect(handler(request, reply)).rejects.toMatchObject({
       code: "auth.noSession",
+      statusCode: 401,
+    });
+  });
+
+  it("rechaza una sesión que conserva una sucursal inactiva", async () => {
+    const { request } = createRequest("owner", true, false);
+    const handler = adminAuthHandler({ roles: ["owner", "admin"] });
+
+    await expect(handler(request, reply)).rejects.toMatchObject({
+      code: "organization.inactive",
       statusCode: 401,
     });
   });

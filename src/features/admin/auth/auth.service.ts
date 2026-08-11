@@ -156,14 +156,18 @@ export function adminAuthService(fastify: FastifyInstance): AdminAuthService {
         let activeOrganizationId: string | null = null;
 
         if (normalizedOrganizationId) {
-          const member = await fastify.db.query.memberDB.findFirst({
-            where(memberDB, { and: andOperator, eq: eqOperator }) {
-              return andOperator(
-                eqOperator(memberDB.userId, response.user.id),
-                eqOperator(memberDB.organizationId, normalizedOrganizationId),
-              );
-            },
-          });
+          const [member] = await fastify.db
+            .select({ id: memberDB.id })
+            .from(memberDB)
+            .innerJoin(organizationDB, eq(memberDB.organizationId, organizationDB.id))
+            .where(
+              and(
+                eq(memberDB.userId, response.user.id),
+                eq(memberDB.organizationId, normalizedOrganizationId),
+                isNull(organizationDB.deletedAt),
+              ),
+            )
+            .limit(1);
 
           if (!member) {
             await revokeCurrentSession();

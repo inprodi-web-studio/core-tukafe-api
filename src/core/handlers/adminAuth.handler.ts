@@ -57,6 +57,20 @@ function adminAuthHandler({ permissions = {}, roles }: AdminAuthHandlerParams = 
         throw unauthorized("auth.noMember", "User is not a member of the organization");
       }
 
+      const activeOrganization = await request.server.db.query.organizationDB.findFirst({
+        where(table, { and, eq, isNull }) {
+          return and(eq(table.id, organizationId), isNull(table.deletedAt));
+        },
+        columns: { id: true },
+      });
+
+      if (!activeOrganization) {
+        throw unauthorized(
+          "organization.inactive",
+          "The active organization is no longer available",
+        );
+      }
+
       if (roles && !roles.includes(member.role as AdminOrganizationRole)) {
         throw forbidden(
           "auth.portalAccessDenied",

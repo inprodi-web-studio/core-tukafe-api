@@ -23,6 +23,7 @@ import {
   sendPasswordResetCodeSms,
 } from "@core/services/sms.service";
 import { resolveGeolocation } from "@core/utils";
+import { and, asc, eq, isNull } from "drizzle-orm";
 import { ORGANIZATION_AC, ORGANIZATION_ROLES } from "./permissions.config";
 
 export const auth = betterAuth({
@@ -122,11 +123,12 @@ export const auth = betterAuth({
     session: {
       create: {
         async before(session) {
-          const members = await db.query.memberDB.findMany({
-            where(member, { eq }) {
-              return eq(member.userId, session.userId);
-            },
-          });
+          const members = await db
+            .select({ organizationId: memberDB.organizationId })
+            .from(memberDB)
+            .innerJoin(organizationDB, eq(memberDB.organizationId, organizationDB.id))
+            .where(and(eq(memberDB.userId, session.userId), isNull(organizationDB.deletedAt)))
+            .orderBy(asc(organizationDB.name), asc(organizationDB.id));
 
           const { city, country } = await resolveGeolocation(session.ipAddress);
 

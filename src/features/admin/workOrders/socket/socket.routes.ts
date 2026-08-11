@@ -45,6 +45,17 @@ async function authenticateSocketRequest(request: FastifyRequest): Promise<Socke
     throw new Error("auth.noMember");
   }
 
+  const activeOrganization = await request.server.db.query.organizationDB.findFirst({
+    where(table, { and, eq, isNull }) {
+      return and(eq(table.id, organizationId), isNull(table.deletedAt));
+    },
+    columns: { id: true },
+  });
+
+  if (!activeOrganization) {
+    throw new Error("organization.inactive");
+  }
+
   const { success } = await request.server.auth.api.hasPermission({
     headers,
     body: {
