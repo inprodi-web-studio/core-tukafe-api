@@ -6,6 +6,7 @@ export type ProductCategoryImage = Pick<Upload, "id" | "name" | "path" | "visibi
 
 export interface ProductCategoryListItem {
   id: string;
+  parentId: string | null;
   name: string;
   icon: string;
   color: string;
@@ -26,20 +27,21 @@ export interface AdminProductCategoriesService {
     input?: ListProductCategoriesServiceParams,
   ): Promise<PaginatedResult<ProductCategoryListItem>>;
   create(input: CreateProductCategoryServiceParams): Promise<ProductCategoryResponse>;
-  update(
-    id: string,
-    input: UpdateProductCategoryServiceParams,
-  ): Promise<ProductCategoryResponse>;
+  update(id: string, input: UpdateProductCategoryServiceParams): Promise<ProductCategoryResponse>;
+  reorder(id: string, direction: ProductCategoryOrderDirection): Promise<void>;
+  remove(id: string): Promise<void>;
 }
+
+export type ProductCategoryOrderDirection = "up" | "down";
 
 export interface CreateProductCategoryServiceParams {
   name: string;
-  icon: string;
+  icon?: string;
   color: string;
   sortOrder?: number;
   isFourPlusOneEligible?: boolean;
   isCashbackEligible?: boolean;
-  imageUploadId?: string | null;
+  imageUploadId: string;
   parentId?: string | null;
 }
 
@@ -50,7 +52,7 @@ export interface UpdateProductCategoryServiceParams {
   sortOrder?: number;
   isFourPlusOneEligible?: boolean;
   isCashbackEligible?: boolean;
-  imageUploadId?: string | null;
+  imageUploadId?: string;
   parentId?: string | null;
 }
 

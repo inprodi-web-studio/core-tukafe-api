@@ -48,7 +48,7 @@ export const normalizeProductCategoryInput = ({
     collapseWhitespace: true,
   });
 
-  const normalizedIcon = normalizeString(icon, {
+  const normalizedIcon = normalizeString(icon ?? "CircleDashedIcon", {
     trim: true,
     collapseWhitespace: true,
   });
@@ -155,6 +155,7 @@ export function buildProductCategoryTree(
   for (const category of categories) {
     nodes.set(category.id, {
       id: category.id,
+      parentId: category.parentId,
       name: category.name,
       icon: category.icon,
       color: category.color,

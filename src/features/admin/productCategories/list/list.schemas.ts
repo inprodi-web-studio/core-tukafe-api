@@ -22,6 +22,7 @@ const imageSchema = z.object({
 const listItemSchema: z.ZodType<ProductCategoryListItem> = z.lazy(() =>
   z.object({
     id: z.string(),
+    parentId: z.string().nullable(),
     name: z.string(),
     icon: z.string(),
     color: z.string(),

@@ -4,12 +4,12 @@ import { z } from "zod";
 export const createBodySchema = z
   .object({
     name: z.string().nonempty(),
-    icon: z.string().nonempty(),
+    icon: z.string().nonempty().optional(),
     color: colorSchema,
     sortOrder: z.number().int().nonnegative().optional(),
     isFourPlusOneEligible: z.boolean().optional(),
     isCashbackEligible: z.boolean().optional(),
-    imageUploadId: z.string().nonempty().nullish(),
+    imageUploadId: z.string().nonempty(),
     parentId: z.string().nullish(),
   })
   .strict();

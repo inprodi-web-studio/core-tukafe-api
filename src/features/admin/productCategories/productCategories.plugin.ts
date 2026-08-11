@@ -17,6 +17,8 @@ const adminProductcategoriesServicesPlugin: FastifyPluginAsync = async (fastify)
     list: productCategoriesService.list,
     create: productCategoriesService.create,
     update: productCategoriesService.update,
+    reorder: productCategoriesService.reorder,
+    remove: productCategoriesService.remove,
   };
 };
 

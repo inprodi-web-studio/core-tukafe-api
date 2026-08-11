@@ -1,4 +1,9 @@
-import { productCategoriesDB } from "@core/db/schemas";
+import {
+  couponCategoryRulesDB,
+  productCategoriesDB,
+  productCategoryLinksDB,
+  productsDB,
+} from "@core/db/schemas";
 import {
   badRequest,
   buildFuzzySearch,
@@ -8,7 +13,7 @@ import {
   notFound,
   paginate,
 } from "@core/utils";
-import { and, asc, inArray, isNull, sql, type SQL } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull, sql, type SQL } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
 import {
   buildProductCategoryTree,
@@ -128,29 +133,44 @@ export function adminProductcategoriesService(
         color,
         icon,
         imageUploadId,
-        sortOrder,
         isFourPlusOneEligible,
         isCashbackEligible,
-      } =
-        normalizeProductCategoryInput(input);
+      } = normalizeProductCategoryInput(input);
 
       if (parentId) {
         await fastify.admin.productCategories.get(parentId);
       }
 
-      const imageUpload = imageUploadId
-        ? await fastify.db.query.uploadsDB.findFirst({
-            columns: {
-              id: true,
-              mimeType: true,
-            },
-            where(uploadTable, { eq }) {
-              return eq(uploadTable.id, imageUploadId);
-            },
-          })
-        : null;
+      if (!imageUploadId) {
+        throw badRequest("productCategory.imageRequired", "The product category requires an image");
+      }
 
-      if (imageUploadId && !imageUpload) {
+      const [nextSortOrderRow] =
+        input.sortOrder === undefined
+          ? await fastify.db
+              .select({
+                nextSortOrder: sql<number>`coalesce(max(${productCategoriesDB.sortOrder}), -1) + 1`,
+              })
+              .from(productCategoriesDB)
+              .where(
+                parentId
+                  ? eq(productCategoriesDB.parentId, parentId)
+                  : isNull(productCategoriesDB.parentId),
+              )
+          : [];
+      const resolvedSortOrder = input.sortOrder ?? nextSortOrderRow?.nextSortOrder ?? 0;
+
+      const imageUpload = await fastify.db.query.uploadsDB.findFirst({
+        columns: {
+          id: true,
+          mimeType: true,
+        },
+        where(uploadTable, { eq }) {
+          return eq(uploadTable.id, imageUploadId);
+        },
+      });
+
+      if (!imageUpload) {
         throw notFound("upload.notFound", "The image upload was not found");
       }
 
@@ -169,10 +189,10 @@ export function adminProductcategoriesService(
             name,
             icon,
             color,
-            sortOrder,
+            sortOrder: resolvedSortOrder,
             isFourPlusOneEligible,
             isCashbackEligible,
-            imageUploadId: imageUpload?.id ?? null,
+            imageUploadId: imageUpload.id,
             parentId,
           })
           .returning();
@@ -216,6 +236,10 @@ export function adminProductcategoriesService(
 
       const normalizedInput = normalizeProductCategoryUpdateInput(input);
 
+      if (input.imageUploadId === undefined && !existingCategory.image) {
+        throw badRequest("productCategory.imageRequired", "The product category requires an image");
+      }
+
       if (normalizedInput.parentId && normalizedInput.parentId === id) {
         throw badRequest(
           "productCategory.invalidParent",
@@ -225,6 +249,15 @@ export function adminProductcategoriesService(
 
       if (normalizedInput.parentId) {
         await fastify.admin.productCategories.get(normalizedInput.parentId);
+
+        const descendants = await getDescendantTreeRows(fastify.db, [id]);
+
+        if (descendants.some((category) => category.id === normalizedInput.parentId)) {
+          throw badRequest(
+            "productCategory.invalidParent",
+            "A category cannot be assigned under one of its descendants",
+          );
+        }
       }
 
       const imageUpload =
@@ -251,11 +284,27 @@ export function adminProductcategoriesService(
         );
       }
 
+      const parentChanged =
+        "parentId" in normalizedInput && normalizedInput.parentId !== existingCategory.parentId;
+      const [nextSortOrderRow] = parentChanged
+        ? await fastify.db
+            .select({
+              nextSortOrder: sql<number>`coalesce(max(${productCategoriesDB.sortOrder}), -1) + 1`,
+            })
+            .from(productCategoriesDB)
+            .where(
+              normalizedInput.parentId
+                ? eq(productCategoriesDB.parentId, normalizedInput.parentId)
+                : isNull(productCategoriesDB.parentId),
+            )
+        : [];
+
       try {
         const [updatedCategory] = await fastify.db
           .update(productCategoriesDB)
           .set({
             ...normalizedInput,
+            ...(parentChanged && { sortOrder: nextSortOrderRow?.nextSortOrder ?? 0 }),
             updatedAt: sql`now()`,
           })
           .where(sql`${productCategoriesDB.id} = ${id}`)
@@ -284,7 +333,7 @@ export function adminProductcategoriesService(
         ) {
           throw conflict(
             "productCategory.duplicatedName",
-            normalizedInput.parentId ?? existingCategory.parentId
+            ("parentId" in normalizedInput ? normalizedInput.parentId : existingCategory.parentId)
               ? "A category with this name already exists under the selected parent"
               : "A root category with this name already exists",
           );
@@ -292,6 +341,107 @@ export function adminProductcategoriesService(
 
         throw error;
       }
+    },
+
+    async reorder(id, direction) {
+      const category = await fastify.admin.productCategories.get(id);
+
+      if (!category) {
+        throw notFound("productCategory.notFound", "The product category was not found");
+      }
+
+      await fastify.db.transaction(async (tx) => {
+        const siblings = await tx
+          .select({
+            id: productCategoriesDB.id,
+            sortOrder: productCategoriesDB.sortOrder,
+            name: productCategoriesDB.name,
+          })
+          .from(productCategoriesDB)
+          .where(
+            category.parentId
+              ? eq(productCategoriesDB.parentId, category.parentId)
+              : isNull(productCategoriesDB.parentId),
+          )
+          .orderBy(
+            asc(productCategoriesDB.sortOrder),
+            asc(productCategoriesDB.name),
+            asc(productCategoriesDB.id),
+          );
+        const currentIndex = siblings.findIndex((sibling) => sibling.id === id);
+
+        if (currentIndex < 0) {
+          throw notFound("productCategory.notFound", "The product category was not found");
+        }
+
+        const targetIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
+        const reordered = [...siblings];
+
+        if (targetIndex >= 0 && targetIndex < reordered.length) {
+          const current = reordered[currentIndex];
+          const target = reordered[targetIndex];
+
+          if (current && target) {
+            reordered[currentIndex] = target;
+            reordered[targetIndex] = current;
+          }
+        }
+
+        for (const [index, sibling] of reordered.entries()) {
+          await tx
+            .update(productCategoriesDB)
+            .set({ sortOrder: index, updatedAt: sql`now()` })
+            .where(eq(productCategoriesDB.id, sibling.id));
+        }
+      });
+    },
+
+    async remove(id) {
+      await fastify.db.transaction(async (tx) => {
+        const [category] = await tx
+          .select({ id: productCategoriesDB.id })
+          .from(productCategoriesDB)
+          .where(eq(productCategoriesDB.id, id));
+
+        if (!category) {
+          throw notFound("productCategory.notFound", "The product category was not found");
+        }
+
+        const [children, legacyProducts, linkedProducts, couponRules] = await Promise.all([
+          tx
+            .select({ id: productCategoriesDB.id })
+            .from(productCategoriesDB)
+            .where(eq(productCategoriesDB.parentId, id)),
+          tx.select({ id: productsDB.id }).from(productsDB).where(eq(productsDB.categoryId, id)),
+          tx
+            .select({ id: productCategoryLinksDB.productId })
+            .from(productCategoryLinksDB)
+            .where(eq(productCategoryLinksDB.categoryId, id)),
+          tx
+            .select({ couponId: couponCategoryRulesDB.couponId })
+            .from(couponCategoryRulesDB)
+            .where(eq(couponCategoryRulesDB.categoryId, id)),
+        ]);
+        const productIds = new Set([
+          ...legacyProducts.map((product) => product.id),
+          ...linkedProducts.map((product) => product.id),
+        ]);
+        const dependencies = {
+          children: children.length,
+          products: productIds.size,
+          couponRules: couponRules.length,
+        };
+
+        if (dependencies.children || dependencies.products || dependencies.couponRules) {
+          throw conflict(
+            "productCategory.inUse",
+            "The product category cannot be deleted while it has dependencies",
+            dependencies,
+          );
+        }
+
+        await tx.delete(productCategoriesDB).where(eq(productCategoriesDB.id, id));
+      });
     },
   };
 }

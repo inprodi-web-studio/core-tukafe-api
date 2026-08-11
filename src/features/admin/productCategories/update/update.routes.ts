@@ -13,7 +13,12 @@ export async function updateRoutes(server: FastifyInstance) {
   server.patch<{ Params: Params; Body: UpdateBody }>(
     "/:categoryId",
     {
-      preHandler: [adminAuthHandler({ permissions: { productCategories: ["update"] } })],
+      preHandler: [
+        adminAuthHandler({
+          roles: ["owner", "admin"],
+          permissions: { productCategories: ["update"] },
+        }),
+      ],
       schema: {
         params: paramsSchema,
         body: updateBodySchema,

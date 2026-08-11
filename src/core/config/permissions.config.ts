@@ -59,7 +59,7 @@ export const ORGANIZATION_ROLES = {
     invitation: ["create", "cancel"],
     schedules: ["create", "read", "update", "delete"],
     products: ["create", "read", "update", "archive", "unarchive", "delete"],
-    productCategories: ["read"],
+    productCategories: ["create", "read", "update", "delete"],
     variationGroups: ["read"],
     modifiers: ["read"],
     ingredients: ["read"],

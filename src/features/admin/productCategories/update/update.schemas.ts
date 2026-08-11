@@ -18,7 +18,7 @@ export const updateBodySchema = z
     sortOrder: z.number().int().nonnegative().optional(),
     isFourPlusOneEligible: z.boolean().optional(),
     isCashbackEligible: z.boolean().optional(),
-    imageUploadId: z.string().trim().min(1).nullish(),
+    imageUploadId: z.string().trim().min(1).optional(),
     parentId: z.string().nullish(),
   })
   .strict()
