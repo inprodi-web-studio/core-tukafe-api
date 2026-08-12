@@ -5,11 +5,27 @@ import type {
   OrderResponse,
   RecordOrderPaymentAttemptResultParams,
 } from "@features/shared/orders/orders.types";
+import type { PaginatedResult } from "@core/utils";
+import type {
+  AdminOrderDetail,
+  AdminOrderListItem,
+  AdminOrdersListQuery,
+} from "./orders.read.schemas";
+
+export interface ListAdminOrdersParams extends AdminOrdersListQuery {
+  organizationId: string;
+}
 
 export interface AdminOrdersService {
+  list(input: ListAdminOrdersParams): Promise<PaginatedResult<AdminOrderListItem>>;
+  get(organizationId: string, orderId: string): Promise<AdminOrderDetail>;
   create(input: CreateOrderServiceParams): Promise<OrderResponse>;
-  createPaymentAttempt(input: CreateOrderPaymentAttemptServiceParams): Promise<OrderPaymentAttemptResponse>;
-  recordPaymentAttemptResult(input: RecordOrderPaymentAttemptResultParams): Promise<OrderPaymentAttemptResponse>;
+  createPaymentAttempt(
+    input: CreateOrderPaymentAttemptServiceParams,
+  ): Promise<OrderPaymentAttemptResponse>;
+  recordPaymentAttemptResult(
+    input: RecordOrderPaymentAttemptResultParams,
+  ): Promise<OrderPaymentAttemptResponse>;
 }
 
 export type CreateOrderServiceParams = CreateOrderParams;
