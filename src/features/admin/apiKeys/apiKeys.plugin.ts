@@ -13,7 +13,9 @@ const adminApiKeysServicesPlugin: FastifyPluginAsync = async (fastify) => {
   const apiKeys = adminApiKeysService(fastify);
 
   fastify.admin.apiKeys = {
+    list: apiKeys.list,
     create: apiKeys.create,
+    revoke: apiKeys.revoke,
   };
 };
 

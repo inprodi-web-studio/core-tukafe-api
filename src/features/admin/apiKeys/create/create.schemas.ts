@@ -3,7 +3,7 @@ import { z } from "zod";
 export const createBodySchema = z
   .object({
     name: z.string().trim().min(1).max(32),
-    expiresInSeconds: z.coerce.number().int().min(86_400).optional(),
+    expiresInSeconds: z.coerce.number().int().min(86_400).max(31_536_000).optional(),
   })
   .strict();
 
