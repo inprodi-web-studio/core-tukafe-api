@@ -16,6 +16,8 @@ const adminIngredientsServicesPlugin: FastifyPluginAsync = async (fastify) => {
     get: ingredientsService.get,
     list: ingredientsService.list,
     create: ingredientsService.create,
+    update: ingredientsService.update,
+    remove: ingredientsService.remove,
   };
 };
 

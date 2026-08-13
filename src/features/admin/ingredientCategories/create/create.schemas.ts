@@ -2,8 +2,8 @@ import { z } from "zod";
 
 export const createBodySchema = z
   .object({
-    name: z.string().nonempty(),
-    icon: z.string().nonempty(),
+    name: z.string().trim().min(1),
+    icon: z.string().trim().min(1).optional(),
     color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Color must be a valid hex code"),
   })
   .strict();

@@ -1,4 +1,4 @@
-import { supplyCategoriesDB } from "@core/db/schemas";
+import { suppliesDB, supplyCategoriesDB } from "@core/db/schemas";
 import {
   buildFuzzySearch,
   conflict,
@@ -7,12 +7,17 @@ import {
   notFound,
   paginate,
 } from "@core/utils";
-import { asc, type SQL } from "drizzle-orm";
+import { asc, count, eq, sql, type SQL } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
-import { normalizeSupplyCategoryInput } from "./supplyCategories.helpers";
+import {
+  normalizeSupplyCategoryInput,
+  normalizeSupplyCategoryUpdateInput,
+} from "./supplyCategories.helpers";
 import type { AdminSupplyCategoriesService } from "./supplyCategories.types";
 
-export function adminSupplyCategoriesService(fastify: FastifyInstance): AdminSupplyCategoriesService {
+export function adminSupplyCategoriesService(
+  fastify: FastifyInstance,
+): AdminSupplyCategoriesService {
   return {
     async get(id, { safe = false } = {}) {
       const category = await fastify.db.query.supplyCategoriesDB.findFirst({
@@ -33,7 +38,10 @@ export function adminSupplyCategoriesService(fastify: FastifyInstance): AdminSup
     },
 
     async list({ search, page, pageSize } = {}) {
-      const defaultOrderBy: [SQL, ...SQL[]] = [asc(supplyCategoriesDB.name), asc(supplyCategoriesDB.id)];
+      const defaultOrderBy: [SQL, ...SQL[]] = [
+        asc(supplyCategoriesDB.name),
+        asc(supplyCategoriesDB.id),
+      ];
       const fuzzySearch = buildFuzzySearch({
         query: search,
         values: [supplyCategoriesDB.name],
@@ -88,6 +96,59 @@ export function adminSupplyCategoriesService(fastify: FastifyInstance): AdminSup
 
         throw error;
       }
+    },
+
+    async update(id, input) {
+      await fastify.admin.supplyCategories.get(id);
+      const normalizedInput = normalizeSupplyCategoryUpdateInput(input);
+
+      try {
+        const [updated] = await fastify.db
+          .update(supplyCategoriesDB)
+          .set({ ...normalizedInput, updatedAt: sql`now()` })
+          .where(eq(supplyCategoriesDB.id, id))
+          .returning();
+        if (!updated) {
+          throw notFound("supplyCategory.notFound", "The supply category was not found");
+        }
+        return updated;
+      } catch (error) {
+        const pgError = getPgError(error);
+        if (pgError?.code === "23505" && pgError.constraint === "supply_category_name_unique") {
+          throw conflict(
+            "supplyCategory.duplicatedName",
+            "A supply category with this name already exists",
+          );
+        }
+        throw error;
+      }
+    },
+
+    async remove(id) {
+      await fastify.db.transaction(async (tx) => {
+        const [category] = await tx
+          .select({ id: supplyCategoriesDB.id })
+          .from(supplyCategoriesDB)
+          .where(eq(supplyCategoriesDB.id, id))
+          .limit(1)
+          .for("update");
+        if (!category) {
+          throw notFound("supplyCategory.notFound", "The supply category was not found");
+        }
+
+        const [dependency] = await tx
+          .select({ count: count() })
+          .from(suppliesDB)
+          .where(eq(suppliesDB.categoryId, id));
+        const items = Number(dependency?.count ?? 0);
+        if (items > 0) {
+          throw conflict("supplyCategory.inUse", "The supply category still contains supplies", {
+            items,
+          });
+        }
+
+        await tx.delete(supplyCategoriesDB).where(eq(supplyCategoriesDB.id, id));
+      });
     },
   };
 }

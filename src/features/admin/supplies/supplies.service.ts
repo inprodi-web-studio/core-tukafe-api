@@ -1,4 +1,11 @@
-import { suppliesDB, supplyCategoriesDB, unitsDB } from "@core/db/schemas";
+import {
+  modifierOptionSuppliesDB,
+  recipeSuppliesDB,
+  suppliesDB,
+  supplyCategoriesDB,
+  unitsDB,
+  variationRecipeSuppliesDB,
+} from "@core/db/schemas";
 import {
   buildFuzzySearch,
   conflict,
@@ -7,17 +14,17 @@ import {
   notFound,
   paginate,
 } from "@core/utils";
-import { and, asc, eq, getTableColumns, isNull, type SQL } from "drizzle-orm";
+import { and, asc, countDistinct, eq, getTableColumns, isNull, sql, type SQL } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
-import { normalizeSupplyInput } from "./supplies.helpers";
+import { normalizeSupplyInput, normalizeSupplyUpdateInput } from "./supplies.helpers";
 import type { AdminSuppliesService } from "./supplies.types";
 
 export function adminSuppliesService(fastify: FastifyInstance): AdminSuppliesService {
   return {
     async get(id, { safe = false } = {}) {
       const supply = await fastify.db.query.suppliesDB.findFirst({
-        where(supplyTable, { eq }) {
-          return eq(supplyTable.id, id);
+        where(supplyTable, { and, eq, isNull }) {
+          return and(eq(supplyTable.id, id), isNull(supplyTable.deletedAt));
         },
         columns: {
           baseUnitId: false,
@@ -73,10 +80,7 @@ export function adminSuppliesService(fastify: FastifyInstance): AdminSuppliesSer
             })
             .from(suppliesDB)
             .innerJoin(unitsDB, eq(suppliesDB.baseUnitId, unitsDB.id))
-            .innerJoin(
-              supplyCategoriesDB,
-              eq(suppliesDB.categoryId, supplyCategoriesDB.id),
-            )
+            .innerJoin(supplyCategoriesDB, eq(suppliesDB.categoryId, supplyCategoriesDB.id))
             .$dynamic();
 
           query.where(
@@ -133,6 +137,78 @@ export function adminSuppliesService(fastify: FastifyInstance): AdminSuppliesSer
 
         throw error;
       }
+    },
+
+    async update(id, input) {
+      await fastify.admin.supplies.get(id);
+      const normalizedInput = normalizeSupplyUpdateInput(input);
+
+      if (normalizedInput.baseUnitId) {
+        await fastify.admin.units.get(normalizedInput.baseUnitId);
+      }
+      if (normalizedInput.categoryId) {
+        await fastify.admin.supplyCategories.get(normalizedInput.categoryId);
+      }
+
+      try {
+        const [updated] = await fastify.db
+          .update(suppliesDB)
+          .set({ ...normalizedInput, updatedAt: sql`now()` })
+          .where(and(eq(suppliesDB.id, id), isNull(suppliesDB.deletedAt)))
+          .returning({ id: suppliesDB.id });
+
+        if (!updated) throw notFound("supply.notFound", "The supply was not found");
+
+        const supply = await fastify.admin.supplies.get(updated.id);
+        if (!supply) throw new Error("Failed to retrieve updated supply");
+        return supply;
+      } catch (error) {
+        const pgError = getPgError(error);
+        if (pgError?.code === "23505" && pgError.constraint === "supply_name_active_unique") {
+          throw conflict("supply.duplicatedName", "A supply with this name already exists");
+        }
+        throw error;
+      }
+    },
+
+    async remove(id) {
+      await fastify.db.transaction(async (tx) => {
+        const [supply] = await tx
+          .select({ id: suppliesDB.id })
+          .from(suppliesDB)
+          .where(eq(suppliesDB.id, id))
+          .limit(1)
+          .for("update");
+        if (!supply) throw notFound("supply.notFound", "The supply was not found");
+
+        const [productRecipes] = await tx
+          .select({ count: countDistinct(recipeSuppliesDB.recipeId) })
+          .from(recipeSuppliesDB)
+          .where(eq(recipeSuppliesDB.supplyId, id));
+        const [variationRecipes] = await tx
+          .select({ count: countDistinct(variationRecipeSuppliesDB.variationId) })
+          .from(variationRecipeSuppliesDB)
+          .where(eq(variationRecipeSuppliesDB.supplyId, id));
+        const [modifierOptions] = await tx
+          .select({ count: countDistinct(modifierOptionSuppliesDB.modifierOptionId) })
+          .from(modifierOptionSuppliesDB)
+          .where(eq(modifierOptionSuppliesDB.supplyId, id));
+
+        const dependencies = {
+          productRecipes: Number(productRecipes?.count ?? 0),
+          variationRecipes: Number(variationRecipes?.count ?? 0),
+          modifierOptions: Number(modifierOptions?.count ?? 0),
+        };
+        if (Object.values(dependencies).some((count) => count > 0)) {
+          throw conflict(
+            "supply.inUse",
+            "The supply is still used by recipes or modifiers",
+            dependencies,
+          );
+        }
+
+        await tx.delete(suppliesDB).where(eq(suppliesDB.id, id));
+      });
     },
   };
 }

@@ -1,5 +1,8 @@
 import { normalizeString } from "@core/utils";
-import type { CreateSupplyCategoryServiceParams } from "./supplyCategories.types";
+import type {
+  CreateSupplyCategoryServiceParams,
+  UpdateSupplyCategoryServiceParams,
+} from "./supplyCategories.types";
 
 export const normalizeSupplyCategoryInput = ({
   name,
@@ -11,7 +14,7 @@ export const normalizeSupplyCategoryInput = ({
     collapseWhitespace: true,
   });
 
-  const normalizedIcon = normalizeString(icon, {
+  const normalizedIcon = normalizeString(icon ?? "CircleDashedIcon", {
     trim: true,
     collapseWhitespace: true,
   });
@@ -27,3 +30,16 @@ export const normalizeSupplyCategoryInput = ({
     color: normalizedColor,
   };
 };
+
+export const normalizeSupplyCategoryUpdateInput = (input: UpdateSupplyCategoryServiceParams) => ({
+  ...input,
+  ...(input.name !== undefined && {
+    name: normalizeString(input.name, { trim: true, collapseWhitespace: true }),
+  }),
+  ...(input.icon !== undefined && {
+    icon: normalizeString(input.icon, { trim: true, collapseWhitespace: true }),
+  }),
+  ...(input.color !== undefined && {
+    color: normalizeString(input.color, { trim: true, uppercase: true }),
+  }),
+});

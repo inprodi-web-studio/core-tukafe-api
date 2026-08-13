@@ -1,5 +1,8 @@
 import { normalizeString } from "@core/utils";
-import type { CreateIngredientServiceParams } from "./ingredients.types";
+import type {
+  CreateIngredientServiceParams,
+  UpdateIngredientServiceParams,
+} from "./ingredients.types";
 
 export const normalizeIngredientInput = ({
   name,
@@ -22,3 +25,13 @@ export const normalizeIngredientInput = ({
     ...rest,
   };
 };
+
+export const normalizeIngredientUpdateInput = (input: UpdateIngredientServiceParams) => ({
+  ...input,
+  ...(input.name !== undefined && {
+    name: normalizeString(input.name, { trim: true, collapseWhitespace: true }),
+  }),
+  ...(input.description !== undefined && {
+    description: normalizeString(input.description, { trim: true, collapseWhitespace: true }),
+  }),
+});

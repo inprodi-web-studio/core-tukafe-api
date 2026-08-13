@@ -1,11 +1,7 @@
 import { normalizeString } from "@core/utils";
-import type { CreateSupplyServiceParams } from "./supplies.types";
+import type { CreateSupplyServiceParams, UpdateSupplyServiceParams } from "./supplies.types";
 
-export const normalizeSupplyInput = ({
-  name,
-  description,
-  ...rest
-}: CreateSupplyServiceParams) => {
+export const normalizeSupplyInput = ({ name, description, ...rest }: CreateSupplyServiceParams) => {
   const normalizedName = normalizeString(name, {
     trim: true,
     collapseWhitespace: true,
@@ -22,3 +18,13 @@ export const normalizeSupplyInput = ({
     ...rest,
   };
 };
+
+export const normalizeSupplyUpdateInput = (input: UpdateSupplyServiceParams) => ({
+  ...input,
+  ...(input.name !== undefined && {
+    name: normalizeString(input.name, { trim: true, collapseWhitespace: true }),
+  }),
+  ...(input.description !== undefined && {
+    description: normalizeString(input.description, { trim: true, collapseWhitespace: true }),
+  }),
+});

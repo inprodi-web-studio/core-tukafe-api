@@ -1,4 +1,11 @@
-import { ingredientCategoriesDB, ingredientsDB, unitsDB } from "@core/db/schemas";
+import {
+  ingredientCategoriesDB,
+  ingredientsDB,
+  modifierOptionIngredientsDB,
+  recipeIngredientsDB,
+  unitsDB,
+  variationRecipeIngredientsDB,
+} from "@core/db/schemas";
 import {
   buildFuzzySearch,
   conflict,
@@ -7,17 +14,17 @@ import {
   notFound,
   paginate,
 } from "@core/utils";
-import { and, asc, eq, getTableColumns, isNull, type SQL } from "drizzle-orm";
+import { and, asc, countDistinct, eq, getTableColumns, isNull, sql, type SQL } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
-import { normalizeIngredientInput } from "./ingredients.helpers";
+import { normalizeIngredientInput, normalizeIngredientUpdateInput } from "./ingredients.helpers";
 import type { AdminIngredientsService } from "./ingredients.types";
 
 export function adminIngredientsService(fastify: FastifyInstance): AdminIngredientsService {
   return {
     async get(id, { safe = false } = {}) {
       const ingredient = await fastify.db.query.ingredientsDB.findFirst({
-        where(ingredientTable, { eq }) {
-          return eq(ingredientTable.id, id);
+        where(ingredientTable, { and, eq, isNull }) {
+          return and(eq(ingredientTable.id, id), isNull(ingredientTable.deletedAt));
         },
         columns: {
           baseUnitId: false,
@@ -62,7 +69,7 @@ export function adminIngredientsService(fastify: FastifyInstance): AdminIngredie
             categoryId: omittedCategoryId,
             ...ingredientColumns
           } = getTableColumns(ingredientsDB);
-          
+
           void omittedBaseUnitId;
           void omittedCategoryId;
 
@@ -135,6 +142,83 @@ export function adminIngredientsService(fastify: FastifyInstance): AdminIngredie
 
         throw error;
       }
+    },
+
+    async update(id, input) {
+      await fastify.admin.ingredients.get(id);
+      const normalizedInput = normalizeIngredientUpdateInput(input);
+
+      if (normalizedInput.baseUnitId) {
+        await fastify.admin.units.get(normalizedInput.baseUnitId);
+      }
+      if (normalizedInput.categoryId) {
+        await fastify.admin.ingredientCategories.get(normalizedInput.categoryId);
+      }
+
+      try {
+        const [updated] = await fastify.db
+          .update(ingredientsDB)
+          .set({ ...normalizedInput, updatedAt: sql`now()` })
+          .where(and(eq(ingredientsDB.id, id), isNull(ingredientsDB.deletedAt)))
+          .returning({ id: ingredientsDB.id });
+
+        if (!updated) {
+          throw notFound("ingredient.notFound", "The ingredient was not found");
+        }
+
+        const ingredient = await fastify.admin.ingredients.get(updated.id);
+        if (!ingredient) throw new Error("Failed to retrieve updated ingredient");
+        return ingredient;
+      } catch (error) {
+        const pgError = getPgError(error);
+        if (pgError?.code === "23505" && pgError.constraint === "ingredient_name_active_unique") {
+          throw conflict(
+            "ingredient.duplicatedName",
+            "An ingredient with this name already exists",
+          );
+        }
+        throw error;
+      }
+    },
+
+    async remove(id) {
+      await fastify.db.transaction(async (tx) => {
+        const [ingredient] = await tx
+          .select({ id: ingredientsDB.id })
+          .from(ingredientsDB)
+          .where(eq(ingredientsDB.id, id))
+          .limit(1)
+          .for("update");
+        if (!ingredient) throw notFound("ingredient.notFound", "The ingredient was not found");
+
+        const [productRecipes] = await tx
+          .select({ count: countDistinct(recipeIngredientsDB.recipeId) })
+          .from(recipeIngredientsDB)
+          .where(eq(recipeIngredientsDB.ingredientId, id));
+        const [variationRecipes] = await tx
+          .select({ count: countDistinct(variationRecipeIngredientsDB.variationId) })
+          .from(variationRecipeIngredientsDB)
+          .where(eq(variationRecipeIngredientsDB.ingredientId, id));
+        const [modifierOptions] = await tx
+          .select({ count: countDistinct(modifierOptionIngredientsDB.modifierOptionId) })
+          .from(modifierOptionIngredientsDB)
+          .where(eq(modifierOptionIngredientsDB.ingredientId, id));
+
+        const dependencies = {
+          productRecipes: Number(productRecipes?.count ?? 0),
+          variationRecipes: Number(variationRecipes?.count ?? 0),
+          modifierOptions: Number(modifierOptions?.count ?? 0),
+        };
+        if (Object.values(dependencies).some((count) => count > 0)) {
+          throw conflict(
+            "ingredient.inUse",
+            "The ingredient is still used by recipes or modifiers",
+            dependencies,
+          );
+        }
+
+        await tx.delete(ingredientsDB).where(eq(ingredientsDB.id, id));
+      });
     },
   };
 }

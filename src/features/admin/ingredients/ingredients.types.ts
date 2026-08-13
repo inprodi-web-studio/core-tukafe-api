@@ -6,7 +6,11 @@ export interface AdminIngredientsService {
   get(id: string, config?: GetServiceConfig): Promise<IngredientResponse | null>;
   list(input?: ListQueryParams): Promise<PaginatedResult<IngredientResponse>>;
   create(input: CreateIngredientServiceParams): Promise<IngredientResponse>;
+  update(id: string, input: UpdateIngredientServiceParams): Promise<IngredientResponse>;
+  remove(id: string): Promise<void>;
 }
+
+export type UpdateIngredientServiceParams = Partial<CreateIngredientServiceParams>;
 
 export interface CreateIngredientServiceParams {
   name: string;

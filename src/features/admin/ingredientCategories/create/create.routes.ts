@@ -1,4 +1,5 @@
 import { adminAuthHandler } from "@core/handlers";
+import { requireGlobalInventoryOwner } from "@features/admin/inventory/inventory.access";
 import type { FastifyInstance } from "fastify";
 import { create } from "./create.controllers";
 import { createBodySchema, createResponseSchema } from "./create.schemas";
@@ -8,7 +9,7 @@ export async function createRoutes(server: FastifyInstance) {
   server.post<{ Body: CreateBody }>(
     "/",
     {
-      preHandler: [adminAuthHandler({ permissions: { ingredientCategories: ["create"] } })],
+      preHandler: [adminAuthHandler(), requireGlobalInventoryOwner],
       schema: {
         body: createBodySchema,
         response: {

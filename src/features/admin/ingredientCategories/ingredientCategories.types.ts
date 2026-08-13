@@ -10,10 +10,14 @@ export interface AdminIngredientCategoriesService {
   get(id: string, config?: GetServiceConfig): Promise<IngredientCategory | null>;
   list(input?: ListQueryParams): Promise<PaginatedResult<IngredientCategory>>;
   create(input: CreateIngredientCategoryServiceParams): Promise<IngredientCategory>;
+  update(id: string, input: UpdateIngredientCategoryServiceParams): Promise<IngredientCategory>;
+  remove(id: string): Promise<void>;
 }
 
 export interface CreateIngredientCategoryServiceParams {
   name: string;
-  icon: string;
+  icon?: string;
   color: string;
 }
+
+export type UpdateIngredientCategoryServiceParams = Partial<CreateIngredientCategoryServiceParams>;

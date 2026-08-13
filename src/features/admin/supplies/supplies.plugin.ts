@@ -16,6 +16,8 @@ const adminSuppliesServicesPlugin: FastifyPluginAsync = async (fastify) => {
     get: suppliesService.get,
     list: suppliesService.list,
     create: suppliesService.create,
+    update: suppliesService.update,
+    remove: suppliesService.remove,
   };
 };
 

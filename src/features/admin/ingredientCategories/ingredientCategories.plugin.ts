@@ -16,6 +16,8 @@ const adminIngredientCategoriesServicesPlugin: FastifyPluginAsync = async (fasti
     get: ingredientCategoriesService.get,
     list: ingredientCategoriesService.list,
     create: ingredientCategoriesService.create,
+    update: ingredientCategoriesService.update,
+    remove: ingredientCategoriesService.remove,
   };
 };
 

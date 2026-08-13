@@ -6,7 +6,11 @@ export interface AdminSuppliesService {
   get(id: string, config?: GetServiceConfig): Promise<SupplyResponse | null>;
   list(input?: ListQueryParams): Promise<PaginatedResult<SupplyResponse>>;
   create(input: CreateSupplyServiceParams): Promise<SupplyResponse>;
+  update(id: string, input: UpdateSupplyServiceParams): Promise<SupplyResponse>;
+  remove(id: string): Promise<void>;
 }
+
+export type UpdateSupplyServiceParams = Partial<CreateSupplyServiceParams>;
 
 export interface CreateSupplyServiceParams {
   name: string;

@@ -1,4 +1,4 @@
-import { ingredientCategoriesDB } from "@core/db/schemas";
+import { ingredientCategoriesDB, ingredientsDB } from "@core/db/schemas";
 import {
   buildFuzzySearch,
   conflict,
@@ -7,9 +7,12 @@ import {
   notFound,
   paginate,
 } from "@core/utils";
-import { asc, type SQL } from "drizzle-orm";
+import { asc, count, eq, sql, type SQL } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
-import { normalizeIngredientCategoryInput } from "./ingredientCategories.helpers";
+import {
+  normalizeIngredientCategoryInput,
+  normalizeIngredientCategoryUpdateInput,
+} from "./ingredientCategories.helpers";
 import type { AdminIngredientCategoriesService } from "./ingredientCategories.types";
 
 export function adminIngredientCategoriesService(
@@ -84,10 +87,7 @@ export function adminIngredientCategoriesService(
       } catch (error) {
         const pgError = getPgError(error);
 
-        if (
-          pgError?.code === "23505" &&
-          pgError.constraint === "ingredient_category_name_unique"
-        ) {
+        if (pgError?.code === "23505" && pgError.constraint === "ingredient_category_name_unique") {
           throw conflict(
             "ingredientCategory.duplicatedName",
             "An ingredient category with this name already exists",
@@ -96,6 +96,61 @@ export function adminIngredientCategoriesService(
 
         throw error;
       }
+    },
+
+    async update(id, input) {
+      await fastify.admin.ingredientCategories.get(id);
+      const normalizedInput = normalizeIngredientCategoryUpdateInput(input);
+
+      try {
+        const [updated] = await fastify.db
+          .update(ingredientCategoriesDB)
+          .set({ ...normalizedInput, updatedAt: sql`now()` })
+          .where(eq(ingredientCategoriesDB.id, id))
+          .returning();
+        if (!updated) {
+          throw notFound("ingredientCategory.notFound", "The ingredient category was not found");
+        }
+        return updated;
+      } catch (error) {
+        const pgError = getPgError(error);
+        if (pgError?.code === "23505" && pgError.constraint === "ingredient_category_name_unique") {
+          throw conflict(
+            "ingredientCategory.duplicatedName",
+            "An ingredient category with this name already exists",
+          );
+        }
+        throw error;
+      }
+    },
+
+    async remove(id) {
+      await fastify.db.transaction(async (tx) => {
+        const [category] = await tx
+          .select({ id: ingredientCategoriesDB.id })
+          .from(ingredientCategoriesDB)
+          .where(eq(ingredientCategoriesDB.id, id))
+          .limit(1)
+          .for("update");
+        if (!category) {
+          throw notFound("ingredientCategory.notFound", "The ingredient category was not found");
+        }
+
+        const [dependency] = await tx
+          .select({ count: count() })
+          .from(ingredientsDB)
+          .where(eq(ingredientsDB.categoryId, id));
+        const items = Number(dependency?.count ?? 0);
+        if (items > 0) {
+          throw conflict(
+            "ingredientCategory.inUse",
+            "The ingredient category still contains ingredients",
+            { items },
+          );
+        }
+
+        await tx.delete(ingredientCategoriesDB).where(eq(ingredientCategoriesDB.id, id));
+      });
     },
   };
 }

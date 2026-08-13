@@ -16,6 +16,8 @@ const adminSupplyCategoriesServicesPlugin: FastifyPluginAsync = async (fastify) 
     get: supplyCategoriesService.get,
     list: supplyCategoriesService.list,
     create: supplyCategoriesService.create,
+    update: supplyCategoriesService.update,
+    remove: supplyCategoriesService.remove,
   };
 };
 

@@ -3,7 +3,7 @@ import { z } from "zod";
 
 export const createBodySchema = z
   .object({
-    name: z.string().nonempty(),
+    name: z.string().trim().min(1),
     description: z.string().nullish(),
     baseUnitId: z.nanoid(),
     categoryId: z.nanoid(),

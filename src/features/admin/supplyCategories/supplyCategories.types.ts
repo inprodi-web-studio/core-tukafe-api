@@ -6,10 +6,14 @@ export interface AdminSupplyCategoriesService {
   get(id: string, config?: GetServiceConfig): Promise<SupplyCategory | null>;
   list(input?: ListQueryParams): Promise<PaginatedResult<SupplyCategory>>;
   create(input: CreateSupplyCategoryServiceParams): Promise<SupplyCategory>;
+  update(id: string, input: UpdateSupplyCategoryServiceParams): Promise<SupplyCategory>;
+  remove(id: string): Promise<void>;
 }
 
 export interface CreateSupplyCategoryServiceParams {
   name: string;
-  icon: string;
+  icon?: string;
   color: string;
 }
+
+export type UpdateSupplyCategoryServiceParams = Partial<CreateSupplyCategoryServiceParams>;
