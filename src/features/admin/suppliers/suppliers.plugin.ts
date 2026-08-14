@@ -13,9 +13,7 @@ const adminSuppliersServicesPlugin: FastifyPluginAsync = async (fastify) => {
   const suppliersService = adminSuppliersService(fastify);
 
   fastify.admin.suppliers = {
-    get: suppliersService.get,
-    list: suppliersService.list,
-    create: suppliersService.create,
+    ...suppliersService,
   };
 };
 

@@ -3,6 +3,7 @@ import {
   ingredientsDB,
   modifierOptionIngredientsDB,
   recipeIngredientsDB,
+  supplierItemsDB,
   unitsDB,
   variationRecipeIngredientsDB,
 } from "@core/db/schemas";
@@ -203,16 +204,21 @@ export function adminIngredientsService(fastify: FastifyInstance): AdminIngredie
           .select({ count: countDistinct(modifierOptionIngredientsDB.modifierOptionId) })
           .from(modifierOptionIngredientsDB)
           .where(eq(modifierOptionIngredientsDB.ingredientId, id));
+        const [supplierLinks] = await tx
+          .select({ count: countDistinct(supplierItemsDB.id) })
+          .from(supplierItemsDB)
+          .where(eq(supplierItemsDB.ingredientId, id));
 
         const dependencies = {
           productRecipes: Number(productRecipes?.count ?? 0),
           variationRecipes: Number(variationRecipes?.count ?? 0),
           modifierOptions: Number(modifierOptions?.count ?? 0),
+          supplierLinks: Number(supplierLinks?.count ?? 0),
         };
         if (Object.values(dependencies).some((count) => count > 0)) {
           throw conflict(
             "ingredient.inUse",
-            "The ingredient is still used by recipes or modifiers",
+            "The ingredient is still used by recipes, modifiers or suppliers",
             dependencies,
           );
         }

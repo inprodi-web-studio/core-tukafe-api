@@ -1,6 +1,7 @@
 import {
   modifierOptionSuppliesDB,
   recipeSuppliesDB,
+  supplierItemsDB,
   suppliesDB,
   supplyCategoriesDB,
   unitsDB,
@@ -193,16 +194,21 @@ export function adminSuppliesService(fastify: FastifyInstance): AdminSuppliesSer
           .select({ count: countDistinct(modifierOptionSuppliesDB.modifierOptionId) })
           .from(modifierOptionSuppliesDB)
           .where(eq(modifierOptionSuppliesDB.supplyId, id));
+        const [supplierLinks] = await tx
+          .select({ count: countDistinct(supplierItemsDB.id) })
+          .from(supplierItemsDB)
+          .where(eq(supplierItemsDB.supplyId, id));
 
         const dependencies = {
           productRecipes: Number(productRecipes?.count ?? 0),
           variationRecipes: Number(variationRecipes?.count ?? 0),
           modifierOptions: Number(modifierOptions?.count ?? 0),
+          supplierLinks: Number(supplierLinks?.count ?? 0),
         };
         if (Object.values(dependencies).some((count) => count > 0)) {
           throw conflict(
             "supply.inUse",
-            "The supply is still used by recipes or modifiers",
+            "The supply is still used by recipes, modifiers or suppliers",
             dependencies,
           );
         }
