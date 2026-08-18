@@ -15,7 +15,7 @@ import { orderItemsDB, ordersDB } from "./order.schema";
 import { organizationDB } from "./organization.schema";
 import { userDB } from "./user.schema";
 
-export const WORK_ORDER_STATUSES = ["open", "completed"] as const;
+export const WORK_ORDER_STATUSES = ["open", "completed", "cancelled"] as const;
 
 export type WorkOrderStatus = (typeof WORK_ORDER_STATUSES)[number];
 
@@ -36,6 +36,11 @@ export interface WorkOrderVariationSelectionSnapshot {
   optionId: string;
   optionName: string;
   optionKitchenName?: string | null;
+}
+
+export interface WorkOrderInventoryRequirementSnapshot {
+  inventoryItemId: string;
+  quantity: number;
 }
 
 const workOrders = pgTable(
@@ -64,6 +69,10 @@ const workOrders = pgTable(
       .$type<WorkOrderModifierSnapshot[]>()
       .notNull()
       .default(sql`'[]'::jsonb`),
+    inventoryRequirementsSnapshot: jsonb("inventory_requirements_snapshot")
+      .$type<WorkOrderInventoryRequirementSnapshot[]>()
+      .notNull()
+      .default(sql`'[]'::jsonb`),
     orderComment: text("order_comment"),
     itemComment: text("item_comment"),
     unitIndex: integer("unit_index").notNull().default(1),
@@ -76,6 +85,10 @@ const workOrders = pgTable(
     scheduledFor: timestamp("scheduled_for", { mode: "date", withTimezone: true }),
     completedAt: timestamp("completed_at", { mode: "date" }),
     completedByUserId: text("completed_by_user_id").references(() => userDB.id, {
+      onDelete: "restrict",
+    }),
+    cancelledAt: timestamp("cancelled_at", { mode: "date", withTimezone: true }),
+    cancelledByUserId: text("cancelled_by_user_id").references(() => userDB.id, {
       onDelete: "restrict",
     }),
     ...generateTimestamps(),
@@ -94,7 +107,8 @@ const workOrders = pgTable(
     index("work_order_order_id_idx").on(table.orderId),
     index("work_order_order_item_id_idx").on(table.orderItemId),
     index("work_order_completed_by_user_id_idx").on(table.completedByUserId),
-    check("work_order_status_check", sql`${table.status} in ('open', 'completed')`),
+    index("work_order_cancelled_by_user_id_idx").on(table.cancelledByUserId),
+    check("work_order_status_check", sql`${table.status} in ('open', 'completed', 'cancelled')`),
     check("work_order_unit_index_positive_check", sql`${table.unitIndex} > 0`),
     check("work_order_quantity_snapshot_positive_check", sql`${table.quantitySnapshot} > 0`),
     check(
@@ -103,7 +117,7 @@ const workOrders = pgTable(
     ),
     check(
       "work_order_completion_consistency_check",
-      sql`(${table.status} = 'open' and ${table.completedAt} is null and ${table.completedByUserId} is null) or (${table.status} = 'completed' and ${table.completedAt} is not null and ${table.completedByUserId} is not null)`,
+      sql`(${table.status} = 'open' and ${table.completedAt} is null and ${table.completedByUserId} is null and ${table.cancelledAt} is null and ${table.cancelledByUserId} is null) or (${table.status} = 'completed' and ${table.completedAt} is not null and ${table.completedByUserId} is not null and ${table.cancelledAt} is null and ${table.cancelledByUserId} is null) or (${table.status} = 'cancelled' and ${table.completedAt} is null and ${table.completedByUserId} is null and ${table.cancelledAt} is not null and ${table.cancelledByUserId} is not null)`,
     ),
   ],
 );
@@ -125,6 +139,10 @@ export const workOrdersRelations = relations(workOrdersDB, ({ one }) => ({
   }),
   completedByUser: one(userDB, {
     fields: [workOrdersDB.completedByUserId],
+    references: [userDB.id],
+  }),
+  cancelledByUser: one(userDB, {
+    fields: [workOrdersDB.cancelledByUserId],
     references: [userDB.id],
   }),
 }));

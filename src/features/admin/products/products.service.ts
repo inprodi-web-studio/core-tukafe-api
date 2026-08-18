@@ -1190,6 +1190,12 @@ export function adminProductsService(fastify: FastifyInstance): AdminProductsSer
               kitchenDescription,
               unitId,
               productType,
+              inventoryTrackingMode:
+                productType === "compound"
+                  ? "derived"
+                  : productType === "assembled"
+                    ? "recipe"
+                    : "untracked",
               categoryId,
               isFeatured,
               imageUploadId: imageUpload?.id ?? null,

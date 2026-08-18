@@ -33,6 +33,12 @@ const taxSchema = z.object({
   rate: z.number().int().nonnegative(),
 });
 
+const availabilitySchema = z.object({
+  isAvailable: z.boolean(),
+  reason: z.enum(["available", "sold_out", "manual_override"]),
+  maxProducible: z.number().int().nonnegative().nullable(),
+});
+
 const organizationSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -65,6 +71,7 @@ const variationSchema = z.object({
   sortOrder: z.number().int().nonnegative(),
   priceCents: z.number().int().nonnegative(),
   customerDescription: z.string().nullable(),
+  availability: availabilitySchema,
   selections: z.array(
     z.object({
       group: z.object({
@@ -85,6 +92,7 @@ const productSchema = z.object({
   isFeatured: z.boolean(),
   customerDescription: z.string().nullable(),
   productType: z.enum(["simple", "assembled", "compound"]),
+  availability: availabilitySchema,
   image: imageSchema.nullable(),
   unit: unitSchema,
   category: categorySchema.nullable(),

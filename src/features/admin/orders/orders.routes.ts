@@ -9,8 +9,11 @@ import {
   adminOrderParamsSchema,
   adminOrdersListQuerySchema,
   adminOrdersListResponseSchema,
+  cancelOrderBodySchema,
+  cancelOrderResponseSchema,
   type AdminOrderParams,
   type AdminOrdersListQuery,
+  type CancelOrderBody,
 } from "./orders.read.schemas";
 import { paymentAttemptsRoutes } from "./paymentAttempts";
 
@@ -68,6 +71,27 @@ export async function adminOrdersRoutes(server: FastifyInstance) {
             request.params.orderId,
           ),
         ),
+  );
+
+  server.post<{ Params: AdminOrderParams; Body: CancelOrderBody }>(
+    "/:orderId/cancel",
+    {
+      preHandler: [adminAuthHandler({ permissions: { orders: ["update"] } })],
+      schema: {
+        params: adminOrderParamsSchema,
+        body: cancelOrderBodySchema,
+        response: { 200: cancelOrderResponseSchema },
+      },
+    },
+    async (request, reply) =>
+      reply.status(200).send(
+        await request.server.admin.orders.cancel({
+          organizationId: request.auth.member.organizationId,
+          orderId: request.params.orderId,
+          userId: request.auth.user.id,
+          reason: request.body.reason,
+        }),
+      ),
   );
 
   await server.register(paymentAttemptsRoutes);

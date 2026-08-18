@@ -8,6 +8,12 @@ const imageSchema = z.object({
   mimeType: z.string(),
 });
 
+const availabilitySchema = z.object({
+  isAvailable: z.boolean(),
+  reason: z.enum(["available", "sold_out", "manual_override"]),
+  maxProducible: z.number().int().nonnegative().nullable(),
+});
+
 export const paramsSchema = z.object({
   productId: z.nanoid(),
 });
@@ -61,6 +67,7 @@ const modifierStepSchema = z.object({
       priceCents: z.number().int().nonnegative(),
       isDefault: z.boolean(),
       sortOrder: z.number().int().nonnegative(),
+      availability: availabilitySchema,
     }),
   ),
 });
@@ -70,6 +77,7 @@ const configurationProductSchema = z.object({
   name: z.string(),
   isFeatured: z.boolean(),
   productType: z.enum(["simple", "assembled", "compound"]),
+  availability: availabilitySchema,
   image: imageSchema.nullable(),
 });
 
@@ -83,6 +91,7 @@ const configurationVariationSchema = z.object({
   sortOrder: z.number().int().nonnegative(),
   priceCents: z.number().int().nonnegative(),
   customerDescription: z.string().nullable(),
+  availability: availabilitySchema,
   selections: z.array(
     z.object({
       variationGroupId: z.string(),
@@ -97,6 +106,7 @@ const configurationBaseSchema = z.object({
     name: z.string(),
     isFeatured: z.boolean(),
     productType: z.enum(["simple", "assembled", "compound"]),
+    availability: availabilitySchema,
     image: imageSchema.nullable(),
   }),
   pricing: configurationPricingSchema,

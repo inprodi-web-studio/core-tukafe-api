@@ -14,6 +14,10 @@ export const createBodySchema = z
         (value) => hasAtMostDecimalPlaces(value, MAX_SUPPORTED_DECIMAL_PLACES),
         `Base cost per unit must have at most ${MAX_SUPPORTED_DECIMAL_PLACES} decimal places`,
       ),
+    isInventoryTracked: z.boolean().optional(),
+    tracksLots: z.boolean().optional(),
+    isPerishable: z.boolean().optional(),
+    expirationWarningDays: z.number().int().min(0).max(365).optional(),
   })
   .strict();
 
@@ -24,6 +28,10 @@ export const createResponseSchema = z.object({
   name: z.string(),
   description: z.string().nullish(),
   baseCostPerUnit: z.number().nonnegative(),
+  isInventoryTracked: z.boolean(),
+  tracksLots: z.boolean(),
+  isPerishable: z.boolean(),
+  expirationWarningDays: z.number().int().nonnegative(),
   baseUnit: z.object({
     id: z.string(),
     name: z.string(),

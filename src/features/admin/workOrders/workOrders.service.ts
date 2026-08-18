@@ -11,6 +11,7 @@ import {
 import { buildFuzzySearch, conflict, generateNanoId, notFound, paginate } from "@core/utils";
 import { and, asc, desc, eq, inArray, type SQL, sql } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
+import { consumeWorkOrderInventory } from "@features/shared/inventory";
 import type {
   AdminWorkOrdersService,
   WorkOrderListStatus,
@@ -220,6 +221,11 @@ export function adminWorkOrdersService(fastify: FastifyInstance): AdminWorkOrder
         if (!completedWorkOrder) {
           throw conflict("workOrder.alreadyCompleted", "The work order is already completed");
         }
+
+        await consumeWorkOrderInventory(tx, {
+          workOrderId: completedWorkOrder.id,
+          actorUserId: completedByUserId,
+        });
 
         const remainingWorkOrder = await tx.query.workOrdersDB.findFirst({
           where(table, { and: andOperator, eq: eqOperator }) {

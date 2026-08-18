@@ -19,8 +19,18 @@ import { unitsDB } from "./unit.schema";
 import { uploadsDB } from "./upload.schema";
 
 export const PRODUCT_TYPES = ["simple", "assembled", "compound"] as const;
+export const PRODUCT_INVENTORY_TRACKING_MODES = [
+  "untracked",
+  "recipe",
+  "finished_good",
+  "derived",
+] as const;
 
 export const productTypeEnum = pgEnum("product_type", PRODUCT_TYPES);
+export const productInventoryTrackingModeEnum = pgEnum(
+  "product_inventory_tracking_mode",
+  PRODUCT_INVENTORY_TRACKING_MODES,
+);
 
 const products = pgTable(
   "product",
@@ -42,6 +52,9 @@ const products = pgTable(
     }),
     isFeatured: boolean("is_featured").notNull().default(false),
     productType: productTypeEnum("product_type").notNull().default("simple"),
+    inventoryTrackingMode: productInventoryTrackingModeEnum("inventory_tracking_mode")
+      .notNull()
+      .default("untracked"),
     ...generateTimestamps({ withDeletedAt: true }),
   },
   (table) => [
@@ -55,6 +68,11 @@ const products = pgTable(
     index("product_is_featured_idx").on(table.isFeatured),
     index("product_image_upload_id_idx").on(table.imageUploadId),
     index("product_product_type_idx").on(table.productType),
+    index("product_inventory_tracking_mode_idx").on(table.inventoryTrackingMode),
+    check(
+      "product_inventory_tracking_mode_type_check",
+      sql`(${table.productType} = 'compound' and ${table.inventoryTrackingMode} = 'derived') or (${table.productType} = 'assembled' and ${table.inventoryTrackingMode} in ('recipe', 'finished_good', 'untracked')) or (${table.productType} = 'simple' and ${table.inventoryTrackingMode} in ('untracked', 'finished_good'))`,
+    ),
   ],
 );
 
@@ -326,3 +344,5 @@ export type ProductCompoundComponent = typeof productCompoundComponentsDB.$infer
 export type ProductCompoundSlot = typeof productCompoundSlotsDB.$inferSelect;
 export type ProductCompoundSlotOption = typeof productCompoundSlotOptionsDB.$inferSelect;
 export type ProductType = (typeof productTypeEnum.enumValues)[number];
+export type ProductInventoryTrackingMode =
+  (typeof productInventoryTrackingModeEnum.enumValues)[number];

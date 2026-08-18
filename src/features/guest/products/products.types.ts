@@ -25,6 +25,12 @@ export type GuestProductUnit = Pick<Unit, "id" | "name" | "abbreviation" | "prec
 
 export type GuestProductTax = Pick<Tax, "id" | "name" | "rate">;
 
+export interface GuestProductAvailability {
+  isAvailable: boolean;
+  reason: "available" | "sold_out" | "manual_override";
+  maxProducible: number | null;
+}
+
 export type GuestProductOrganization = Pick<
   Organization,
   "id" | "name" | "slug" | "address" | "latitude" | "longitude" | "logo"
@@ -52,6 +58,7 @@ export interface GuestProductVariation {
   sortOrder: number;
   priceCents: number;
   customerDescription: string | null;
+  availability: GuestProductAvailability;
   selections: GuestProductVariationSelection[];
 }
 
@@ -62,6 +69,7 @@ export interface GuestProductListItem {
   isFeatured: boolean;
   customerDescription: string | null;
   productType: ProductType;
+  availability: GuestProductAvailability;
   image: GuestProductImage | null;
   unit: GuestProductUnit;
   category: GuestProductCategory | null;
@@ -77,6 +85,7 @@ export interface GuestProductConfigurationProduct {
   name: string;
   isFeatured: boolean;
   productType: ProductType;
+  availability: GuestProductAvailability;
   image: GuestProductImage | null;
 }
 
@@ -99,6 +108,7 @@ export interface GuestProductConfigurationModifierOption {
   priceCents: number;
   isDefault: boolean;
   sortOrder: number;
+  availability: GuestProductAvailability;
 }
 
 export interface GuestProductConfigurationStepBase {
@@ -143,6 +153,7 @@ export interface GuestProductConfigurationVariation {
   sortOrder: number;
   priceCents: number;
   customerDescription: string | null;
+  availability: GuestProductAvailability;
   selections: GuestProductConfigurationVariationSelection[];
 }
 

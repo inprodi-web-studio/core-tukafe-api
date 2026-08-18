@@ -5,7 +5,8 @@ import {
   ordersDB,
   workOrdersDB,
 } from "@core/db/schemas";
-import { notFound, paginate } from "@core/utils";
+import { conflict, notFound, paginate } from "@core/utils";
+import { releaseWorkOrderInventory } from "@features/shared/inventory";
 import { mapOrderResponse } from "@features/shared/orders/orders.mappers";
 import {
   createOrder,
@@ -40,13 +41,16 @@ export function deriveOrderPreparationStatus({
   total,
   open,
   scheduledFor,
+  cancelledAt,
   now = new Date(),
 }: {
   total: number;
   open: number;
   scheduledFor: Date | null;
+  cancelledAt?: Date | null;
   now?: Date;
 }): PreparationStatus {
+  if (cancelledAt) return "cancelled";
   if (total === 0) return "no_work";
   if (open === 0) return "ready";
   if (scheduledFor && scheduledFor.getTime() > now.getTime()) return "scheduled";
@@ -76,6 +80,15 @@ function openWorkOrders() {
     from ${workOrdersDB} order_work
     where order_work.order_id = ${ordersDB.id}
       and order_work.status = 'open'
+  )`;
+}
+
+function cancelledWorkOrders() {
+  return sql<number>`(
+    select count(*)::int
+    from ${workOrdersDB} order_work
+    where order_work.order_id = ${ordersDB.id}
+      and order_work.status = 'cancelled'
   )`;
 }
 
@@ -142,6 +155,7 @@ function preparationStatusFilter(status: "all" | PreparationStatus, now: Date): 
       ) ?? null
     );
   }
+  if (status === "cancelled") return sql`${ordersDB.cancelledAt} is not null`;
   return null;
 }
 
@@ -207,6 +221,7 @@ export function adminOrdersService(fastify: FastifyInstance): AdminOrdersService
               folio: ordersDB.folio,
               createdAt: ordersDB.createdAt,
               scheduledFor: ordersDB.scheduledFor,
+              cancelledAt: ordersDB.cancelledAt,
               source: ordersDB.source,
               customerId: customersDB.id,
               customerName: customersDB.name,
@@ -229,6 +244,7 @@ export function adminOrdersService(fastify: FastifyInstance): AdminOrdersService
               paymentProvider: latestCompletedPaymentProvider(),
               workOrderTotal: totalWorkOrders(),
               workOrderOpen: openWorkOrders(),
+              workOrderCancelled: cancelledWorkOrders(),
             })
             .from(ordersDB)
             .leftJoin(customersDB, eq(customersDB.id, ordersDB.customerId))
@@ -244,6 +260,7 @@ export function adminOrdersService(fastify: FastifyInstance): AdminOrdersService
             total: row.workOrderTotal,
             open: row.workOrderOpen,
             scheduledFor: row.scheduledFor,
+            cancelledAt: row.cancelledAt,
             now,
           });
 
@@ -282,7 +299,9 @@ export function adminOrdersService(fastify: FastifyInstance): AdminOrdersService
               status: preparationStatus,
               total: row.workOrderTotal,
               open: row.workOrderOpen,
-              completed: row.workOrderTotal - row.workOrderOpen,
+              completed:
+                row.workOrderTotal - row.workOrderOpen - row.workOrderCancelled,
+              cancelled: row.workOrderCancelled,
             },
           };
         },
@@ -367,10 +386,14 @@ export function adminOrdersService(fastify: FastifyInstance): AdminOrdersService
       const openWorkOrderCount = workOrders.filter(
         (workOrder) => workOrder.status === "open",
       ).length;
+      const cancelledWorkOrderCount = workOrders.filter(
+        (workOrder) => workOrder.status === "cancelled",
+      ).length;
       const preparationStatus = deriveOrderPreparationStatus({
         total: workOrders.length,
         open: openWorkOrderCount,
         scheduledFor: order.scheduledFor,
+        cancelledAt: order.cancelledAt,
       });
       const registeredName = order.customer ? fullCustomerName(order.customer) : "";
       const capturedName = workOrders.find((workOrder) =>
@@ -388,6 +411,8 @@ export function adminOrdersService(fastify: FastifyInstance): AdminOrdersService
         source: order.source,
         comment: order.comment,
         couponCode: order.couponCode,
+        cancelledAt: order.cancelledAt,
+        cancellationReason: order.cancellationReason,
         customer: mapped.customer,
         customerDisplayName: registeredName || capturedName?.trim() || "Venta de mostrador",
         economics: {
@@ -421,7 +446,8 @@ export function adminOrdersService(fastify: FastifyInstance): AdminOrdersService
           status: preparationStatus,
           total: workOrders.length,
           open: openWorkOrderCount,
-          completed: workOrders.length - openWorkOrderCount,
+          completed: workOrders.length - openWorkOrderCount - cancelledWorkOrderCount,
+          cancelled: cancelledWorkOrderCount,
         },
         items: mapped.items,
         workOrders: workOrders.map((workOrder) => ({
@@ -453,6 +479,82 @@ export function adminOrdersService(fastify: FastifyInstance): AdminOrdersService
     },
     async recordPaymentAttemptResult(input) {
       return recordOrderPaymentAttemptResult(fastify, input);
+    },
+    async cancel(input) {
+      const result = await fastify.db.transaction(async (tx) => {
+        await tx.execute(
+          sql`select pg_advisory_xact_lock(hashtextextended(${input.orderId}, 0))`,
+        );
+        const orderResult = await tx.execute(sql`
+          select id, cancelled_at as "cancelledAt"
+          from "order"
+          where id = ${input.orderId} and organization_id = ${input.organizationId}
+          for update
+        `);
+        const order = orderResult.rows[0] as
+          | { id: string; cancelledAt: Date | null }
+          | undefined;
+        if (!order) throw notFound("order.notFound", "The order was not found");
+        if (order.cancelledAt) {
+          throw conflict("order.alreadyCancelled", "The order is already cancelled");
+        }
+
+        const workOrderResult = await tx.execute(sql`
+          select id from work_order
+          where order_id = ${input.orderId}
+            and organization_id = ${input.organizationId}
+            and status = 'open'
+          order by id
+          for update
+        `);
+        const openWorkOrders = workOrderResult.rows as Array<{ id: string }>;
+        if (openWorkOrders.length === 0) {
+          throw conflict(
+            "order.noOpenWorkOrders",
+            "The order has no pending preparation to cancel",
+          );
+        }
+
+        for (const workOrder of openWorkOrders) {
+          await releaseWorkOrderInventory(tx, {
+            workOrderId: workOrder.id,
+            actorUserId: input.userId,
+          });
+        }
+
+        const cancelledAt = new Date();
+        await tx
+          .update(workOrdersDB)
+          .set({
+            status: "cancelled",
+            cancelledAt,
+            cancelledByUserId: input.userId,
+            updatedAt: cancelledAt,
+          })
+          .where(
+            and(
+              eq(workOrdersDB.orderId, input.orderId),
+              eq(workOrdersDB.organizationId, input.organizationId),
+              eq(workOrdersDB.status, "open"),
+            ),
+          );
+        await tx
+          .update(ordersDB)
+          .set({
+            cancelledAt,
+            cancelledByUserId: input.userId,
+            cancellationReason: input.reason,
+            updatedAt: cancelledAt,
+          })
+          .where(eq(ordersDB.id, input.orderId));
+
+        return {
+          orderId: input.orderId,
+          cancelledAt,
+          cancelledWorkOrders: openWorkOrders.length,
+        };
+      });
+      return result;
     },
   };
 }

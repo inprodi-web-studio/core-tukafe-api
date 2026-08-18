@@ -17,6 +17,12 @@ import { conflict, generateNanoId, getPgError, notFound, validation } from "@cor
 import { and, eq, sql } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
 import {
+  prepareOrderInventory,
+  releaseCheckoutInventory,
+  reserveCheckoutInventory,
+  reserveOrderInventory,
+} from "@features/shared/inventory";
+import {
   applyCouponToPreparedOrder,
   resolveCouponPeriodStartDate,
   validateCouponPromotionCompatibility,
@@ -882,7 +888,7 @@ function validateManualRedemptionWasApplied({
   );
 }
 
-async function validateAndPrepare(
+export async function prepareOrderPayload(
   fastify: FastifyInstance,
   normalizedInput: NormalizedCreateOrderParams,
 ): Promise<PreparedOrderPayload> {
@@ -894,7 +900,9 @@ async function validateAndPrepare(
     normalizedInput.items,
   );
 
-  return validateAndPrepareOrderPayload(normalizedInput.items, validationContext);
+  return validateAndPrepareOrderPayload(normalizedInput.items, validationContext, {
+    enforceModifierMinSelect: true,
+  });
 }
 
 async function validateOrderContext(
@@ -1247,7 +1255,7 @@ export async function previewOrder(
     };
   }
 
-  const preparedOrderPayload = await validateAndPrepare(fastify, normalizedInput);
+  const preparedOrderPayload = await prepareOrderPayload(fastify, normalizedInput);
 
   const calculatedOrder = calculatePreparedOrder({
     preparedPayload: preparedOrderPayload,
@@ -1312,18 +1320,47 @@ export async function createOrderPaymentAttempt(
 
   const paymentAttemptId = generateNanoId();
   const reference = `tk-${paymentAttemptId}`;
-  const [paymentAttempt] = await fastify.db
-    .insert(orderPaymentAttemptsDB)
-    .values({
-      id: paymentAttemptId,
-      organizationId: input.organizationId,
-      provider: "zettle",
-      reference,
-      amountCents: input.amountCents,
-      currency: normalizedCurrency,
-      status: "pending",
-    })
-    .returning();
+  const normalizedInput = normalizeCreateOrderInput(input);
+  const preparedPayload = await prepareOrderPayload(fastify, normalizedInput);
+  const scheduledFor =
+    normalizedInput.preparationDelayMinutes > 0
+      ? new Date(Date.now() + normalizedInput.preparationDelayMinutes * 60_000)
+      : null;
+  const paymentAttempt = await fastify.db.transaction(async (tx) => {
+    const [created] = await tx
+      .insert(orderPaymentAttemptsDB)
+      .values({
+        id: paymentAttemptId,
+        organizationId: input.organizationId,
+        customerId: normalizedInput.customerId,
+        provider: "zettle",
+        reference,
+        amountCents: input.amountCents,
+        currency: normalizedCurrency,
+        status: "pending",
+        orderPayload: {
+          organizationId: normalizedInput.organizationId,
+          customerId: normalizedInput.customerId,
+          customerName: normalizedInput.customerName,
+          couponCode: normalizedInput.couponCode,
+          cashbackRedeemCents: normalizedInput.cashbackRedeemCents,
+          preparationDelayMinutes: normalizedInput.preparationDelayMinutes,
+          comment: normalizedInput.comment,
+          tip: normalizedInput.tip,
+          items: normalizedInput.items,
+        },
+      })
+      .returning();
+    if (!created) return null;
+    await reserveCheckoutInventory(tx, {
+      organizationId: normalizedInput.organizationId,
+      paymentAttemptId,
+      payload: preparedPayload,
+      scheduledFor,
+      expiresAt: new Date(Date.now() + 10 * 60_000),
+    });
+    return created;
+  });
 
   if (!paymentAttempt) {
     throw new Error("Failed to create order payment attempt");
@@ -1393,6 +1430,12 @@ export async function recordOrderPaymentAttemptResult(
     throw notFound("order.paymentAttempt.notFound", "The payment attempt was not found");
   }
 
+  if (nextStatus === "cancelled" || nextStatus === "failed") {
+    await fastify.db.transaction(async (tx) => {
+      await releaseCheckoutInventory(tx, updatedAttempt.id);
+    });
+  }
+
   return normalizePaymentAttemptResponse(updatedAttempt);
 }
 
@@ -1416,7 +1459,7 @@ export async function createOrder(
     }
   }
 
-  const preparedOrderPayload = await validateAndPrepare(fastify, normalizedInput);
+  const preparedOrderPayload = await prepareOrderPayload(fastify, normalizedInput);
 
   const now = new Date();
   const coupon = normalizedInput.couponCode
@@ -1654,13 +1697,26 @@ export async function createOrder(
           scheduledFor,
         });
 
-        if (workOrdersToInsert.length > 0) {
-          await tx.insert(workOrdersDB).values(workOrdersToInsert);
+        const inventoryPlan = await prepareOrderInventory(tx, {
+          organizationId: normalizedInput.organizationId,
+          payload: calculatedOrder.payload,
+          workOrders: workOrdersToInsert,
+        });
 
-          for (const workOrder of workOrdersToInsert) {
+        if (inventoryPlan.workOrders.length > 0) {
+          await tx.insert(workOrdersDB).values(inventoryPlan.workOrders);
+
+          for (const workOrder of inventoryPlan.workOrders) {
             await notifyWorkOrderCreated(tx, workOrder);
           }
         }
+
+        await reserveOrderInventory(tx, {
+          plan: inventoryPlan,
+          orderId,
+          scheduledFor,
+          paymentAttemptId: normalizedInput.paymentAttemptId,
+        });
 
         if (normalizedInput.customerId && calculatedOrder.nextPromotionState) {
           await tx

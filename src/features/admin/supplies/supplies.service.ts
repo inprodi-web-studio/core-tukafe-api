@@ -99,8 +99,8 @@ export function adminSuppliesService(fastify: FastifyInstance): AdminSuppliesSer
     },
 
     async create(input) {
-      const { name, categoryId, baseCostPerUnit, description, baseUnitId } =
-        normalizeSupplyInput(input);
+      const normalizedInput = normalizeSupplyInput(input);
+      const { name, categoryId, baseCostPerUnit, description, baseUnitId } = normalizedInput;
 
       await fastify.admin.units.get(baseUnitId);
       await fastify.admin.supplyCategories.get(categoryId);
@@ -115,6 +115,10 @@ export function adminSuppliesService(fastify: FastifyInstance): AdminSuppliesSer
             baseCostPerUnit,
             description,
             baseUnitId,
+            isInventoryTracked: normalizedInput.isInventoryTracked ?? true,
+            tracksLots: normalizedInput.tracksLots ?? false,
+            isPerishable: normalizedInput.isPerishable ?? false,
+            expirationWarningDays: normalizedInput.expirationWarningDays ?? 3,
           })
           .returning();
 
@@ -143,6 +147,26 @@ export function adminSuppliesService(fastify: FastifyInstance): AdminSuppliesSer
     async update(id, input) {
       await fastify.admin.supplies.get(id);
       const normalizedInput = normalizeSupplyUpdateInput(input);
+
+      if (
+        normalizedInput.isInventoryTracked !== undefined ||
+        normalizedInput.tracksLots !== undefined ||
+        normalizedInput.isPerishable !== undefined
+      ) {
+        const result = await fastify.db.execute(sql`
+          select exists(
+            select 1 from inventory_balance
+            where inventory_item_id = ${`inv_sup_${id}`}
+              and (on_hand_quantity <> 0 or reserved_quantity <> 0)
+          ) as "hasStock"
+        `);
+        if (result.rows[0]?.hasStock) {
+          throw conflict(
+            "inventory.itemConfigurationHasStock",
+            "Inventory tracking and lot configuration can only change with zero balances",
+          );
+        }
+      }
 
       if (normalizedInput.baseUnitId) {
         await fastify.admin.units.get(normalizedInput.baseUnitId);

@@ -5,9 +5,15 @@ import {
   createOrder,
   loadOrder,
   loadPaymentAttempt,
+  prepareOrderPayload,
   previewOrder,
   recordOrderPaymentAttemptResult,
 } from "@features/shared/orders/orders.service";
+import { normalizeCreateOrderInput } from "@features/shared/orders/orders.helpers";
+import {
+  releaseCheckoutInventory,
+  reserveCheckoutInventory,
+} from "@features/shared/inventory";
 import { eq, sql } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
 import Stripe from "stripe";
@@ -347,21 +353,38 @@ export function customerOrdersService(fastify: FastifyInstance): CustomerOrdersS
       const paymentAttemptId = generateNanoId();
       const reference = `stripe-${paymentAttemptId}`;
       const orderPayload = buildOrderPayload(input);
+      const normalizedOrder = normalizeCreateOrderInput(input);
+      const preparedPayload = await prepareOrderPayload(fastify, normalizedOrder);
+      const scheduledFor =
+        normalizedOrder.preparationDelayMinutes > 0
+          ? new Date(Date.now() + normalizedOrder.preparationDelayMinutes * 60_000)
+          : null;
 
-      const [paymentAttempt] = await fastify.db
-        .insert(orderPaymentAttemptsDB)
-        .values({
-          id: paymentAttemptId,
+      const paymentAttempt = await fastify.db.transaction(async (tx) => {
+        const [created] = await tx
+          .insert(orderPaymentAttemptsDB)
+          .values({
+            id: paymentAttemptId,
+            organizationId: input.organizationId,
+            customerId: input.customerId,
+            provider: "stripe",
+            reference,
+            amountCents: input.amountCents,
+            currency: normalizedCurrency,
+            status: "pending",
+            orderPayload,
+          })
+          .returning();
+        if (!created) return null;
+        await reserveCheckoutInventory(tx, {
           organizationId: input.organizationId,
-          customerId: input.customerId,
-          provider: "stripe",
-          reference,
-          amountCents: input.amountCents,
-          currency: normalizedCurrency,
-          status: "pending",
-          orderPayload,
-        })
-        .returning();
+          paymentAttemptId,
+          payload: preparedPayload,
+          scheduledFor,
+          expiresAt: new Date(Date.now() + 10 * 60_000),
+        });
+        return created;
+      });
 
       if (!paymentAttempt) {
         throw internalError(
@@ -441,16 +464,19 @@ export function customerOrdersService(fastify: FastifyInstance): CustomerOrdersS
           },
         };
       } catch (error) {
-        await fastify.db
-          .update(orderPaymentAttemptsDB)
-          .set({
-            status: "failed",
-            failureCode: "stripe.paymentSheet.createFailed",
-            failureMessage:
-              error instanceof Error ? error.message : "Failed to create Stripe payment sheet",
-            updatedAt: sql`now()`,
-          })
-          .where(eq(orderPaymentAttemptsDB.id, paymentAttemptId));
+        await fastify.db.transaction(async (tx) => {
+          await tx
+            .update(orderPaymentAttemptsDB)
+            .set({
+              status: "failed",
+              failureCode: "stripe.paymentSheet.createFailed",
+              failureMessage:
+                error instanceof Error ? error.message : "Failed to create Stripe payment sheet",
+              updatedAt: sql`now()`,
+            })
+            .where(eq(orderPaymentAttemptsDB.id, paymentAttemptId));
+          await releaseCheckoutInventory(tx, paymentAttemptId);
+        });
 
         throw error;
       }

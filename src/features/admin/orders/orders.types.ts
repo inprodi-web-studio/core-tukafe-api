@@ -10,6 +10,7 @@ import type {
   AdminOrderDetail,
   AdminOrderListItem,
   AdminOrdersListQuery,
+  CancelOrderResponse,
 } from "./orders.read.schemas";
 
 export interface ListAdminOrdersParams extends AdminOrdersListQuery {
@@ -19,6 +20,12 @@ export interface ListAdminOrdersParams extends AdminOrdersListQuery {
 export interface AdminOrdersService {
   list(input: ListAdminOrdersParams): Promise<PaginatedResult<AdminOrderListItem>>;
   get(organizationId: string, orderId: string): Promise<AdminOrderDetail>;
+  cancel(input: {
+    organizationId: string;
+    orderId: string;
+    userId: string;
+    reason: string;
+  }): Promise<CancelOrderResponse>;
   create(input: CreateOrderServiceParams): Promise<OrderResponse>;
   createPaymentAttempt(
     input: CreateOrderPaymentAttemptServiceParams,

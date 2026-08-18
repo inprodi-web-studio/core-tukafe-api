@@ -6,6 +6,10 @@ const listItemSchema = z.object({
   name: z.string(),
   description: z.string().nullish(),
   baseCostPerUnit: z.number().nonnegative(),
+  isInventoryTracked: z.boolean(),
+  tracksLots: z.boolean(),
+  isPerishable: z.boolean(),
+  expirationWarningDays: z.number().int().nonnegative(),
   baseUnit: z.object({
     id: z.string(),
     name: z.string(),

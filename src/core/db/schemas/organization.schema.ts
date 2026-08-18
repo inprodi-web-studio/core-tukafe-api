@@ -14,6 +14,7 @@ const organization = pgTable(
     address: text("address").notNull(),
     latitude: doublePrecision("latitude"),
     longitude: doublePrecision("longitude"),
+    timezone: text("timezone").notNull().default("America/Mexico_City"),
     ...generateTimestamps({ withDeletedAt: true }),
   },
   (table) => [

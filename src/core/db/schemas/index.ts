@@ -9,6 +9,7 @@ export * from "./customerQrLoginToken.schema";
 export * from "./ingredient.schema";
 export * from "./ingredientCategory.schema";
 export * from "./invitation.schema";
+export * from "./inventory.schema";
 export * from "./legacyCustomerPassword.schema";
 export * from "./member.schema";
 export * from "./modifier.schema";

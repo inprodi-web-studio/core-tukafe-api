@@ -11,6 +11,7 @@ import {
   variationsDB,
 } from "@core/db/schemas";
 import { notFound } from "@core/utils";
+import { createInventoryAvailabilitySnapshot } from "@features/shared/inventory";
 import { and, asc, desc, eq, exists, gte, inArray, isNull, or, sql } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
 import type {
@@ -510,6 +511,14 @@ export function guestProductsService(fastify: FastifyInstance): GuestProductsSer
         }),
       ]);
 
+      const inventoryAvailability = organizationId
+        ? await createInventoryAvailabilitySnapshot(fastify, { organizationId })
+        : null;
+      const unlimitedAvailability = {
+        isAvailable: true,
+        reason: "available" as const,
+        maxProducible: null,
+      };
       const organizationsByProductId = new Map<string, GuestProductListItem["organizations"]>();
 
       for (const link of organizationLinks) {
@@ -566,6 +575,9 @@ export function guestProductsService(fastify: FastifyInstance): GuestProductsSer
           sortOrder: variation.sortOrder,
           priceCents: variation.priceCents,
           customerDescription: variation.customerDescription ?? null,
+          availability:
+            inventoryAvailability?.variation(variation.productId, variation.id) ??
+            unlimitedAvailability,
           selections: [...variation.selections].sort((left, right) => {
             if (left.group.sortOrder !== right.group.sortOrder) {
               return left.group.sortOrder - right.group.sortOrder;
@@ -597,6 +609,8 @@ export function guestProductsService(fastify: FastifyInstance): GuestProductsSer
           isFeatured: product.isFeatured,
           customerDescription: product.customerDescription ?? null,
           productType: product.productType,
+          availability:
+            inventoryAvailability?.product(product.id) ?? unlimitedAvailability,
           image: product.image,
           unit: product.unit,
           category: product.category,
@@ -831,6 +845,15 @@ export function guestProductsService(fastify: FastifyInstance): GuestProductsSer
           );
         }
       }
+
+      const inventoryAvailability = organizationId
+        ? await createInventoryAvailabilitySnapshot(fastify, { organizationId })
+        : null;
+      const unlimitedAvailability = {
+        isAvailable: true,
+        reason: "available" as const,
+        maxProducible: null,
+      };
 
       const [includeAllowedModifierOptions, includeModifierVisibilityRules] = await Promise.all([
         productModifierOptionsTableExists(fastify),
@@ -1096,11 +1119,77 @@ export function guestProductsService(fastify: FastifyInstance): GuestProductsSer
                   priceCents: option.priceCents,
                   isDefault: option.isDefault,
                   sortOrder: option.sortOrder,
+                  availability:
+                    inventoryAvailability?.modifierOption(option.id) ?? unlimitedAvailability,
                 };
               }),
             ),
           };
         });
+
+      const modifierCanMeetMinimum = (
+        step: (typeof modifierSteps)[number],
+        selections: Array<{ variationGroupId: string; variationOptionId: string }>,
+      ) => {
+        const isVisible =
+          step.visibleWhen.length === 0 ||
+          step.visibleWhen.some((condition) =>
+            selections.some(
+              (selection) =>
+                selection.variationGroupId === condition.variationGroupId &&
+                selection.variationOptionId === condition.variationOptionId,
+            ),
+          );
+        if (!isVisible || step.minSelect === 0) return true;
+        return step.options.filter((option) => option.availability.isAvailable).length >= step.minSelect;
+      };
+      const resolvedVariations = sortConfigurationVariations(
+        variations.map((variation) => {
+          const selections = [...variation.selections]
+            .sort((left, right) => {
+              if (left.group.sortOrder !== right.group.sortOrder) {
+                return left.group.sortOrder - right.group.sortOrder;
+              }
+
+              if (left.group.name !== right.group.name) {
+                return left.group.name.localeCompare(right.group.name);
+              }
+
+              return left.group.id.localeCompare(right.group.id);
+            })
+            .map((selection) => ({
+              variationGroupId: selection.variationGroupId,
+              variationOptionId: selection.variationOptionId,
+            }));
+          const inventoryState =
+            inventoryAvailability?.variation(product.id, variation.id) ?? unlimitedAvailability;
+          const canConfigure = modifierSteps.every((step) =>
+            modifierCanMeetMinimum(step, selections),
+          );
+          return {
+            id: variation.id,
+            sortOrder: variation.sortOrder,
+            priceCents: variation.priceCents,
+            customerDescription: variation.customerDescription ?? null,
+            availability: canConfigure
+              ? inventoryState
+              : { isAvailable: false, reason: "sold_out" as const, maxProducible: 0 },
+            selections,
+          };
+        }),
+      );
+      const baseInventoryAvailability =
+        inventoryAvailability?.product(product.id) ?? unlimitedAvailability;
+      const productAvailability =
+        product.productType === "compound"
+          ? baseInventoryAvailability
+          : resolvedVariations.length > 0
+            ? resolvedVariations.some((variation) => variation.availability.isAvailable)
+              ? baseInventoryAvailability
+              : { isAvailable: false, reason: "sold_out" as const, maxProducible: 0 }
+            : modifierSteps.every((step) => modifierCanMeetMinimum(step, []))
+              ? baseInventoryAvailability
+              : { isAvailable: false, reason: "sold_out" as const, maxProducible: 0 };
 
       const configuration = {
         product: {
@@ -1108,6 +1197,7 @@ export function guestProductsService(fastify: FastifyInstance): GuestProductsSer
           name: product.name,
           isFeatured: product.isFeatured,
           productType: product.productType,
+          availability: productAvailability,
           image: product.image,
         },
         pricing: {
@@ -1115,30 +1205,7 @@ export function guestProductsService(fastify: FastifyInstance): GuestProductsSer
           usesVariationPricing: variations.length > 0,
         },
         steps: [...variationSteps, ...modifierSteps],
-        variations: sortConfigurationVariations(
-          variations.map((variation) => ({
-            id: variation.id,
-            sortOrder: variation.sortOrder,
-            priceCents: variation.priceCents,
-            customerDescription: variation.customerDescription ?? null,
-            selections: [...variation.selections]
-              .sort((left, right) => {
-                if (left.group.sortOrder !== right.group.sortOrder) {
-                  return left.group.sortOrder - right.group.sortOrder;
-                }
-
-                if (left.group.name !== right.group.name) {
-                  return left.group.name.localeCompare(right.group.name);
-                }
-
-                return left.group.id.localeCompare(right.group.id);
-              })
-              .map((selection) => ({
-                variationGroupId: selection.variationGroupId,
-                variationOptionId: selection.variationOptionId,
-              })),
-          })),
-        ),
+        variations: resolvedVariations,
       };
 
       if (product.productType !== "compound") {

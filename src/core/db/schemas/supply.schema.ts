@@ -1,5 +1,14 @@
 import { relations, sql } from "drizzle-orm";
-import { check, index, numeric, pgTable, text, uniqueIndex } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  check,
+  index,
+  integer,
+  numeric,
+  pgTable,
+  text,
+  uniqueIndex,
+} from "drizzle-orm/pg-core";
 
 import { generateTimestamps } from "@core/utils";
 import { supplyCategoriesDB } from "./supplyCategory.schema";
@@ -22,10 +31,18 @@ const supplies = pgTable(
       scale: 6,
       mode: "number",
     }).notNull(),
+    isInventoryTracked: boolean("is_inventory_tracked").notNull().default(true),
+    tracksLots: boolean("tracks_lots").notNull().default(false),
+    isPerishable: boolean("is_perishable").notNull().default(false),
+    expirationWarningDays: integer("expiration_warning_days").notNull().default(3),
     ...generateTimestamps({ withDeletedAt: true }),
   },
   (table) => [
     check("supply_base_cost_per_unit_non_negative_check", sql`${table.baseCostPerUnit} >= 0`),
+    check(
+      "supply_expiration_warning_days_non_negative_check",
+      sql`${table.expirationWarningDays} >= 0`,
+    ),
     uniqueIndex("supply_name_active_unique")
       .on(table.name)
       .where(sql`${table.deletedAt} IS NULL`),

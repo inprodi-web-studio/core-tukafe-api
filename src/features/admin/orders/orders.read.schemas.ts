@@ -8,6 +8,7 @@ export const adminOrderPreparationStatusSchema = z.enum([
   "preparing",
   "ready",
   "no_work",
+  "cancelled",
 ]);
 export const adminOrderSourceSchema = z.enum(["inplace", "mobile", "admin", "unknown"]);
 
@@ -25,6 +26,7 @@ const preparationSummarySchema = z.object({
   total: z.number().int().nonnegative(),
   open: z.number().int().nonnegative(),
   completed: z.number().int().nonnegative(),
+  cancelled: z.number().int().nonnegative(),
 });
 
 const paymentSummarySchema = z.object({
@@ -59,7 +61,9 @@ export const adminOrdersListQuerySchema = z
     dateFrom: z.iso.date().optional(),
     dateTo: z.iso.date().optional(),
     paymentStatus: z.enum(["all", "paid", "not_required", "not_recorded"]).default("all"),
-    preparationStatus: z.enum(["all", "scheduled", "preparing", "ready", "no_work"]).default("all"),
+    preparationStatus: z
+      .enum(["all", "scheduled", "preparing", "ready", "no_work", "cancelled"])
+      .default("all"),
     source: z.enum(["all", "inplace", "mobile", "admin", "unknown"]).default("all"),
   })
   .strict();
@@ -126,7 +130,7 @@ const adminOrderWorkOrderSchema = z.object({
   itemComment: z.string().nullable(),
   unitIndex: z.number().int().positive(),
   quantitySnapshot: z.number().positive(),
-  status: z.enum(["open", "completed"]),
+  status: z.enum(["open", "completed", "cancelled"]),
   scheduledFor: z.date().nullable(),
   completedAt: z.date().nullable(),
   completedBy: z.object({ id: z.string(), name: z.string(), email: z.string() }).nullable(),
@@ -143,6 +147,8 @@ export const adminOrderDetailSchema = z.object({
   source: adminOrderSourceSchema,
   comment: z.string().nullable(),
   couponCode: z.string().nullable(),
+  cancelledAt: z.date().nullable(),
+  cancellationReason: z.string().nullable(),
   customer: adminOrderCustomerSchema.nullable(),
   customerDisplayName: z.string(),
   economics: z.object({
@@ -165,7 +171,19 @@ export const adminOrderDetailSchema = z.object({
   workOrders: z.array(adminOrderWorkOrderSchema),
 });
 
+export const cancelOrderBodySchema = z
+  .object({ reason: z.string().trim().min(1).max(500) })
+  .strict();
+
+export const cancelOrderResponseSchema = z.object({
+  orderId: z.string(),
+  cancelledAt: z.date(),
+  cancelledWorkOrders: z.number().int().positive(),
+});
+
 export type AdminOrdersListQuery = z.infer<typeof adminOrdersListQuerySchema>;
 export type AdminOrderParams = z.infer<typeof adminOrderParamsSchema>;
 export type AdminOrderListItem = z.infer<typeof adminOrderListItemSchema>;
 export type AdminOrderDetail = z.infer<typeof adminOrderDetailSchema>;
+export type CancelOrderBody = z.infer<typeof cancelOrderBodySchema>;
+export type CancelOrderResponse = z.infer<typeof cancelOrderResponseSchema>;

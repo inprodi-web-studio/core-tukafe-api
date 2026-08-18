@@ -18,6 +18,10 @@ export interface CreateSupplyServiceParams {
   baseUnitId: string;
   categoryId: string;
   baseCostPerUnit: number;
+  isInventoryTracked?: boolean;
+  tracksLots?: boolean;
+  isPerishable?: boolean;
+  expirationWarningDays?: number;
 }
 
 export interface SupplyResponse extends Omit<Supply, "categoryId" | "baseUnitId"> {

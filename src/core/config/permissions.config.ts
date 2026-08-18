@@ -20,6 +20,7 @@ const organizationStatements = {
   cashback: ["read", "update"],
   notifications: ["create", "read", "update"],
   uploads: ["create", "read", "update", "delete"],
+  inventory: ["read", "adjust", "manage"],
 } as const;
 
 export const ORGANIZATION_AC = createAccessControl(organizationStatements);
@@ -52,6 +53,7 @@ export const ORGANIZATION_ROLES = {
     cashback: ["read", "update"],
     notifications: ["create", "read", "update"],
     uploads: ["create", "read", "update", "delete"],
+    inventory: ["read", "adjust", "manage"],
   }),
   admin: ORGANIZATION_AC.newRole({
     organization: ["update"],
@@ -74,6 +76,7 @@ export const ORGANIZATION_ROLES = {
     cashback: ["read", "update"],
     notifications: ["create", "read", "update"],
     uploads: ["create", "read"],
+    inventory: ["read", "adjust", "manage"],
   }),
   member: ORGANIZATION_AC.newRole({
     invitation: ["create"],
@@ -92,6 +95,7 @@ export const ORGANIZATION_ROLES = {
     orders: ["create", "read"],
     coupons: ["read"],
     uploads: ["read"],
+    inventory: ["read"],
   }),
   barista: ORGANIZATION_AC.newRole({
     orders: ["read", "update"],

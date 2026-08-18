@@ -20,6 +20,7 @@ import { organizationDB } from "./organization.schema";
 import { productsDB } from "./product.schema";
 import { taxDB } from "./tax.schema";
 import { unitsDB } from "./unit.schema";
+import { userDB } from "./user.schema";
 import { variationsDB } from "./variation.schema";
 
 const orders = pgTable(
@@ -38,6 +39,11 @@ const orders = pgTable(
     folio: text("folio").notNull(),
     comment: text("comment"),
     scheduledFor: timestamp("scheduled_for", { mode: "date", withTimezone: true }),
+    cancelledAt: timestamp("cancelled_at", { mode: "date", withTimezone: true }),
+    cancelledByUserId: text("cancelled_by_user_id").references(() => userDB.id, {
+      onDelete: "restrict",
+    }),
+    cancellationReason: text("cancellation_reason"),
     tipType: text("tip_type", { enum: ["none", "percentage", "amount"] })
       .notNull()
       .default("none"),
@@ -61,6 +67,7 @@ const orders = pgTable(
     index("order_customer_id_idx").on(table.customerId),
     index("order_coupon_id_idx").on(table.couponId),
     index("order_customer_id_created_at_idx").on(table.customerId, table.createdAt),
+    index("order_cancelled_by_user_id_idx").on(table.cancelledByUserId),
     index("order_created_at_idx").on(table.createdAt),
     check("order_folio_format_check", sql`${table.folio} ~ '^(0[1-9]|1[0-2])-[0-9]{2}-[0-9]{6}$'`),
     check("order_source_check", sql`${table.source} in ('inplace', 'mobile', 'admin', 'unknown')`),
@@ -92,6 +99,10 @@ const orders = pgTable(
     ),
     check("order_grand_total_cents_non_negative_check", sql`${table.grandTotalCents} >= 0`),
     check("order_amount_due_cents_non_negative_check", sql`${table.amountDueCents} >= 0`),
+    check(
+      "order_cancellation_consistency_check",
+      sql`(${table.cancelledAt} is null and ${table.cancelledByUserId} is null and ${table.cancellationReason} is null) or (${table.cancelledAt} is not null and ${table.cancelledByUserId} is not null and nullif(trim(${table.cancellationReason}), '') is not null)`,
+    ),
     check(
       "order_cashback_redemption_lte_grand_total_check",
       sql`${table.cashbackRedemptionCents} <= ${table.grandTotalCents}`,

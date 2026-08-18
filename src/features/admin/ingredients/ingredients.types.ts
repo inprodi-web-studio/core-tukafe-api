@@ -18,6 +18,10 @@ export interface CreateIngredientServiceParams {
   baseUnitId: string;
   categoryId: string;
   baseCostPerUnit: number;
+  isInventoryTracked?: boolean;
+  tracksLots?: boolean;
+  isPerishable?: boolean;
+  expirationWarningDays?: number;
 }
 
 export interface IngredientResponse extends Omit<Ingredient, "categoryId" | "baseUnitId"> {

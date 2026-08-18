@@ -103,8 +103,8 @@ export function adminIngredientsService(fastify: FastifyInstance): AdminIngredie
     },
 
     async create(input) {
-      const { name, categoryId, baseCostPerUnit, description, baseUnitId } =
-        normalizeIngredientInput(input);
+      const normalizedInput = normalizeIngredientInput(input);
+      const { name, categoryId, baseCostPerUnit, description, baseUnitId } = normalizedInput;
 
       try {
         await fastify.admin.units.get(baseUnitId);
@@ -120,6 +120,10 @@ export function adminIngredientsService(fastify: FastifyInstance): AdminIngredie
             baseCostPerUnit,
             description,
             baseUnitId,
+            isInventoryTracked: normalizedInput.isInventoryTracked ?? true,
+            tracksLots: normalizedInput.tracksLots ?? false,
+            isPerishable: normalizedInput.isPerishable ?? false,
+            expirationWarningDays: normalizedInput.expirationWarningDays ?? 3,
           })
           .returning();
 
@@ -148,6 +152,26 @@ export function adminIngredientsService(fastify: FastifyInstance): AdminIngredie
     async update(id, input) {
       await fastify.admin.ingredients.get(id);
       const normalizedInput = normalizeIngredientUpdateInput(input);
+
+      if (
+        normalizedInput.isInventoryTracked !== undefined ||
+        normalizedInput.tracksLots !== undefined ||
+        normalizedInput.isPerishable !== undefined
+      ) {
+        const result = await fastify.db.execute(sql`
+          select exists(
+            select 1 from inventory_balance
+            where inventory_item_id = ${`inv_ing_${id}`}
+              and (on_hand_quantity <> 0 or reserved_quantity <> 0)
+          ) as "hasStock"
+        `);
+        if (result.rows[0]?.hasStock) {
+          throw conflict(
+            "inventory.itemConfigurationHasStock",
+            "Inventory tracking and lot configuration can only change with zero balances",
+          );
+        }
+      }
 
       if (normalizedInput.baseUnitId) {
         await fastify.admin.units.get(normalizedInput.baseUnitId);

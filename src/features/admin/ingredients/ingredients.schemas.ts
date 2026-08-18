@@ -17,6 +17,10 @@ export const updateIngredientBodySchema = z
         `Base cost per unit must have at most ${MAX_SUPPORTED_DECIMAL_PLACES} decimal places`,
       )
       .optional(),
+    isInventoryTracked: z.boolean().optional(),
+    tracksLots: z.boolean().optional(),
+    isPerishable: z.boolean().optional(),
+    expirationWarningDays: z.number().int().min(0).max(365).optional(),
   })
   .strict()
   .refine((body) => Object.keys(body).length > 0, {
