@@ -21,6 +21,7 @@ const organizationStatements = {
   notifications: ["create", "read", "update"],
   uploads: ["create", "read", "update", "delete"],
   inventory: ["read", "adjust", "manage"],
+  purchaseOrders: ["read", "manage", "receive"],
 } as const;
 
 export const ORGANIZATION_AC = createAccessControl(organizationStatements);
@@ -54,6 +55,7 @@ export const ORGANIZATION_ROLES = {
     notifications: ["create", "read", "update"],
     uploads: ["create", "read", "update", "delete"],
     inventory: ["read", "adjust", "manage"],
+    purchaseOrders: ["read", "manage", "receive"],
   }),
   admin: ORGANIZATION_AC.newRole({
     organization: ["update"],
@@ -77,6 +79,7 @@ export const ORGANIZATION_ROLES = {
     notifications: ["create", "read", "update"],
     uploads: ["create", "read"],
     inventory: ["read", "adjust", "manage"],
+    purchaseOrders: ["read", "manage", "receive"],
   }),
   member: ORGANIZATION_AC.newRole({
     invitation: ["create"],
@@ -96,6 +99,7 @@ export const ORGANIZATION_ROLES = {
     coupons: ["read"],
     uploads: ["read"],
     inventory: ["read"],
+    purchaseOrders: ["read"],
   }),
   barista: ORGANIZATION_AC.newRole({
     orders: ["read", "update"],

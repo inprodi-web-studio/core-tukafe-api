@@ -19,6 +19,7 @@ export * from "./organizationSchedule.schema";
 export * from "./order.schema";
 export * from "./product.schema";
 export * from "./productCategory.schema";
+export * from "./purchaseOrder.schema";
 export * from "./recipe.schema";
 export * from "./session.schema";
 export * from "./supplier.schema";

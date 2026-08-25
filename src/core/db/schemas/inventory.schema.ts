@@ -48,6 +48,8 @@ export const INVENTORY_MOVEMENT_TYPES = [
   "order_reserve",
   "reservation_release",
   "sale_consumption",
+  "purchase_receipt",
+  "purchase_receipt_reversal",
 ] as const;
 export const INVENTORY_RESERVATION_KINDS = ["checkout", "order"] as const;
 export const INVENTORY_RESERVATION_STATUSES = [
@@ -57,11 +59,7 @@ export const INVENTORY_RESERVATION_STATUSES = [
   "released",
   "expired",
 ] as const;
-export const INVENTORY_OVERRIDE_TARGET_TYPES = [
-  "product",
-  "variation",
-  "modifier_option",
-] as const;
+export const INVENTORY_OVERRIDE_TARGET_TYPES = ["product", "variation", "modifier_option"] as const;
 
 export const inventoryItemKindEnum = pgEnum("inventory_item_kind", INVENTORY_ITEM_KINDS);
 export const inventoryLocationTypeEnum = pgEnum(
@@ -380,6 +378,7 @@ export const inventoryMovementsDB = pgTable(
     workOrderId: text("work_order_id").references(() => workOrdersDB.id, {
       onDelete: "restrict",
     }),
+    purchaseReceiptId: text("purchase_receipt_id"),
     actorUserId: text("actor_user_id").references(() => userDB.id, {
       onDelete: "restrict",
     }),
@@ -389,6 +388,7 @@ export const inventoryMovementsDB = pgTable(
     index("inventory_movement_location_created_at_idx").on(table.locationId, table.createdAt),
     index("inventory_movement_adjustment_id_idx").on(table.adjustmentId),
     index("inventory_movement_order_id_idx").on(table.orderId),
+    index("inventory_movement_purchase_receipt_id_idx").on(table.purchaseReceiptId),
   ],
 );
 
