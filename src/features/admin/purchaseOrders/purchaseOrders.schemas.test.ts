@@ -25,6 +25,18 @@ describe("purchase order schemas", () => {
     ).toBe(false);
   });
 
+  it("allows zero-priced lines without observations", () => {
+    expect(
+      purchaseOrderDraftBodySchema.safeParse({
+        supplierId: "supplier-1",
+        locationId: "location-1",
+        lines: [
+          { presentationId: "p-1", quantity: 1, unitPriceCents: 0, taxIds: [] },
+        ],
+      }).success,
+    ).toBe(true);
+  });
+
   it("requires at least one positive receipt allocation", () => {
     expect(receiptBodySchema.safeParse({ receivedOn: "2026-08-25", allocations: [] }).success).toBe(
       false,

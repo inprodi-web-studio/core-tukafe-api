@@ -385,12 +385,6 @@ async function replaceDraftLines(
     subtotalCents += totals.subtotalCents;
     taxCents += totals.taxCents;
   }
-  if (input.lines.some((line) => line.unitPriceCents === 0) && !input.observations) {
-    throw validation(
-      "purchaseOrder.zeroPriceObservationsRequired",
-      "Observations are required when a line has a zero price",
-    );
-  }
   await tx
     .update(purchaseOrdersDB)
     .set({ subtotalCents, taxCents, totalCents: subtotalCents + taxCents, updatedAt: new Date() })
