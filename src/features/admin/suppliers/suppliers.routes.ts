@@ -34,12 +34,16 @@ import {
 } from "./suppliers.schemas";
 
 export async function adminSuppliersRoutes(server: FastifyInstance) {
-  const handlers = [adminAuthHandler(), requireGlobalSupplierManager];
+  const canRead = adminAuthHandler({
+    roles: ["owner", "admin"],
+    permissions: { suppliers: ["read"] },
+  });
+  const canManage = [adminAuthHandler({ roles: ["owner", "admin"] }), requireGlobalSupplierManager];
 
   server.get<{ Querystring: ListQuery }>(
     "/",
     {
-      preHandler: handlers,
+      preHandler: [canRead],
       schema: { querystring: listQuerySchema, response: { 200: supplierListResponseSchema } },
     },
     async (request, reply) =>
@@ -49,7 +53,7 @@ export async function adminSuppliersRoutes(server: FastifyInstance) {
   server.post<{ Body: CreateSupplierBody }>(
     "/",
     {
-      preHandler: handlers,
+      preHandler: canManage,
       schema: { body: createSupplierBodySchema, response: { 201: supplierSchema } },
     },
     async (request, reply) =>
@@ -59,7 +63,7 @@ export async function adminSuppliersRoutes(server: FastifyInstance) {
   server.get<{ Params: SupplierParams }>(
     "/:supplierId",
     {
-      preHandler: handlers,
+      preHandler: [canRead],
       schema: { params: supplierParamsSchema, response: { 200: supplierSchema } },
     },
     async (request, reply) =>
@@ -73,7 +77,7 @@ export async function adminSuppliersRoutes(server: FastifyInstance) {
   server.patch<{ Params: SupplierParams; Body: UpdateSupplierBody }>(
     "/:supplierId",
     {
-      preHandler: handlers,
+      preHandler: canManage,
       schema: {
         params: supplierParamsSchema,
         body: updateSupplierBodySchema,
@@ -89,7 +93,7 @@ export async function adminSuppliersRoutes(server: FastifyInstance) {
   server.delete<{ Params: SupplierParams }>(
     "/:supplierId",
     {
-      preHandler: handlers,
+      preHandler: canManage,
       schema: { params: supplierParamsSchema },
     },
     async (request, reply) => {
@@ -101,7 +105,7 @@ export async function adminSuppliersRoutes(server: FastifyInstance) {
   server.put<{ Params: SupplierParams }>(
     "/:supplierId/restore",
     {
-      preHandler: handlers,
+      preHandler: canManage,
       schema: { params: supplierParamsSchema, response: { 200: supplierSchema } },
     },
     async (request, reply) =>
@@ -111,7 +115,7 @@ export async function adminSuppliersRoutes(server: FastifyInstance) {
   server.get<{ Params: SupplierParams; Querystring: ItemListQuery }>(
     "/:supplierId/items",
     {
-      preHandler: handlers,
+      preHandler: [canRead],
       schema: {
         params: supplierParamsSchema,
         querystring: itemListQuerySchema,
@@ -127,7 +131,7 @@ export async function adminSuppliersRoutes(server: FastifyInstance) {
   server.post<{ Params: SupplierParams; Body: AssignItemBody }>(
     "/:supplierId/items",
     {
-      preHandler: handlers,
+      preHandler: canManage,
       schema: {
         params: supplierParamsSchema,
         body: assignItemBodySchema,
@@ -149,7 +153,7 @@ export async function adminSuppliersRoutes(server: FastifyInstance) {
   server.delete<{ Params: SupplierItemParams }>(
     "/:supplierId/items/:supplierItemId",
     {
-      preHandler: handlers,
+      preHandler: canManage,
       schema: { params: supplierItemParamsSchema },
     },
     async (request, reply) => {
@@ -164,7 +168,7 @@ export async function adminSuppliersRoutes(server: FastifyInstance) {
   server.put<{ Params: SupplierItemParams }>(
     "/:supplierId/items/:supplierItemId/restore",
     {
-      preHandler: handlers,
+      preHandler: canManage,
       schema: { params: supplierItemParamsSchema, response: { 200: supplierItemSchema } },
     },
     async (request, reply) =>
@@ -181,7 +185,7 @@ export async function adminSuppliersRoutes(server: FastifyInstance) {
   server.post<{ Params: SupplierItemParams; Body: PresentationInputBody }>(
     "/:supplierId/items/:supplierItemId/presentations",
     {
-      preHandler: handlers,
+      preHandler: canManage,
       schema: {
         params: supplierItemParamsSchema,
         body: presentationInputSchema,
@@ -204,7 +208,7 @@ export async function adminSuppliersRoutes(server: FastifyInstance) {
   server.delete<{ Params: PresentationParams }>(
     "/:supplierId/items/:supplierItemId/presentations/:presentationId",
     {
-      preHandler: handlers,
+      preHandler: canManage,
       schema: { params: presentationParamsSchema },
     },
     async (request, reply) => {
@@ -220,7 +224,7 @@ export async function adminSuppliersRoutes(server: FastifyInstance) {
   server.put<{ Params: PresentationParams }>(
     "/:supplierId/items/:supplierItemId/presentations/:presentationId/restore",
     {
-      preHandler: handlers,
+      preHandler: canManage,
       schema: { params: presentationParamsSchema, response: { 200: presentationSchema } },
     },
     async (request, reply) =>
@@ -238,7 +242,7 @@ export async function adminSuppliersRoutes(server: FastifyInstance) {
   server.put<{ Params: PresentationParams }>(
     "/:supplierId/items/:supplierItemId/presentations/:presentationId/default",
     {
-      preHandler: handlers,
+      preHandler: canManage,
       schema: { params: presentationParamsSchema, response: { 200: presentationSchema } },
     },
     async (request, reply) =>
@@ -256,7 +260,7 @@ export async function adminSuppliersRoutes(server: FastifyInstance) {
   server.post<{ Params: PresentationParams; Body: CostBody }>(
     "/:supplierId/items/:supplierItemId/presentations/:presentationId/costs",
     {
-      preHandler: handlers,
+      preHandler: canManage,
       schema: {
         params: presentationParamsSchema,
         body: costBodySchema,
@@ -280,7 +284,7 @@ export async function adminSuppliersRoutes(server: FastifyInstance) {
   server.get<{ Params: PresentationParams; Querystring: PaginationQuery }>(
     "/:supplierId/items/:supplierItemId/presentations/:presentationId/costs",
     {
-      preHandler: handlers,
+      preHandler: [canRead],
       schema: {
         params: presentationParamsSchema,
         querystring: paginationQuerySchema,
