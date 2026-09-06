@@ -1,8 +1,6 @@
-import type { FastifyRequest } from "fastify";
 import Fastify from "fastify";
 import zodSchemaPlugin from "@core/plugins/zodSchema.plugin";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { requireGlobalSupplierManager } from "./suppliers.access";
 import { adminSuppliersRoutes } from "./suppliers.routes";
 import {
   assignItemBodySchema,
@@ -18,54 +16,40 @@ afterEach(async () => {
   await Promise.all(servers.splice(0).map((server) => server.close()));
 });
 
-function requestWithRole(role: string) {
-  return {
-    auth: { user: { id: "viewer" } },
-    server: {
-      db: {
-        select: vi.fn(() => ({
-          from: vi.fn(() => ({
-            where: vi.fn(() => ({ limit: vi.fn().mockResolvedValue([{ role }]) })),
-          })),
-        })),
-      },
-    },
-  } as unknown as FastifyRequest;
-}
-
 describe("global supplier catalog contracts", () => {
-  it("allows global owners and admins but rejects membership-only roles", async () => {
-    await expect(requireGlobalSupplierManager(requestWithRole("owner"))).resolves.toBeUndefined();
-    await expect(requireGlobalSupplierManager(requestWithRole("admin"))).resolves.toBeUndefined();
-    await expect(requireGlobalSupplierManager(requestWithRole("member"))).rejects.toMatchObject({
-      code: "supplier.globalManagerRequired",
-      statusCode: 403,
-    });
-    await expect(requireGlobalSupplierManager(requestWithRole("barista"))).rejects.toMatchObject({
-      statusCode: 403,
-    });
-  });
-
   it("defaults listing to active suppliers and twenty rows", () => {
     expect(listQuerySchema.parse({})).toEqual({ page: 1, pageSize: 20, status: "active" });
   });
 
-  it("allows an organization admin to read suppliers without a global user role", async () => {
+  it("allows an organization admin to read and create suppliers without a global user role", async () => {
     const list = vi.fn().mockResolvedValue({
       data: [],
       pagination: { page: 1, pageSize: 20, totalItems: 0, totalPages: 0 },
     });
+    const createdSupplier = {
+      id: "supplier-new",
+      name: "Nuevo proveedor",
+      email: null,
+      phone: null,
+      status: "active",
+      ingredientCount: 0,
+      supplyCount: 0,
+      createdAt: new Date("2026-09-06T12:00:00.000Z"),
+      updatedAt: new Date("2026-09-06T12:00:00.000Z"),
+    };
+    const create = vi.fn().mockResolvedValue(createdSupplier);
+    const hasPermission = vi.fn().mockResolvedValue({ success: true });
     const server = Fastify();
     servers.push(server);
     await server.register(zodSchemaPlugin);
-    server.decorate("admin", { suppliers: { list } } as unknown as typeof server.admin);
+    server.decorate("admin", { suppliers: { list, create } } as unknown as typeof server.admin);
     server.decorate("auth", {
       api: {
         getSession: vi.fn().mockResolvedValue({
           session: { activeOrganizationId: "org-active" },
           user: { id: "customer-with-admin-membership", role: "customer" },
         }),
-        hasPermission: vi.fn().mockResolvedValue({ success: true }),
+        hasPermission,
       },
     } as unknown as typeof server.auth);
     server.decorate("db", {
@@ -87,9 +71,19 @@ describe("global supplier catalog contracts", () => {
     await server.ready();
 
     const response = await server.inject({ method: "GET", url: "/suppliers" });
+    const createResponse = await server.inject({
+      method: "POST",
+      url: "/suppliers",
+      payload: { name: "Nuevo proveedor" },
+    });
 
     expect(response.statusCode).toBe(200);
+    expect(createResponse.statusCode).toBe(201);
     expect(list).toHaveBeenCalledWith({ page: 1, pageSize: 20, status: "active" });
+    expect(create).toHaveBeenCalledWith({ name: "Nuevo proveedor" });
+    expect(hasPermission).toHaveBeenCalledWith(
+      expect.objectContaining({ body: { permissions: { suppliers: ["create"] } } }),
+    );
   });
 
   it("requires at least one supplier field on update", () => {

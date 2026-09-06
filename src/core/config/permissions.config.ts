@@ -68,7 +68,7 @@ export const ORGANIZATION_ROLES = {
     modifiers: ["read"],
     ingredients: ["read"],
     supplies: ["read"],
-    suppliers: ["read"],
+    suppliers: ["create", "read", "update", "delete"],
     ingredientCategories: ["read"],
     supplyCategories: ["read"],
     taxes: ["read"],

@@ -1,6 +1,5 @@
 import { adminAuthHandler } from "@core/handlers";
 import type { FastifyInstance } from "fastify";
-import { requireGlobalSupplierManager } from "./suppliers.access";
 import {
   assignItemBodySchema,
   costBodySchema,
@@ -38,7 +37,18 @@ export async function adminSuppliersRoutes(server: FastifyInstance) {
     roles: ["owner", "admin"],
     permissions: { suppliers: ["read"] },
   });
-  const canManage = [adminAuthHandler({ roles: ["owner", "admin"] }), requireGlobalSupplierManager];
+  const canCreate = adminAuthHandler({
+    roles: ["owner", "admin"],
+    permissions: { suppliers: ["create"] },
+  });
+  const canUpdate = adminAuthHandler({
+    roles: ["owner", "admin"],
+    permissions: { suppliers: ["update"] },
+  });
+  const canDelete = adminAuthHandler({
+    roles: ["owner", "admin"],
+    permissions: { suppliers: ["delete"] },
+  });
 
   server.get<{ Querystring: ListQuery }>(
     "/",
@@ -53,7 +63,7 @@ export async function adminSuppliersRoutes(server: FastifyInstance) {
   server.post<{ Body: CreateSupplierBody }>(
     "/",
     {
-      preHandler: canManage,
+      preHandler: [canCreate],
       schema: { body: createSupplierBodySchema, response: { 201: supplierSchema } },
     },
     async (request, reply) =>
@@ -77,7 +87,7 @@ export async function adminSuppliersRoutes(server: FastifyInstance) {
   server.patch<{ Params: SupplierParams; Body: UpdateSupplierBody }>(
     "/:supplierId",
     {
-      preHandler: canManage,
+      preHandler: [canUpdate],
       schema: {
         params: supplierParamsSchema,
         body: updateSupplierBodySchema,
@@ -93,7 +103,7 @@ export async function adminSuppliersRoutes(server: FastifyInstance) {
   server.delete<{ Params: SupplierParams }>(
     "/:supplierId",
     {
-      preHandler: canManage,
+      preHandler: [canDelete],
       schema: { params: supplierParamsSchema },
     },
     async (request, reply) => {
@@ -105,7 +115,7 @@ export async function adminSuppliersRoutes(server: FastifyInstance) {
   server.put<{ Params: SupplierParams }>(
     "/:supplierId/restore",
     {
-      preHandler: canManage,
+      preHandler: [canDelete],
       schema: { params: supplierParamsSchema, response: { 200: supplierSchema } },
     },
     async (request, reply) =>
@@ -131,7 +141,7 @@ export async function adminSuppliersRoutes(server: FastifyInstance) {
   server.post<{ Params: SupplierParams; Body: AssignItemBody }>(
     "/:supplierId/items",
     {
-      preHandler: canManage,
+      preHandler: [canUpdate],
       schema: {
         params: supplierParamsSchema,
         body: assignItemBodySchema,
@@ -153,7 +163,7 @@ export async function adminSuppliersRoutes(server: FastifyInstance) {
   server.delete<{ Params: SupplierItemParams }>(
     "/:supplierId/items/:supplierItemId",
     {
-      preHandler: canManage,
+      preHandler: [canUpdate],
       schema: { params: supplierItemParamsSchema },
     },
     async (request, reply) => {
@@ -168,7 +178,7 @@ export async function adminSuppliersRoutes(server: FastifyInstance) {
   server.put<{ Params: SupplierItemParams }>(
     "/:supplierId/items/:supplierItemId/restore",
     {
-      preHandler: canManage,
+      preHandler: [canUpdate],
       schema: { params: supplierItemParamsSchema, response: { 200: supplierItemSchema } },
     },
     async (request, reply) =>
@@ -185,7 +195,7 @@ export async function adminSuppliersRoutes(server: FastifyInstance) {
   server.post<{ Params: SupplierItemParams; Body: PresentationInputBody }>(
     "/:supplierId/items/:supplierItemId/presentations",
     {
-      preHandler: canManage,
+      preHandler: [canUpdate],
       schema: {
         params: supplierItemParamsSchema,
         body: presentationInputSchema,
@@ -208,7 +218,7 @@ export async function adminSuppliersRoutes(server: FastifyInstance) {
   server.delete<{ Params: PresentationParams }>(
     "/:supplierId/items/:supplierItemId/presentations/:presentationId",
     {
-      preHandler: canManage,
+      preHandler: [canUpdate],
       schema: { params: presentationParamsSchema },
     },
     async (request, reply) => {
@@ -224,7 +234,7 @@ export async function adminSuppliersRoutes(server: FastifyInstance) {
   server.put<{ Params: PresentationParams }>(
     "/:supplierId/items/:supplierItemId/presentations/:presentationId/restore",
     {
-      preHandler: canManage,
+      preHandler: [canUpdate],
       schema: { params: presentationParamsSchema, response: { 200: presentationSchema } },
     },
     async (request, reply) =>
@@ -242,7 +252,7 @@ export async function adminSuppliersRoutes(server: FastifyInstance) {
   server.put<{ Params: PresentationParams }>(
     "/:supplierId/items/:supplierItemId/presentations/:presentationId/default",
     {
-      preHandler: canManage,
+      preHandler: [canUpdate],
       schema: { params: presentationParamsSchema, response: { 200: presentationSchema } },
     },
     async (request, reply) =>
@@ -260,7 +270,7 @@ export async function adminSuppliersRoutes(server: FastifyInstance) {
   server.post<{ Params: PresentationParams; Body: CostBody }>(
     "/:supplierId/items/:supplierItemId/presentations/:presentationId/costs",
     {
-      preHandler: canManage,
+      preHandler: [canUpdate],
       schema: {
         params: presentationParamsSchema,
         body: costBodySchema,
