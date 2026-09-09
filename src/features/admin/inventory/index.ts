@@ -1,4 +1,3 @@
-export * from "./inventory.access";
 export * from "./inventory.controllers";
 export { default as adminInventoryServicesPlugin } from "./inventory.plugin";
 export * from "./inventory.routes";
