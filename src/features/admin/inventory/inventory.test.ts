@@ -1,4 +1,5 @@
-import type { FastifyInstance, FastifyRequest } from "fastify";
+import { ORGANIZATION_ROLES } from "@core/config/permissions.config";
+import type { FastifyInstance } from "fastify";
 import { describe, expect, it, vi } from "vitest";
 import { normalizeIngredientCategoryInput } from "../ingredientCategories/ingredientCategories.helpers";
 import { updateIngredientCategoryBodySchema } from "../ingredientCategories/ingredientCategories.schemas";
@@ -9,22 +10,6 @@ import { normalizeSupplyCategoryInput } from "../supplyCategories/supplyCategori
 import { updateSupplyCategoryBodySchema } from "../supplyCategories/supplyCategories.schemas";
 import { updateSupplyBodySchema } from "../supplies/supplies.schemas";
 import { adminSuppliesService } from "../supplies/supplies.service";
-import { requireGlobalInventoryOwner } from "./inventory.access";
-
-function requestWithRole(role: string) {
-  return {
-    auth: { user: { id: "viewer" } },
-    server: {
-      db: {
-        select: vi.fn(() => ({
-          from: vi.fn(() => ({
-            where: vi.fn(() => ({ limit: vi.fn().mockResolvedValue([{ role }]) })),
-          })),
-        })),
-      },
-    },
-  } as unknown as FastifyRequest;
-}
 
 function transactionFastify(results: unknown[][]) {
   const queued = [...results];
@@ -58,15 +43,13 @@ function transactionFastify(results: unknown[][]) {
 }
 
 describe("global inventory catalog contracts", () => {
-  it("allows writes only for the global owner", async () => {
-    await expect(requireGlobalInventoryOwner(requestWithRole("owner"))).resolves.toBeUndefined();
-    await expect(requireGlobalInventoryOwner(requestWithRole("admin"))).rejects.toMatchObject({
-      code: "inventory.globalOwnerRequired",
-      statusCode: 403,
-    });
-    await expect(requireGlobalInventoryOwner(requestWithRole("member"))).rejects.toMatchObject({
-      statusCode: 403,
-    });
+  it("grants administrators full management of ingredients, supplies and their categories", () => {
+    const fullManagement = ["create", "read", "update", "delete"];
+
+    expect(ORGANIZATION_ROLES.admin.statements.ingredients).toEqual(fullManagement);
+    expect(ORGANIZATION_ROLES.admin.statements.supplies).toEqual(fullManagement);
+    expect(ORGANIZATION_ROLES.admin.statements.ingredientCategories).toEqual(fullManagement);
+    expect(ORGANIZATION_ROLES.admin.statements.supplyCategories).toEqual(fullManagement);
   });
 
   it("validates partial item updates and cost precision", () => {

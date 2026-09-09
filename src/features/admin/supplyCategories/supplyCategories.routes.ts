@@ -1,5 +1,4 @@
 import { adminAuthHandler } from "@core/handlers";
-import { requireGlobalInventoryOwner } from "@features/admin/inventory/inventory.access";
 import type { FastifyInstance } from "fastify";
 import { createRoutes } from "./create";
 import { createResponseSchema } from "./create/create.schemas";
@@ -18,7 +17,7 @@ export async function adminSupplyCategoriesRoutes(server: FastifyInstance) {
   server.patch<{ Params: SupplyCategoryParams; Body: UpdateSupplyCategoryBody }>(
     "/:categoryId",
     {
-      preHandler: [adminAuthHandler(), requireGlobalInventoryOwner],
+      preHandler: [adminAuthHandler({ permissions: { supplyCategories: ["update"] } })],
       schema: {
         params: supplyCategoryParamsSchema,
         body: updateSupplyCategoryBodySchema,
@@ -39,7 +38,7 @@ export async function adminSupplyCategoriesRoutes(server: FastifyInstance) {
   server.delete<{ Params: SupplyCategoryParams }>(
     "/:categoryId",
     {
-      preHandler: [adminAuthHandler(), requireGlobalInventoryOwner],
+      preHandler: [adminAuthHandler({ permissions: { supplyCategories: ["delete"] } })],
       schema: { params: supplyCategoryParamsSchema },
     },
     async (request, reply) => {

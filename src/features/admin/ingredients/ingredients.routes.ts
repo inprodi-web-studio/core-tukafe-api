@@ -1,5 +1,4 @@
 import { adminAuthHandler } from "@core/handlers";
-import { requireGlobalInventoryOwner } from "@features/admin/inventory/inventory.access";
 import type { FastifyInstance } from "fastify";
 import { createRoutes } from "./create";
 import { createResponseSchema } from "./create/create.schemas";
@@ -30,7 +29,7 @@ export async function adminIngredientsRoutes(server: FastifyInstance) {
   server.patch<{ Params: IngredientParams; Body: UpdateIngredientBody }>(
     "/:ingredientId",
     {
-      preHandler: [adminAuthHandler(), requireGlobalInventoryOwner],
+      preHandler: [adminAuthHandler({ permissions: { ingredients: ["update"] } })],
       schema: {
         params: ingredientParamsSchema,
         body: updateIngredientBodySchema,
@@ -48,7 +47,7 @@ export async function adminIngredientsRoutes(server: FastifyInstance) {
   server.delete<{ Params: IngredientParams }>(
     "/:ingredientId",
     {
-      preHandler: [adminAuthHandler(), requireGlobalInventoryOwner],
+      preHandler: [adminAuthHandler({ permissions: { ingredients: ["delete"] } })],
       schema: { params: ingredientParamsSchema },
     },
     async (request, reply) => {
