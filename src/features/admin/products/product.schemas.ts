@@ -194,7 +194,7 @@ export const productResponseSchema = z.object({
   kitchenName: z.string().nullish(),
   priceCents: z.number().nonnegative().nullable(),
   isFeatured: z.boolean(),
-  customerDescription: z.string(),
+  customerDescription: z.string().nullable(),
   kitchenDescription: z.string().nullish(),
   image: imageSchema.nullable(),
   unit: z.object({

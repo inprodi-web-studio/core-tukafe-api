@@ -1167,6 +1167,23 @@ export function adminProductsService(fastify: FastifyInstance): AdminProductsSer
         );
 
         if (
+          validatedVariationConfig.variationGroups.length > 0 &&
+          validatedVariationConfig.variations.length === 0
+        ) {
+          throw badRequest(
+            "product.variationsRequired",
+            "Variation groups require at least one active variation",
+          );
+        }
+
+        if (calculateVariationMatrixSize(validatedVariationConfig.variationGroups) > 250) {
+          throw badRequest(
+            "productVariation.matrixTooLarge",
+            "Variation configuration cannot generate more than 250 combinations",
+          );
+        }
+
+        if (
           productType === "compound" &&
           (validatedVariationConfig.variations.length > 0 ||
             validatedVariationConfig.variationGroups.length > 0 ||
