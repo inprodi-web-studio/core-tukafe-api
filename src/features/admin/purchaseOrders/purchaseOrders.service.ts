@@ -35,6 +35,7 @@ import {
   calculatePurchaseLineTotals,
   roundPurchaseQuantity,
 } from "./purchaseOrders.calculations";
+import { dateInTimezone } from "./purchaseOrders.dates";
 import type {
   AdminPurchaseOrdersService,
   PurchaseOrderActorContext,
@@ -117,17 +118,6 @@ function optionalText(value: string | null | undefined) {
   if (value == null) return null;
   const normalized = normalizeString(value, { trim: true, collapseWhitespace: true });
   return normalized.length > 0 ? normalized : null;
-}
-
-function dateInTimezone(date: Date, timezone: string) {
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: timezone,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(date);
-  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
-  return `${values.year}-${values.month}-${values.day}`;
 }
 
 function purchaseYear() {
@@ -406,7 +396,7 @@ async function lockOrder(tx: TransactionDb, purchaseOrderId: string) {
         locationId: string;
         observations: string | null;
         folio: string;
-        issuedAt: Date | null;
+        issuedAt: string | null;
         locationTimezone: string;
       }
     | undefined;
