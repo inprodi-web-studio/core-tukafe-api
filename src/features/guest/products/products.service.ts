@@ -367,7 +367,7 @@ export function guestProductsService(fastify: FastifyInstance): GuestProductsSer
             },
           },
         },
-        orderBy: [asc(productsDB.name), asc(productsDB.id)],
+        orderBy: [desc(productsDB.isFeatured), asc(productsDB.name), asc(productsDB.id)],
       });
 
       const productIds = products.map((product) => product.id);
