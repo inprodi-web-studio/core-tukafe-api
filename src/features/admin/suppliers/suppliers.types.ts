@@ -42,11 +42,17 @@ export interface PresentationInput {
   isDefault?: boolean;
 }
 
+export interface UpdatePresentationInput {
+  name?: string;
+  contentQuantity?: number;
+}
+
 export interface SupplierPresentationResponse {
   id: string;
   name: string;
   contentQuantity: number;
   isDefault: boolean;
+  canDelete: boolean;
   status: SupplierStatus;
   currentCost: SupplierCostResponse | null;
   createdAt: Date;
@@ -103,6 +109,12 @@ export interface AdminSuppliersService {
     supplierItemId: string,
     input: PresentationInput,
     actorUserId: string,
+  ): Promise<SupplierPresentationResponse>;
+  updatePresentation(
+    supplierId: string,
+    supplierItemId: string,
+    presentationId: string,
+    input: UpdatePresentationInput,
   ): Promise<SupplierPresentationResponse>;
   deactivatePresentation(
     supplierId: string,

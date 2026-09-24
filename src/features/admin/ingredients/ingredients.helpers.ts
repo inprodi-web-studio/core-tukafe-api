@@ -32,6 +32,9 @@ export const normalizeIngredientUpdateInput = (input: UpdateIngredientServicePar
     name: normalizeString(input.name, { trim: true, collapseWhitespace: true }),
   }),
   ...(input.description !== undefined && {
-    description: normalizeString(input.description, { trim: true, collapseWhitespace: true }),
+    description:
+      input.description === null
+        ? null
+        : normalizeString(input.description, { trim: true, collapseWhitespace: true }),
   }),
 });

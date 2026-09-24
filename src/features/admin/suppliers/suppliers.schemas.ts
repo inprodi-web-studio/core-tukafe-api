@@ -67,6 +67,16 @@ export const presentationInputSchema = z
   })
   .strict();
 
+export const updatePresentationBodySchema = z
+  .object({
+    name: z.string().trim().min(1).max(160).optional(),
+    contentQuantity: quantitySchema.optional(),
+  })
+  .strict()
+  .refine((value) => Object.keys(value).length > 0, {
+    message: "At least one field is required",
+  });
+
 export const assignItemBodySchema = z
   .object({
     itemType: z.enum(["ingredient", "supply"]),
@@ -110,6 +120,7 @@ export const presentationSchema = z.object({
   name: z.string(),
   contentQuantity: z.number().positive(),
   isDefault: z.boolean(),
+  canDelete: z.boolean(),
   status: supplierStatusSchema,
   currentCost: costSchema.nullable(),
   createdAt: z.date(),
@@ -147,5 +158,6 @@ export type PresentationParams = z.infer<typeof presentationParamsSchema>;
 export type ItemListQuery = z.infer<typeof itemListQuerySchema>;
 export type AssignItemBody = z.infer<typeof assignItemBodySchema>;
 export type PresentationInputBody = z.infer<typeof presentationInputSchema>;
+export type UpdatePresentationBody = z.infer<typeof updatePresentationBodySchema>;
 export type CostBody = z.infer<typeof costBodySchema>;
 export type PaginationQuery = z.infer<typeof paginationQuerySchema>;
