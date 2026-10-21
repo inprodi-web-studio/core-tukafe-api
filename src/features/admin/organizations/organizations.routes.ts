@@ -1,8 +1,5 @@
-import { userDB } from "@core/db/schemas";
 import { adminAuthHandler } from "@core/handlers";
-import { forbidden } from "@core/utils";
-import { eq } from "drizzle-orm";
-import type { FastifyInstance, FastifyRequest } from "fastify";
+import type { FastifyInstance } from "fastify";
 import { updateLocationRoutes } from "./updateLocation";
 import {
   createOrganization,
@@ -24,25 +21,13 @@ import {
   type UpdateBody,
 } from "./organizations.schemas";
 
-export async function requireGlobalOwner(request: FastifyRequest) {
-  const [user] = await request.server.db
-    .select({ role: userDB.role })
-    .from(userDB)
-    .where(eq(userDB.id, request.auth.user.id))
-    .limit(1);
-
-  if (user?.role !== "owner") {
-    throw forbidden("organization.globalOwnerRequired", "Only a global owner can manage branches");
-  }
-}
-
 export async function adminOrganizationsRoutes(server: FastifyInstance) {
-  const globalOwnerHandlers = [adminAuthHandler({ roles: ["owner", "admin"] }), requireGlobalOwner];
+  const canManageOrganizations = adminAuthHandler({ roles: ["owner", "admin"] });
 
   server.get<{ Querystring: ListQuery }>(
     "/",
     {
-      preHandler: globalOwnerHandlers,
+      preHandler: [canManageOrganizations],
       schema: { querystring: listQuerySchema, response: { 200: listResponseSchema } },
     },
     listOrganizations,
@@ -50,7 +35,7 @@ export async function adminOrganizationsRoutes(server: FastifyInstance) {
   server.post<{ Body: CreateBody }>(
     "/",
     {
-      preHandler: globalOwnerHandlers,
+      preHandler: [canManageOrganizations],
       schema: { body: createBodySchema, response: { 201: organizationSchema } },
     },
     createOrganization,
@@ -58,7 +43,7 @@ export async function adminOrganizationsRoutes(server: FastifyInstance) {
   server.patch<{ Params: Params; Body: UpdateBody }>(
     "/:organizationId",
     {
-      preHandler: globalOwnerHandlers,
+      preHandler: [canManageOrganizations],
       schema: {
         params: paramsSchema,
         body: updateBodySchema,
@@ -69,13 +54,13 @@ export async function adminOrganizationsRoutes(server: FastifyInstance) {
   );
   server.delete<{ Params: Params }>(
     "/:organizationId",
-    { preHandler: globalOwnerHandlers, schema: { params: paramsSchema } },
+    { preHandler: [canManageOrganizations], schema: { params: paramsSchema } },
     deactivateOrganization,
   );
   server.put<{ Params: Params }>(
     "/:organizationId/restore",
     {
-      preHandler: globalOwnerHandlers,
+      preHandler: [canManageOrganizations],
       schema: { params: paramsSchema, response: { 200: organizationSchema } },
     },
     restoreOrganization,
