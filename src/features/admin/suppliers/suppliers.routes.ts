@@ -17,6 +17,7 @@ import {
   supplierListResponseSchema,
   supplierParamsSchema,
   supplierSchema,
+  updatePresentationBodySchema,
   updateSupplierBodySchema,
   listQuerySchema,
   type AssignItemBody,
@@ -29,6 +30,7 @@ import {
   type PresentationParams,
   type SupplierItemParams,
   type SupplierParams,
+  type UpdatePresentationBody,
   type UpdateSupplierBody,
 } from "./suppliers.schemas";
 
@@ -229,6 +231,29 @@ export async function adminSuppliersRoutes(server: FastifyInstance) {
       );
       return reply.status(204).send();
     },
+  );
+
+  server.patch<{ Params: PresentationParams; Body: UpdatePresentationBody }>(
+    "/:supplierId/items/:supplierItemId/presentations/:presentationId",
+    {
+      preHandler: [canUpdate],
+      schema: {
+        params: presentationParamsSchema,
+        body: updatePresentationBodySchema,
+        response: { 200: presentationSchema },
+      },
+    },
+    async (request, reply) =>
+      reply
+        .status(200)
+        .send(
+          await server.admin.suppliers.updatePresentation(
+            request.params.supplierId,
+            request.params.supplierItemId,
+            request.params.presentationId,
+            request.body,
+          ),
+        ),
   );
 
   server.put<{ Params: PresentationParams }>(

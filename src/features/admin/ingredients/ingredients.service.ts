@@ -150,14 +150,35 @@ export function adminIngredientsService(fastify: FastifyInstance): AdminIngredie
     },
 
     async update(id, input) {
-      await fastify.admin.ingredients.get(id);
+      const current = await fastify.admin.ingredients.get(id);
+      if (!current) throw notFound("ingredient.notFound", "The ingredient was not found");
       const normalizedInput = normalizeIngredientUpdateInput(input);
-
       if (
-        normalizedInput.isInventoryTracked !== undefined ||
-        normalizedInput.tracksLots !== undefined ||
-        normalizedInput.isPerishable !== undefined
+        normalizedInput.description !== undefined &&
+        (normalizedInput.description ?? "") === (current.description ?? "")
       ) {
+        delete normalizedInput.description;
+      }
+
+      const changesRestrictedField =
+        (normalizedInput.description !== undefined &&
+          normalizedInput.description !== current.description) ||
+        (normalizedInput.baseUnitId !== undefined &&
+          normalizedInput.baseUnitId !== current.baseUnit.id) ||
+        (normalizedInput.categoryId !== undefined &&
+          normalizedInput.categoryId !== current.category.id) ||
+        (normalizedInput.baseCostPerUnit !== undefined &&
+          normalizedInput.baseCostPerUnit !== current.baseCostPerUnit) ||
+        (normalizedInput.isInventoryTracked !== undefined &&
+          normalizedInput.isInventoryTracked !== current.isInventoryTracked) ||
+        (normalizedInput.tracksLots !== undefined &&
+          normalizedInput.tracksLots !== current.tracksLots) ||
+        (normalizedInput.isPerishable !== undefined &&
+          normalizedInput.isPerishable !== current.isPerishable) ||
+        (normalizedInput.expirationWarningDays !== undefined &&
+          normalizedInput.expirationWarningDays !== current.expirationWarningDays);
+
+      if (changesRestrictedField) {
         const result = await fastify.db.execute(sql`
           select exists(
             select 1 from inventory_balance
@@ -168,15 +189,15 @@ export function adminIngredientsService(fastify: FastifyInstance): AdminIngredie
         if (result.rows[0]?.hasStock) {
           throw conflict(
             "inventory.itemConfigurationHasStock",
-            "Inventory tracking and lot configuration can only change with zero balances",
+            "Only the name can change while this ingredient has stock",
           );
         }
       }
 
-      if (normalizedInput.baseUnitId) {
+      if (normalizedInput.baseUnitId && normalizedInput.baseUnitId !== current.baseUnit.id) {
         await fastify.admin.units.get(normalizedInput.baseUnitId);
       }
-      if (normalizedInput.categoryId) {
+      if (normalizedInput.categoryId && normalizedInput.categoryId !== current.category.id) {
         await fastify.admin.ingredientCategories.get(normalizedInput.categoryId);
       }
 

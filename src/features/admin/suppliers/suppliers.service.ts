@@ -1,5 +1,6 @@
 import {
   ingredientsDB,
+  purchaseOrderItemsDB,
   supplierItemPresentationsDB,
   supplierItemsDB,
   supplierPresentationCostsDB,
@@ -174,6 +175,10 @@ export function adminSuppliersService(fastify: FastifyInstance): AdminSuppliersS
         name: supplierItemPresentationsDB.name,
         contentQuantity: supplierItemPresentationsDB.contentQuantity,
         isDefault: supplierItemPresentationsDB.isDefault,
+        canDelete: sql<boolean>`not exists (
+          select 1 from ${purchaseOrderItemsDB}
+          where ${purchaseOrderItemsDB.presentationId} = ${supplierItemPresentationsDB.id}
+        )`,
         deletedAt: supplierItemPresentationsDB.deletedAt,
         createdAt: supplierItemPresentationsDB.createdAt,
         updatedAt: supplierItemPresentationsDB.updatedAt,
@@ -211,6 +216,7 @@ export function adminSuppliersService(fastify: FastifyInstance): AdminSuppliersS
         name: row.name,
         contentQuantity: Number(row.contentQuantity),
         isDefault: row.isDefault,
+        canDelete: Boolean(row.canDelete),
         status: row.deletedAt ? "inactive" : "active",
         currentCost:
           row.costId && row.priceCents !== null && row.effectiveFrom
@@ -459,10 +465,7 @@ export function adminSuppliersService(fastify: FastifyInstance): AdminSuppliersS
             .for("update");
           if (!supplier) throw notFound("supplier.notFound", "The supplier was not found");
           if (supplier.deletedAt) {
-            throw conflict(
-              "supplier.inactive",
-              "Restore the supplier before changing its catalog",
-            );
+            throw conflict("supplier.inactive", "Restore the supplier before changing its catalog");
           }
           const [existing] = await tx
             .select({ id: supplierItemsDB.id, deletedAt: supplierItemsDB.deletedAt })
@@ -571,10 +574,7 @@ export function adminSuppliersService(fastify: FastifyInstance): AdminSuppliersS
             .limit(1)
             .for("update");
           if (!supplier || supplier.deletedAt) {
-            throw conflict(
-              "supplier.inactive",
-              "Restore the supplier before changing its catalog",
-            );
+            throw conflict("supplier.inactive", "Restore the supplier before changing its catalog");
           }
           const activeRows = await tx
             .select({ id: supplierItemPresentationsDB.id })
@@ -628,6 +628,66 @@ export function adminSuppliersService(fastify: FastifyInstance): AdminSuppliersS
       ) as SupplierPresentationResponse;
     },
 
+    async updatePresentation(supplierId, supplierItemId, presentationId, input) {
+      await assertActiveSupplier(supplierId);
+      const item = await getSupplierItem(supplierId, supplierItemId, true);
+      const presentation = await getPresentation(supplierId, supplierItemId, presentationId, true);
+
+      if (input.contentQuantity !== undefined) {
+        if (Number(presentation.contentQuantity) !== input.contentQuantity) {
+          const [usage] = await fastify.db
+            .select({ id: purchaseOrderItemsDB.id })
+            .from(purchaseOrderItemsDB)
+            .where(eq(purchaseOrderItemsDB.presentationId, presentationId))
+            .limit(1);
+          if (usage) {
+            throw conflict(
+              "supplier.presentationContentInUse",
+              "Content quantity cannot change after the presentation has purchase history",
+            );
+          }
+        }
+        await validateQuantity(
+          item.ingredientId ? "ingredient" : "supply",
+          item.itemId,
+          input.contentQuantity,
+        );
+      }
+
+      try {
+        await fastify.db
+          .update(supplierItemPresentationsDB)
+          .set({
+            ...(input.name !== undefined
+              ? { name: normalizeString(input.name, { trim: true, collapseWhitespace: true }) }
+              : {}),
+            ...(input.contentQuantity !== undefined
+              ? { contentQuantity: input.contentQuantity }
+              : {}),
+            updatedAt: new Date(),
+          })
+          .where(
+            and(
+              eq(supplierItemPresentationsDB.id, presentationId),
+              eq(supplierItemPresentationsDB.supplierItemId, supplierItemId),
+            ),
+          );
+      } catch (error) {
+        const pgError = getPgError(error);
+        if (pgError?.code === "23505") {
+          throw conflict(
+            "supplier.presentationDuplicated",
+            "A presentation with this name already exists",
+          );
+        }
+        throw error;
+      }
+
+      return (await listPresentations(supplierItemId)).find(
+        (row) => row.id === presentationId,
+      ) as SupplierPresentationResponse;
+    },
+
     async deactivatePresentation(supplierId, supplierItemId, presentationId) {
       await assertActiveSupplier(supplierId);
       await fastify.db.transaction(async (tx) => {
@@ -635,10 +695,7 @@ export function adminSuppliersService(fastify: FastifyInstance): AdminSuppliersS
           .select({ id: supplierItemsDB.id, deletedAt: supplierItemsDB.deletedAt })
           .from(supplierItemsDB)
           .where(
-            and(
-              eq(supplierItemsDB.id, supplierItemId),
-              eq(supplierItemsDB.supplierId, supplierId),
-            ),
+            and(eq(supplierItemsDB.id, supplierItemId), eq(supplierItemsDB.supplierId, supplierId)),
           )
           .limit(1)
           .for("update");
@@ -756,10 +813,7 @@ export function adminSuppliersService(fastify: FastifyInstance): AdminSuppliersS
           .limit(1)
           .for("update");
         if (!supplier || supplier.deletedAt) {
-          throw conflict(
-            "supplier.inactive",
-            "Restore the supplier before changing its catalog",
-          );
+          throw conflict("supplier.inactive", "Restore the supplier before changing its catalog");
         }
         const current = await tx
           .select({ id: supplierPresentationCostsDB.id })
