@@ -1,9 +1,19 @@
 import { relations, sql } from "drizzle-orm";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
-import { boolean, check, index, integer, pgTable, text, uniqueIndex } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  check,
+  index,
+  integer,
+  pgTable,
+  primaryKey,
+  text,
+  uniqueIndex,
+} from "drizzle-orm/pg-core";
 
 import { generateTimestamps } from "@core/utils";
 import { uploadsDB } from "./upload.schema";
+import { organizationDB } from "./organization.schema";
 
 const productCategories = pgTable(
   "product_category",
@@ -41,6 +51,23 @@ const productCategories = pgTable(
 );
 
 export const productCategoriesDB = productCategories;
+export const organizationProductCategoriesDB = pgTable(
+  "organization_product_category",
+  {
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organizationDB.id, { onDelete: "cascade" }),
+    categoryId: text("category_id")
+      .notNull()
+      .references(() => productCategoriesDB.id, { onDelete: "cascade" }),
+    isActive: boolean("is_active").notNull().default(true),
+    ...generateTimestamps(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.organizationId, table.categoryId] }),
+    index("organization_product_category_category_idx").on(table.categoryId),
+  ],
+);
 export const productCategoriesRelations = relations(productCategoriesDB, ({ one }) => ({
   image: one(uploadsDB, {
     fields: [productCategoriesDB.imageUploadId],

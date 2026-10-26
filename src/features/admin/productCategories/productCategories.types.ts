@@ -15,6 +15,11 @@ export interface ProductCategoryListItem {
   isCashbackEligible: boolean;
   image: ProductCategoryImage | null;
   children: ProductCategoryListItem[];
+  organizationStatus?: {
+    isActive: boolean;
+    effectiveIsActive: boolean;
+    inheritedInactive: boolean;
+  };
 }
 
 export interface ProductCategoryResponse extends Omit<ProductCategory, "imageUploadId"> {
@@ -25,7 +30,9 @@ export interface AdminProductCategoriesService {
   get(id: string, config?: GetServiceConfig): Promise<ProductCategoryResponse | null>;
   list(
     input?: ListProductCategoriesServiceParams,
+    organizationId?: string,
   ): Promise<PaginatedResult<ProductCategoryListItem>>;
+  updateOrganizationStatus(id: string, organizationId: string, isActive: boolean): Promise<void>;
   create(input: CreateProductCategoryServiceParams): Promise<ProductCategoryResponse>;
   update(id: string, input: UpdateProductCategoryServiceParams): Promise<ProductCategoryResponse>;
   reorder(id: string, direction: ProductCategoryOrderDirection): Promise<void>;

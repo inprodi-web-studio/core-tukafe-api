@@ -18,5 +18,5 @@ export interface GuestProductCategoryListItem {
 }
 
 export interface GuestProductCategoriesService {
-  list(): Promise<GuestProductCategoryListItem[]>;
+  list(organizationId?: string): Promise<GuestProductCategoryListItem[]>;
 }

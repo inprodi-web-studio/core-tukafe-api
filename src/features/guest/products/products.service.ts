@@ -24,6 +24,7 @@ import type {
   GuestProductVariationGroup,
 } from "./products.types";
 import { hasAvailableCompoundConfiguration } from "./products.availability";
+import { productCategoryAvailable } from "@features/shared/productCategoryAvailability";
 
 function sortVariationGroups(
   variationGroups: GuestProductVariationGroup[],
@@ -152,6 +153,7 @@ async function getActiveProductIdsForOrganization(
         eq(organizationProductDB.isActive, true),
         inArray(organizationProductDB.productId, productIds),
         isNull(productsDB.deletedAt),
+        productCategoryAvailable(productsDB.id, organizationId),
       ),
     );
 
@@ -260,9 +262,11 @@ export function guestProductsService(fastify: FastifyInstance): GuestProductsSer
           )
         : undefined;
       const products = await fastify.db.query.productsDB.findMany({
-        where: categoryFilter
-          ? and(isNull(productsDB.deletedAt), categoryFilter)
-          : isNull(productsDB.deletedAt),
+        where: and(
+          isNull(productsDB.deletedAt),
+          categoryFilter,
+          organizationId ? productCategoryAvailable(productsDB.id, organizationId) : undefined,
+        ),
         columns: {
           kitchenName: false,
           kitchenDescription: false,
@@ -609,8 +613,7 @@ export function guestProductsService(fastify: FastifyInstance): GuestProductsSer
           isFeatured: product.isFeatured,
           customerDescription: product.customerDescription ?? null,
           productType: product.productType,
-          availability:
-            inventoryAvailability?.product(product.id) ?? unlimitedAvailability,
+          availability: inventoryAvailability?.product(product.id) ?? unlimitedAvailability,
           image: product.image,
           unit: product.unit,
           category: product.category,
@@ -1141,7 +1144,9 @@ export function guestProductsService(fastify: FastifyInstance): GuestProductsSer
             ),
           );
         if (!isVisible || step.minSelect === 0) return true;
-        return step.options.filter((option) => option.availability.isAvailable).length >= step.minSelect;
+        return (
+          step.options.filter((option) => option.availability.isAvailable).length >= step.minSelect
+        );
       };
       const resolvedVariations = sortConfigurationVariations(
         variations.map((variation) => {

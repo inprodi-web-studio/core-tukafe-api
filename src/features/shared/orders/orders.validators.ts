@@ -22,6 +22,7 @@ import {
 } from "@core/utils";
 import { and, inArray, isNull, sql } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
+import { productCategoryAvailable } from "@features/shared/productCategoryAvailability";
 import {
   calculateIncludedTaxBreakdown,
   calculateExtendedPriceCents,
@@ -318,6 +319,7 @@ export async function buildOrderValidationContext(
         eq(table.organizationId, organizationId),
         eq(table.isActive, true),
         inArray(table.productId, uniqueProductIds),
+        productCategoryAvailable(table.productId, organizationId),
       );
     },
     columns: {

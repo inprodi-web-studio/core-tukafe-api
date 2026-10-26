@@ -1,6 +1,7 @@
 import { productCategoriesDB } from "@core/db/schemas";
 import { asc } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
+import { getCategoryAvailability } from "@features/shared/productCategoryAvailability";
 import type {
   GuestProductCategoriesService,
   GuestProductCategoryListItem,
@@ -67,7 +68,7 @@ export function guestProductCategoriesService(
   fastify: FastifyInstance,
 ): GuestProductCategoriesService {
   return {
-    async list() {
+    async list(organizationId) {
       const categories = await fastify.db.query.productCategoriesDB.findMany({
         columns: {
           id: true,
@@ -97,7 +98,10 @@ export function guestProductCategoriesService(
         ],
       });
 
-      return buildProductCategoryTree(categories);
+      const state = organizationId ? await getCategoryAvailability(fastify, organizationId) : null;
+      return buildProductCategoryTree(
+        state ? categories.filter((category) => state(category.id).effectiveIsActive) : categories,
+      );
     },
   };
 }

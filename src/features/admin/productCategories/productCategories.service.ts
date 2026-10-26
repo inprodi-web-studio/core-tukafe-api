@@ -3,6 +3,7 @@ import {
   productCategoriesDB,
   productCategoryLinksDB,
   productsDB,
+  organizationProductCategoriesDB,
 } from "@core/db/schemas";
 import {
   badRequest,
@@ -15,6 +16,7 @@ import {
 } from "@core/utils";
 import { and, asc, eq, inArray, isNull, sql, type SQL } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
+import { getCategoryAvailability } from "@features/shared/productCategoryAvailability";
 import {
   buildProductCategoryTree,
   getDescendantTreeRows,
@@ -23,7 +25,10 @@ import {
   normalizeProductCategoryInput,
   normalizeProductCategoryUpdateInput,
 } from "./productCategories.helpers";
-import type { AdminProductCategoriesService } from "./productCategories.types";
+import type {
+  AdminProductCategoriesService,
+  ProductCategoryListItem,
+} from "./productCategories.types";
 
 export function adminProductcategoriesService(
   fastify: FastifyInstance,
@@ -61,7 +66,7 @@ export function adminProductcategoriesService(
       return category;
     },
 
-    async list({ page, pageSize, search } = {}) {
+    async list({ page, pageSize, search } = {}, organizationId) {
       const defaultOrderBy: [SQL, ...SQL[]] = [
         asc(productCategoriesDB.sortOrder),
         asc(productCategoriesDB.name),
@@ -119,11 +124,35 @@ export function adminProductcategoriesService(
           : await getDescendantTreeRows(fastify.db, paginatedRootIds);
 
       const tree = buildProductCategoryTree(categories);
+      if (organizationId) {
+        const status = await getCategoryAvailability(fastify, organizationId);
+        const apply = (nodes: ProductCategoryListItem[]) => {
+          for (const node of nodes) {
+            node.organizationStatus = status(node.id);
+            apply(node.children);
+          }
+        };
+        apply(tree);
+      }
 
       return {
         data: tree,
         pagination: paginatedRoots.pagination,
       };
+    },
+
+    async updateOrganizationStatus(id, organizationId, isActive) {
+      await fastify.admin.productCategories.get(id);
+      await fastify.db
+        .insert(organizationProductCategoriesDB)
+        .values({ categoryId: id, organizationId, isActive })
+        .onConflictDoUpdate({
+          target: [
+            organizationProductCategoriesDB.organizationId,
+            organizationProductCategoriesDB.categoryId,
+          ],
+          set: { isActive, updatedAt: sql`now()` },
+        });
     },
 
     async create(input) {

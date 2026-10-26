@@ -31,6 +31,13 @@ const listItemSchema: z.ZodType<ProductCategoryListItem> = z.lazy(() =>
     isCashbackEligible: z.boolean(),
     image: imageSchema.nullable(),
     children: z.array(listItemSchema),
+    organizationStatus: z
+      .object({
+        isActive: z.boolean(),
+        effectiveIsActive: z.boolean(),
+        inheritedInactive: z.boolean(),
+      })
+      .optional(),
   }),
 );
 

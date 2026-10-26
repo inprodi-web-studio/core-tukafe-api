@@ -1,5 +1,9 @@
 import type { GuestProductCategoryListItem } from "../productCategories.types";
 import { z } from "zod";
+export const listQuerySchema = z
+  .object({ organizationId: z.string().trim().min(1).optional() })
+  .strict();
+export type ListQuery = z.infer<typeof listQuerySchema>;
 
 const imageSchema = z.object({
   id: z.string(),
