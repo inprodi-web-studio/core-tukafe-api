@@ -41,6 +41,7 @@ export const INVENTORY_ADJUSTMENT_REASONS = [
   "other",
 ] as const;
 export const INVENTORY_MOVEMENT_TYPES = [
+  "physical_count",
   "adjustment_entry",
   "adjustment_exit",
   "adjustment_reversal",

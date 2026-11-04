@@ -1,3 +1,4 @@
+import { loadReservableBalances } from "./inventory.balances";
 import {
   inventoryBalancesDB,
   inventoryMovementLinesDB,
@@ -5,10 +6,7 @@ import {
   inventoryReservationAllocationsDB,
   inventoryReservationsDB,
 } from "@core/db/schemas";
-import type {
-  workOrdersDB,
-  WorkOrderInventoryRequirementSnapshot,
-} from "@core/db/schemas";
+import type { workOrdersDB, WorkOrderInventoryRequirementSnapshot } from "@core/db/schemas";
 import { conflict, generateNanoId } from "@core/utils";
 import { and, eq, sql } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
@@ -239,9 +237,10 @@ async function loadRequirementContext(tx: TransactionDb) {
     where variation_id is not null and is_tracked = true
   `);
   const finishedItems = new Map(
-    (
-      productItemsResult.rows as Array<{ sourceId: string; inventoryItemId: string }>
-    ).map((row) => [row.sourceId, row.inventoryItemId]),
+    (productItemsResult.rows as Array<{ sourceId: string; inventoryItemId: string }>).map((row) => [
+      row.sourceId,
+      row.inventoryItemId,
+    ]),
   );
 
   const groupRows = (rows: readonly Record<string, unknown>[]) => {
@@ -370,6 +369,9 @@ export async function createInventoryAvailabilitySnapshot(
           inner join inventory_lot l on l.id = b.lot_id
           where b.location_id = ${location.id}
             and (l.expires_on is null or l.expires_on >= ${eligibleDate}::date)
+            and not exists (select 1 from inventory_balance deficit
+              where deficit.location_id = b.location_id and deficit.inventory_item_id = b.inventory_item_id
+                and deficit.on_hand_quantity < deficit.reserved_quantity)
           group by b.inventory_item_id
         `),
         tx.execute(sql`
@@ -470,7 +472,13 @@ export async function createInventoryAvailabilitySnapshot(
       if (!location.salesEnforcementEnabled) return unlimited();
       return resolveInventoryRequirementsAvailability(
         resolveWorkUnitRequirements(
-          { workOrderId: "availability", productId, variationId, multiplier: 1, modifierOptions: [] },
+          {
+            workOrderId: "availability",
+            productId,
+            variationId,
+            multiplier: 1,
+            modifierOptions: [],
+          },
           context,
         ),
         availableByItem,
@@ -519,17 +527,22 @@ export async function createInventoryAvailabilitySnapshot(
         const resolved: InventoryAvailability = {
           isAvailable: availableOptions.length > 0,
           reason: availableOptions.length > 0 ? "available" : "sold_out",
-          maxProducible:
-            availableOptions.some((option) => option.maxProducible === null)
-              ? null
-              : Math.max(0, ...finite),
+          maxProducible: availableOptions.some((option) => option.maxProducible === null)
+            ? null
+            : Math.max(0, ...finite),
         };
         productCache.set(productId, resolved);
         return resolved;
       }
       const resolved = resolveInventoryRequirementsAvailability(
         resolveWorkUnitRequirements(
-          { workOrderId: "availability", productId, variationId: null, multiplier: 1, modifierOptions: [] },
+          {
+            workOrderId: "availability",
+            productId,
+            variationId: null,
+            multiplier: 1,
+            modifierOptions: [],
+          },
           context,
         ),
         availableByItem,
@@ -763,10 +776,7 @@ export async function releaseWorkOrderInventory(
       | { onHandQuantity: string | number; reservedQuantity: string | number }
       | undefined;
     if (!balance) continue;
-    const reservedAfter = Math.max(
-      0,
-      roundQuantity(Number(balance.reservedQuantity) - quantity),
-    );
+    const reservedAfter = Math.max(0, roundQuantity(Number(balance.reservedQuantity) - quantity));
     await tx
       .update(inventoryBalancesDB)
       .set({ reservedQuantity: reservedAfter, updatedAt: new Date() })
@@ -907,18 +917,12 @@ export async function reserveCheckoutInventory(
 
   for (const requirement of requirements) {
     let remaining = requirement.quantity;
-    const result = await tx.execute(sql`
-      select b.lot_id as "lotId", b.on_hand_quantity as "onHandQuantity",
-        b.reserved_quantity as "reservedQuantity"
-      from inventory_balance b
-      inner join inventory_lot l on l.id = b.lot_id
-      where b.location_id = ${location.id}
-        and b.inventory_item_id = ${requirement.inventoryItemId}
-        and (l.expires_on is null or l.expires_on >= ${eligibleDate}::date)
-        and b.on_hand_quantity > b.reserved_quantity
-      order by l.expires_on asc nulls last, l.created_at asc, l.id asc
-      for update of b
-    `);
+    const result = await loadReservableBalances(
+      tx,
+      location.id,
+      requirement.inventoryItemId,
+      eligibleDate,
+    );
     for (const raw of result.rows) {
       if (remaining <= 0.0000001) break;
       const balance = raw as {
@@ -1017,9 +1021,7 @@ export async function prepareOrderInventory(
     for (const requirement of requirements) {
       aggregate.set(
         requirement.inventoryItemId,
-        roundQuantity(
-          (aggregate.get(requirement.inventoryItemId) ?? 0) + requirement.quantity,
-        ),
+        roundQuantity((aggregate.get(requirement.inventoryItemId) ?? 0) + requirement.quantity),
       );
     }
     return { ...workOrder, inventoryRequirementsSnapshot: requirements };
@@ -1077,20 +1079,12 @@ export async function reserveOrderInventory(
     const requirements = workOrder.inventoryRequirementsSnapshot ?? [];
     for (const requirement of requirements) {
       let remaining = Number(requirement.quantity);
-      const balancesResult = await tx.execute(sql`
-        select
-          b.lot_id as "lotId",
-          b.on_hand_quantity as "onHandQuantity",
-          b.reserved_quantity as "reservedQuantity"
-        from inventory_balance b
-        inner join inventory_lot l on l.id = b.lot_id
-        where b.location_id = ${input.plan.locationId}
-          and b.inventory_item_id = ${requirement.inventoryItemId}
-          and (l.expires_on is null or l.expires_on >= ${eligibleDate}::date)
-          and b.on_hand_quantity > b.reserved_quantity
-        order by l.expires_on asc nulls last, l.created_at asc, l.id asc
-        for update of b
-      `);
+      const balancesResult = await loadReservableBalances(
+        tx,
+        input.plan.locationId,
+        requirement.inventoryItemId,
+        eligibleDate,
+      );
 
       for (const rawBalance of balancesResult.rows) {
         if (remaining <= 0.0000001) break;
@@ -1267,6 +1261,9 @@ export async function consumeWorkOrderInventory(
   const remaining = Number((remainingResult.rows[0] as { remaining?: string })?.remaining ?? 0);
   await tx
     .update(inventoryReservationsDB)
-    .set({ status: remaining <= 0.0000001 ? "consumed" : "partially_consumed", updatedAt: new Date() })
+    .set({
+      status: remaining <= 0.0000001 ? "consumed" : "partially_consumed",
+      updatedAt: new Date(),
+    })
     .where(eq(inventoryReservationsDB.id, first.reservationId));
 }

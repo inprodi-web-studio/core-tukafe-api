@@ -96,7 +96,7 @@ function mapLocation(location: InventoryLocation): InventoryLocationResponse {
   };
 }
 
-function mapInventoryItem(row: RawInventoryItemRow): InventoryItemResponse {
+export function mapInventoryItem(row: RawInventoryItemRow): InventoryItemResponse {
   return {
     id: row.id,
     kind: row.kind,
@@ -115,7 +115,7 @@ function mapInventoryItem(row: RawInventoryItemRow): InventoryItemResponse {
   };
 }
 
-async function ensureInventoryCatalog(db: InventoryDb) {
+export async function ensureInventoryCatalog(db: InventoryDb) {
   await db.execute(sql`
     insert into inventory_item (
       id, kind, ingredient_id, base_unit_id, is_tracked, tracks_lots,
@@ -204,7 +204,7 @@ async function isGlobalOwner(db: InventoryDb, userId: string) {
   return user?.role === "owner";
 }
 
-async function assertLocationAccess(
+export async function assertLocationAccess(
   db: InventoryDb,
   context: InventoryActorContext & { locationId: string },
 ) {
@@ -246,7 +246,7 @@ async function assertLocationAccess(
   return location;
 }
 
-async function listInventoryItemRows(db: InventoryDb): Promise<RawInventoryItemRow[]> {
+export async function listInventoryItemRows(db: InventoryDb): Promise<RawInventoryItemRow[]> {
   const result = await db.execute(sql`
     select
       ii.id,
@@ -840,7 +840,8 @@ export function adminInventoryService(fastify: FastifyInstance): AdminInventoryS
           ii.id,
           coalesce(sum(b.on_hand_quantity), 0) as "onHandQuantity",
           coalesce(sum(b.reserved_quantity), 0) as "reservedQuantity",
-          coalesce(sum(case when l.expires_on is null or l.expires_on >= ${currentDate}::date then greatest(b.on_hand_quantity - b.reserved_quantity, 0) else 0 end), 0) as "availableQuantity",
+          case when coalesce(sum(greatest(b.reserved_quantity - b.on_hand_quantity, 0)), 0) > 0 then 0
+            else coalesce(sum(case when l.expires_on is null or l.expires_on >= ${currentDate}::date then greatest(b.on_hand_quantity - b.reserved_quantity, 0) else 0 end), 0) end as "availableQuantity",
           coalesce(sum(greatest(b.reserved_quantity - b.on_hand_quantity, 0)), 0) as "deficitQuantity",
           coalesce(sum(case when l.expires_on < ${currentDate}::date then b.on_hand_quantity else 0 end), 0) as "expiredQuantity",
           count(b.lot_id)::int as "lotCount",

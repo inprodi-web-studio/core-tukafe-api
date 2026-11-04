@@ -1,5 +1,6 @@
 import { adminAuthHandler } from "@core/handlers";
 import type { FastifyInstance } from "fastify";
+import { adminInventoryCountsRoutes } from "./counts/counts.routes";
 import {
   activateLocation,
   createAdjustment,
@@ -56,6 +57,7 @@ import {
 } from "./inventory.schemas";
 
 export async function adminInventoryRoutes(server: FastifyInstance) {
+  await server.register(adminInventoryCountsRoutes);
   const canRead = adminAuthHandler({
     roles: ["owner", "admin", "member"],
     permissions: { inventory: ["read"] },
@@ -102,11 +104,7 @@ export async function adminInventoryRoutes(server: FastifyInstance) {
     { preHandler: [canRead], schema: { params: locationParamsSchema } },
     getSummary,
   );
-  server.get(
-    "/availability-targets",
-    { preHandler: [canRead] },
-    listAvailabilityTargets,
-  );
+  server.get("/availability-targets", { preHandler: [canRead] }, listAvailabilityTargets);
   server.patch<{ Params: LocationItemParams; Body: UpdateLocationItemBody }>(
     "/locations/:locationId/items/:inventoryItemId",
     {

@@ -239,6 +239,13 @@
       "when": 1793052000000,
       "tag": "0034_organization_product_categories",
       "breakpoints": false
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1793815200000,
+      "tag": "0035_inventory_counts",
+      "breakpoints": true
     }
   ]
 }
