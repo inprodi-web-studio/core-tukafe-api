@@ -1,3 +1,4 @@
+import { resolveAdjustmentExitAllocations } from "./inventory.adjustment-exits";
 import {
   ingredientsDB,
   inventoryAdjustmentLinesDB,
@@ -387,40 +388,6 @@ async function resolveEntryLot(
   }
 
   return createdLot;
-}
-
-async function resolveExitLot(
-  tx: TransactionDb,
-  input: { item: RawInventoryItemRow; lotId?: string | null },
-) {
-  if (!input.lotId && (input.item.tracksLots || input.item.isPerishable)) {
-    throw validation(
-      "inventory.lotSelectionRequired",
-      "A lot must be selected for this inventory exit",
-      { inventoryItemId: input.item.id },
-    );
-  }
-
-  const [lot] = await tx
-    .select()
-    .from(inventoryLotsDB)
-    .where(
-      and(
-        eq(inventoryLotsDB.inventoryItemId, input.item.id),
-        input.lotId
-          ? eq(inventoryLotsDB.id, input.lotId)
-          : eq(inventoryLotsDB.internalBatchKey, "default"),
-      ),
-    )
-    .limit(1);
-
-  if (!lot) {
-    throw notFound("inventory.lotNotFound", "Inventory lot was not found", {
-      inventoryItemId: input.item.id,
-    });
-  }
-
-  return lot;
 }
 
 async function lockBalance(
@@ -1125,40 +1092,53 @@ export function adminInventoryService(fastify: FastifyInstance): AdminInventoryS
             });
           }
           await ensureLocationItem(tx, location.id, item.id);
-          const lot =
+          const allocations =
             input.direction === "entry"
-              ? await resolveEntryLot(tx, {
+              ? [
+                  {
+                    lotId: (
+                      await resolveEntryLot(tx, {
+                        item,
+                        location,
+                        lotCode: line.lotCode,
+                        expiresOn: line.expiresOn,
+                      })
+                    ).id,
+                    quantity: line.quantity,
+                  },
+                ]
+              : await resolveAdjustmentExitAllocations(tx, {
+                  locationId: location.id,
                   item,
-                  location,
-                  lotCode: line.lotCode,
-                  expiresOn: line.expiresOn,
-                })
-              : await resolveExitLot(tx, { item, lotId: line.lotId });
-          const delta = input.direction === "entry" ? line.quantity : -line.quantity;
-          const balance = await applyBalanceDelta(tx, {
-            locationId: location.id,
-            inventoryItemId: item.id,
-            lotId: lot.id,
-            onHandDelta: delta,
-          });
-
-          await tx.insert(inventoryAdjustmentLinesDB).values({
-            id: generateNanoId(),
-            adjustmentId,
-            inventoryItemId: item.id,
-            lotId: lot.id,
-            quantity: line.quantity,
-          });
-          await tx.insert(inventoryMovementLinesDB).values({
-            id: generateNanoId(),
-            movementId,
-            inventoryItemId: item.id,
-            lotId: lot.id,
-            onHandDelta: delta,
-            reservedDelta: 0,
-            onHandAfter: balance.onHandAfter,
-            reservedAfter: balance.reservedAfter,
-          });
+                  quantity: line.quantity,
+                  lotId: line.lotId,
+                });
+          for (const allocation of allocations) {
+            const delta = input.direction === "entry" ? allocation.quantity : -allocation.quantity;
+            const balance = await applyBalanceDelta(tx, {
+              locationId: location.id,
+              inventoryItemId: item.id,
+              lotId: allocation.lotId,
+              onHandDelta: delta,
+            });
+            await tx.insert(inventoryAdjustmentLinesDB).values({
+              id: generateNanoId(),
+              adjustmentId,
+              inventoryItemId: item.id,
+              lotId: allocation.lotId,
+              quantity: allocation.quantity,
+            });
+            await tx.insert(inventoryMovementLinesDB).values({
+              id: generateNanoId(),
+              movementId,
+              inventoryItemId: item.id,
+              lotId: allocation.lotId,
+              onHandDelta: delta,
+              reservedDelta: 0,
+              onHandAfter: balance.onHandAfter,
+              reservedAfter: balance.reservedAfter,
+            });
+          }
         }
 
         return adjustmentId;
