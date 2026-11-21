@@ -141,7 +141,26 @@ describe.skipIf(!connectionString)("inventory adjustment exits with PostgreSQL",
       ),
     ).toBe(0);
   });
-  it("rolls back the complete adjustment if a later line exceeds remaining physical stock", async () => {
+  it("skips the reserved units in an older partition and completes the exit from another one", async () => {
+    await pool.query(`
+      update inventory_balance
+      set on_hand_quantity=case lot_id when 'a' then 84 when 'b' then 25 else 500 end,
+        reserved_quantity=case lot_id when 'a' then 2 else 0 end
+      where location_id='loc';
+    `);
+
+    const result = await exit(100);
+    expect(result.lines.map((line) => [line.lotId, line.quantity]).sort()).toEqual([
+      ["a", 82],
+      ["b", 18],
+    ]);
+    expect(await stocks()).toEqual([
+      { id: "a", quantity: 2, reserved: 2 },
+      { id: "b", quantity: 7, reserved: 0 },
+      { id: "c", quantity: 500, reserved: 0 },
+    ]);
+  });
+  it("rolls back the complete adjustment if a later line exceeds remaining unreserved stock", async () => {
     await expect(
       service.createAdjustment({
         ...context,
@@ -149,10 +168,13 @@ describe.skipIf(!connectionString)("inventory adjustment exits with PostgreSQL",
         reason: "waste",
         lines: [
           { inventoryItemId: "inv_ing_roll", quantity: 10 },
-          { inventoryItemId: "inv_ing_roll", quantity: 18 },
+          { inventoryItemId: "inv_ing_roll", quantity: 16 },
         ],
       }),
-    ).rejects.toMatchObject({ code: "inventory.insufficientPhysicalStock" });
+    ).rejects.toMatchObject({
+      code: "inventory.insufficientPhysicalStock",
+      data: { onHandQuantity: 17, availableQuantity: 15, requestedQuantity: 16 },
+    });
     expect((await stocks()).map((row) => row.quantity)).toEqual([11, 8, 8]);
     expect(
       (await pool.query("select count(*)::int as n from inventory_adjustment")).rows[0].n,
@@ -181,6 +203,45 @@ describe.skipIf(!connectionString)("inventory adjustment exits with PostgreSQL",
   it("rejects an explicit lot belonging to another article", async () => {
     await expect(exit(10, "foreign")).rejects.toMatchObject({ code: "inventory.lotNotFound" });
     expect((await stocks()).map((row) => row.quantity)).toEqual([11, 8, 8]);
+  });
+  it("honors the chosen lot and preserves its reservations even for an expired lot", async () => {
+    await pool.query("update inventory_lot set expires_on='2020-01-01' where id='c'");
+    await expect(exit(7, "c")).rejects.toMatchObject({
+      code: "inventory.insufficientPhysicalStock",
+      data: { lotId: "c", onHandQuantity: 8, availableQuantity: 6, requestedQuantity: 7 },
+    });
+    expect((await exit(6, "c")).lines.map((line) => [line.lotId, line.quantity])).toEqual([
+      ["c", 6],
+    ]);
+    expect(await stocks()).toEqual([
+      { id: "a", quantity: 11, reserved: 0 },
+      { id: "b", quantity: 8, reserved: 0 },
+      { id: "c", quantity: 2, reserved: 2 },
+    ]);
+  });
+  it("blocks an entry reversal when its exact lot would lose reserved stock", async () => {
+    const entry = await service.createAdjustment({
+      ...context,
+      direction: "entry",
+      reason: "initial_inventory",
+      lines: [{ inventoryItemId: "inv_ing_roll", quantity: 5 }],
+    });
+    const lotId = entry.lines[0]!.lotId;
+    await pool.query(
+      "update inventory_balance set reserved_quantity=2 where location_id='loc' and lot_id=$1",
+      [lotId],
+    );
+
+    await expect(
+      service.reverseAdjustment({ ...context, adjustmentId: entry.id }),
+    ).rejects.toMatchObject({
+      code: "inventory.insufficientPhysicalStock",
+      data: { lotId, onHandQuantity: 5, availableQuantity: 3, requestedQuantity: 5 },
+    });
+    expect(await stocks()).toContainEqual({ id: lotId, quantity: 5, reserved: 2 });
+    expect((await pool.query("select type from inventory_movement")).rows).toEqual([
+      { type: "adjustment_entry" },
+    ]);
   });
   it("handles fractional quantities without a remainder or negative balances", async () => {
     await pool.query(

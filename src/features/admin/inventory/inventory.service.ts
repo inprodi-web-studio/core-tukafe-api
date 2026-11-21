@@ -1,4 +1,7 @@
-import { resolveAdjustmentExitAllocations } from "./inventory.adjustment-exits";
+import {
+  insufficientAdjustmentStock,
+  resolveAdjustmentExitAllocations,
+} from "./inventory.adjustment-exits";
 import {
   ingredientsDB,
   inventoryAdjustmentLinesDB,
@@ -443,11 +446,12 @@ async function applyBalanceDelta(
   const onHandAfter = roundQuantity(balance.onHandQuantity + input.onHandDelta);
   const reservedAfter = roundQuantity(balance.reservedQuantity + (input.reservedDelta ?? 0));
 
-  if (onHandAfter < -EPSILON) {
-    throw conflict("inventory.insufficientPhysicalStock", "Physical inventory is insufficient", {
+  if (input.onHandDelta < 0 && onHandAfter < reservedAfter - EPSILON) {
+    throw insufficientAdjustmentStock({
       inventoryItemId: input.inventoryItemId,
       lotId: input.lotId,
       onHandQuantity: balance.onHandQuantity,
+      availableQuantity: Math.max(0, roundQuantity(balance.onHandQuantity - reservedAfter)),
       requestedQuantity: Math.abs(input.onHandDelta),
     });
   }
